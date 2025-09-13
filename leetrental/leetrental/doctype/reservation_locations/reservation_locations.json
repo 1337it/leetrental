@@ -61,7 +61,7 @@
  "links": [],
  "modified": "2022-10-31 16:40:10.381900",
  "modified_by": "Administrator",
- "module": "LeetRental",
+ "module": "leetrental",
  "name": "Reservation Locations",
  "naming_rule": "Expression (old style)",
  "owner": "Administrator",

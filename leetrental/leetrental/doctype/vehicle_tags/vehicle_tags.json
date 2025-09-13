@@ -21,7 +21,7 @@
  "links": [],
  "modified": "2022-10-31 16:32:44.377840",
  "modified_by": "Administrator",
- "module": "LeetRental",
+ "module": "leetrental",
  "name": "Vehicle Tags",
  "naming_rule": "Expression (old style)",
  "owner": "Administrator",

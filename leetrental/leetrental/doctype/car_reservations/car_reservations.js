@@ -1,7 +1,7 @@
 // Copyright (c) 2022, Solufy and contributors
 // For license information, please see license.txt
 
-frappe.ui.form.on('LeetRental',{
+frappe.ui.form.on('leetrental',{
 	onload: function(frm) {
 		cur_frm.set_query("vehicle", function() {
 		return {
@@ -14,7 +14,7 @@ frappe.ui.form.on('LeetRental',{
 });
 
 
-frappe.ui.form.on('LeetRental', {
+frappe.ui.form.on('leetrental', {
     validate: function (frm) {
         // Get the selected car and reservation dates
         var vehicle = frm.doc.vehicle;

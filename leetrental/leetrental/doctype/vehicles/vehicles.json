@@ -292,7 +292,7 @@
  "links": [],
  "modified": "2022-11-17 17:34:55.644058",
  "modified_by": "Administrator",
- "module": "LeetRental",
+ "module": "leetrental",
  "name": "Vehicles",
  "naming_rule": "Expression (old style)",
  "owner": "Administrator",

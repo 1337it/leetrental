@@ -43,7 +43,7 @@
  "links": [],
  "modified": "2022-11-15 11:17:40.337953",
  "modified_by": "Administrator",
- "module": "LeetRental",
+ "module": "leetrental",
  "name": "Vehicles Model",
  "naming_rule": "Autoincrement",
  "owner": "Administrator",

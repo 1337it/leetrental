@@ -1,9 +1,9 @@
 from . import __version__ as app_version
 
 app_name = "leetrental"
-app_title = "LeetRental"
+app_title = "leetrental"
 app_publisher = "1337it"
-app_description = "Vehicle & LeetRental System."
+app_description = "Vehicle & leetrental System."
 app_email = ""
 app_license = "MIT"
 
@@ -13,7 +13,7 @@ app_license = "MIT"
 fixtures = [{
     "doctype": "Workflow",
         "filters": {
-            "name": [ "in", ["Vehicles Workflow","LeetRental Workflow","Service Workflow","Contract Information"]]
+            "name": [ "in", ["Vehicles Workflow","leetrental Workflow","Service Workflow","Contract Information"]]
             }
         },
         {
@@ -128,9 +128,9 @@ fixtures = [{
 # }
 
 doc_events = {
-	'LeetRental': {
+	'leetrental': {
         'validate': [
-            'leetrental.leetrental.doctype.LeetRental.LeetRental.validate'   
+            'leetrental.leetrental.doctype.leetrental.leetrental.validate'   
             ],
 	},
     'Services': {

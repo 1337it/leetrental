@@ -1,4 +1,4 @@
-## LeetRental
+## leetrental
 
 Vehicle & Car Reservation System.
 

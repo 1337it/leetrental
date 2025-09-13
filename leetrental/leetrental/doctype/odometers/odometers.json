@@ -63,7 +63,7 @@
  "links": [],
  "modified": "2022-11-15 11:20:44.199489",
  "modified_by": "Administrator",
- "module": "LeetRental",
+ "module": "leetrental",
  "name": "Odometers",
  "naming_rule": "Expression (old style)",
  "owner": "Administrator",

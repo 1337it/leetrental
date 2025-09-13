@@ -29,7 +29,7 @@
  "links": [],
  "modified": "2022-10-31 16:22:57.223979",
  "modified_by": "Administrator",
- "module": "LeetRental",
+ "module": "leetrental",
  "name": "Service Types",
  "naming_rule": "Expression (old style)",
  "owner": "Administrator",

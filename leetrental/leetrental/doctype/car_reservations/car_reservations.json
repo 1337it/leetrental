@@ -151,8 +151,8 @@
  "links": [],
  "modified": "2022-11-16 16:34:10.667899",
  "modified_by": "Administrator",
- "module": "LeetRental",
- "name": "LeetRental",
+ "module": "leetrental",
+ "name": "leetrental",
  "naming_rule": "Expression (old style)",
  "owner": "Administrator",
  "permissions": [

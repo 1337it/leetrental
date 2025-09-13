@@ -13,5 +13,5 @@ def get_data():
 		),
 		"fieldname": "vehicle",
 		"non_standard_fieldnames": {"Customer": "customer"},
-		"transactions": [{"items": ["Services"]}, {"items": ["Odometers"]},{"items": ["LeetRental"]},{"items": ["Contract Information"]},{"items": ["Driver History"]}],
+		"transactions": [{"items": ["Services"]}, {"items": ["Odometers"]},{"items": ["leetrental"]},{"items": ["Contract Information"]},{"items": ["Driver History"]}],
 	}

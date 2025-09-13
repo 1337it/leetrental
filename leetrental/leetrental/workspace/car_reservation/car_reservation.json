@@ -5,7 +5,7 @@
    "label": "Contract Information"
   }
  ],
- "content": "[{\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">LeetRental</span>\",\"col\":12}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Vehicles\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"LeetRental\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Driver History\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Odometers\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Services\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Contract Information\",\"col\":3}},{\"type\":\"spacer\",\"data\":{\"col\":12}},{\"type\":\"card\",\"data\":{\"card_name\":\"Masters\",\"col\":4}},{\"type\":\"card\",\"data\":{\"card_name\":\"Reporting\",\"col\":4}},{\"type\":\"spacer\",\"data\":{\"col\":12}},{\"type\":\"chart\",\"data\":{\"chart_name\":\"Contract Information\",\"col\":12}}]",
+ "content": "[{\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">leetrental</span>\",\"col\":12}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Vehicles\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"leetrental\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Driver History\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Odometers\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Services\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Contract Information\",\"col\":3}},{\"type\":\"spacer\",\"data\":{\"col\":12}},{\"type\":\"card\",\"data\":{\"card_name\":\"Masters\",\"col\":4}},{\"type\":\"card\",\"data\":{\"card_name\":\"Reporting\",\"col\":4}},{\"type\":\"spacer\",\"data\":{\"col\":12}},{\"type\":\"chart\",\"data\":{\"chart_name\":\"Contract Information\",\"col\":12}}]",
  "creation": "2022-11-16 17:11:54.313736",
  "docstatus": 0,
  "doctype": "Workspace",
@@ -13,7 +13,7 @@
  "hide_custom": 0,
  "icon": "check",
  "idx": 0,
- "label": "LeetRental",
+ "label": "leetrental",
  "links": [
   {
    "hidden": 0,
@@ -68,9 +68,9 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "LeetRental Details",
+   "label": "leetrental Details",
    "link_count": 0,
-   "link_to": "LeetRental Details",
+   "link_to": "leetrental Details",
    "link_type": "Report",
    "onboard": 0,
    "type": "Link"
@@ -154,9 +154,9 @@
   {
    "hidden": 0,
    "is_query_report": 1,
-   "label": "LeetRental Details",
+   "label": "leetrental Details",
    "link_count": 0,
-   "link_to": "LeetRental Details",
+   "link_to": "leetrental Details",
    "link_type": "Report",
    "onboard": 0,
    "type": "Link"
@@ -204,8 +204,8 @@
  ],
  "modified": "2022-11-17 15:43:48.912824",
  "modified_by": "Administrator",
- "module": "LeetRental",
- "name": "LeetRental",
+ "module": "leetrental",
+ "name": "leetrental",
  "owner": "Administrator",
  "parent_page": "",
  "public": 1,
@@ -228,8 +228,8 @@
   {
    "color": "Green",
    "doc_view": "List",
-   "label": "LeetRental",
-   "link_to": "LeetRental",
+   "label": "leetrental",
+   "link_to": "leetrental",
    "stats_filter": "{\"name\":[\"is\",\"set\"]}",
    "type": "DocType"
   },
@@ -266,5 +266,5 @@
    "type": "DocType"
   }
  ],
- "title": "LeetRental"
+ "title": "leetrental"
 }

@@ -33,7 +33,7 @@
  "links": [],
  "modified": "2023-05-03 15:20:10.953955",
  "modified_by": "Administrator",
- "module": "LeetRental",
+ "module": "leetrental",
  "name": "Manufacturers",
  "naming_rule": "Autoincrement",
  "owner": "Administrator",
