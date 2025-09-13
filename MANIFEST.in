@@ -1,0 +1,18 @@
+include MANIFEST.in
+include requirements.txt
+include *.json
+include *.md
+include *.py
+include *.txt
+recursive-include leetrental *.css
+recursive-include leetrental *.csv
+recursive-include leetrental *.html
+recursive-include leetrental *.ico
+recursive-include leetrental *.js
+recursive-include leetrental *.json
+recursive-include leetrental *.md
+recursive-include leetrental *.png
+recursive-include leetrental *.py
+recursive-include leetrental *.svg
+recursive-include leetrental *.txt
+recursive-exclude leetrental *.pyc
