@@ -26,7 +26,7 @@ frappe.ui.form.on('leetrental', {
 
         // Check if there are existing reservations for the same car and period
         frappe.call({
-            method: 'leetrental.leetrental.doctype.leetrental.leetrental.check_conflicting_reservations',
+            method: 'leetrental.leetrental.doctype.car_reservations.car_reservations.check_conflicting_reservations',
             args: {
                 vehicle: vehicle,
                 start_time: start_time,
