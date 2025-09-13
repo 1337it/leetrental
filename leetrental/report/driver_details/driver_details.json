@@ -1,0 +1,29 @@
+{
+ "add_total_row": 0,
+ "columns": [],
+ "creation": "2022-11-17 14:22:36.517571",
+ "disable_prepared_report": 0,
+ "disabled": 0,
+ "docstatus": 0,
+ "doctype": "Report",
+ "filters": [],
+ "idx": 0,
+ "is_standard": "Yes",
+ "json": "{}",
+ "modified": "2022-11-17 15:05:03.426535",
+ "modified_by": "Administrator",
+ "module": "LeetRental",
+ "name": "Driver Details",
+ "owner": "Administrator",
+ "prepared_report": 0,
+ "query": "SELECT\n    `tabDriver History`.`driver` as `Driver:date:180`,\n    `tabDriver History`.`vehicle` as `Vehicle:link:120`,\n    `tabDriver History`.`approver` as `Approver:data:120`,\n    `tabDriver History`.`start_date` as `Start Date:date:120`,\n    `tabDriver History`.`end_date` as `End Date:date:120`,\n    `tabDriver History`.`pickup_location` as `Pickup Location:data:120`,\n    `tabDriver History`.`drop_location` as `Drop Location:data:120`,\n    `tabDriver History`.`kilometer_distance` as `Kilometer Distance:data:120`\n     \n    \n    \n    FROM    \n        `tabDriver History`",
+ "ref_doctype": "Driver History",
+ "reference_report": "",
+ "report_name": "Driver Details",
+ "report_type": "Query Report",
+ "roles": [
+  {
+   "role": "System Manager"
+  }
+ ]
+}

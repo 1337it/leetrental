@@ -1,0 +1,175 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "CRA.#####",
+ "creation": "2022-11-01 12:15:21.308675",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "reservation_name",
+  "section_break_2",
+  "vehicle",
+  "driver",
+  "employee",
+  "column_break_6",
+  "approver",
+  "contactsemployees",
+  "section_break_9",
+  "timing_information",
+  "start_time",
+  "column_break_12",
+  "end_time",
+  "section_break_14",
+  "location_information",
+  "pickup_location",
+  "drop_location",
+  "kilometer_distance",
+  "column_break_19",
+  "description",
+  "section_break_22",
+  "map_view"
+ ],
+ "fields": [
+  {
+   "fieldname": "reservation_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Reservation Name",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_break_2",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "vehicle",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Vehicle",
+   "options": "Vehicles",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "vehicle.driver",
+   "fieldname": "driver",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Driver"
+  },
+  {
+   "fieldname": "employee",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Employee",
+   "options": "Employee"
+  },
+  {
+   "fieldname": "column_break_6",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "approver",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": " Approver",
+   "options": "User"
+  },
+  {
+   "fieldname": "contactsemployees",
+   "fieldtype": "Select",
+   "label": "Contacts/Employees",
+   "options": "Contacts\nEmployee"
+  },
+  {
+   "fieldname": "section_break_9",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "timing_information",
+   "fieldtype": "Heading",
+   "label": "Timing information"
+  },
+  {
+   "fieldname": "start_time",
+   "fieldtype": "Datetime",
+   "label": "Start Time"
+  },
+  {
+   "fieldname": "column_break_12",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "end_time",
+   "fieldtype": "Datetime",
+   "label": " End Time"
+  },
+  {
+   "fieldname": "section_break_14",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "location_information",
+   "fieldtype": "Heading",
+   "label": "Location information"
+  },
+  {
+   "fieldname": "pickup_location",
+   "fieldtype": "Data",
+   "label": "Pickup Location"
+  },
+  {
+   "fieldname": "drop_location",
+   "fieldtype": "Data",
+   "label": "Drop Location"
+  },
+  {
+   "fieldname": "kilometer_distance",
+   "fieldtype": "Float",
+   "label": "Kilometer (Distance)"
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Long Text",
+   "label": "Description"
+  },
+  {
+   "fieldname": "column_break_19",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_22",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "map_view",
+   "fieldtype": "Geolocation",
+   "label": "Map View"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2022-11-16 16:34:10.667899",
+ "modified_by": "Administrator",
+ "module": "LeetRental",
+ "name": "LeetRentals",
+ "naming_rule": "Expression (old style)",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

@@ -1,0 +1,318 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "VH.####",
+ "creation": "2022-10-31 15:36:39.343093",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "model",
+  "license_plate",
+  "tags",
+  "column_break_4",
+  "upload_photo",
+  "image_5",
+  "section_break_4",
+  "driver_info",
+  "driver",
+  "driver_licence_no",
+  "future_driver",
+  "plan_to_change_car",
+  "assignment_date",
+  "location",
+  "column_break_10",
+  "vehicle_info",
+  "last_odometer_unit",
+  "last_odometer_value",
+  "update_odometer",
+  "immatriculation_date",
+  "chassis_number",
+  "catalog_value_vat_incl",
+  "purchase_value",
+  "residual_value",
+  "column_break_20",
+  "contract_info",
+  "manager",
+  "first_contract_date",
+  "column_break_24",
+  "model_info",
+  "seats_number",
+  "doors_number",
+  "color",
+  "model_year",
+  "section_break_30",
+  "engine_info",
+  "transmission",
+  "fuel_type",
+  "co2_emissions",
+  "horsepower",
+  "horsepower_taxation",
+  "power",
+  "column_break_38",
+  "description",
+  "workflow_state"
+ ],
+ "fields": [
+  {
+   "fieldname": "license_plate",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": " License Plate",
+   "reqd": 1
+  },
+  {
+   "fieldname": "tags",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Tags",
+   "options": "Vehicle Tags"
+  },
+  {
+   "fieldname": "driver",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Driver",
+   "options": "Customer"
+  },
+  {
+   "fieldname": "future_driver",
+   "fieldtype": "Data",
+   "label": "Future Driver"
+  },
+  {
+   "default": "0",
+   "fieldname": "plan_to_change_car",
+   "fieldtype": "Check",
+   "label": "Plan To Change Car"
+  },
+  {
+   "fieldname": "assignment_date",
+   "fieldtype": "Date",
+   "label": "Assignment Date"
+  },
+  {
+   "fieldname": "location",
+   "fieldtype": "Data",
+   "label": "Location"
+  },
+  {
+   "fieldname": "last_odometer_unit",
+   "fieldtype": "Select",
+   "label": "Last Odometer Unit",
+   "options": "KM\nMI"
+  },
+  {
+   "fieldname": "last_odometer_value",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Last Odometer Value"
+  },
+  {
+   "fieldname": "immatriculation_date",
+   "fieldtype": "Date",
+   "label": "Immatriculation Date"
+  },
+  {
+   "fieldname": "chassis_number",
+   "fieldtype": "Data",
+   "label": "Chassis Number"
+  },
+  {
+   "fieldname": "catalog_value_vat_incl",
+   "fieldtype": "Float",
+   "label": "Catalog Value (VAT Incl.)"
+  },
+  {
+   "fieldname": "purchase_value",
+   "fieldtype": "Float",
+   "label": "Purchase Value"
+  },
+  {
+   "fieldname": "residual_value",
+   "fieldtype": "Float",
+   "label": "Residual Value"
+  },
+  {
+   "fieldname": "column_break_10",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "vehicle_info",
+   "fieldtype": "Heading",
+   "label": "Vehicle Info"
+  },
+  {
+   "fieldname": "section_break_4",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "driver_info",
+   "fieldtype": "Heading",
+   "label": "Driver Info"
+  },
+  {
+   "fieldname": "column_break_20",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "contract_info",
+   "fieldtype": "Heading",
+   "label": "Contract Info"
+  },
+  {
+   "fieldname": "manager",
+   "fieldtype": "Link",
+   "label": "Manager",
+   "options": "User"
+  },
+  {
+   "default": "Today",
+   "fieldname": "first_contract_date",
+   "fieldtype": "Date",
+   "label": "First Contract Date"
+  },
+  {
+   "fieldname": "column_break_24",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "model_info",
+   "fieldtype": "Heading",
+   "label": "Model Info"
+  },
+  {
+   "fieldname": "seats_number",
+   "fieldtype": "Data",
+   "label": "Seats Number"
+  },
+  {
+   "fieldname": "doors_number",
+   "fieldtype": "Data",
+   "label": "Doors Number"
+  },
+  {
+   "fieldname": "color",
+   "fieldtype": "Data",
+   "label": "Color"
+  },
+  {
+   "fieldname": "model_year",
+   "fieldtype": "Data",
+   "label": "Model Year"
+  },
+  {
+   "fieldname": "section_break_30",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "engine_info",
+   "fieldtype": "Heading",
+   "label": "Engine Info"
+  },
+  {
+   "fieldname": "transmission",
+   "fieldtype": "Select",
+   "label": "Transmission",
+   "options": "Manual\nAutomatic"
+  },
+  {
+   "fieldname": "fuel_type",
+   "fieldtype": "Select",
+   "label": "Fuel Type",
+   "options": "Gasoline\nDiesel\nLPG\nElectric\nHybrid"
+  },
+  {
+   "fieldname": "co2_emissions",
+   "fieldtype": "Float",
+   "label": "CO2 Emissions"
+  },
+  {
+   "fieldname": "horsepower",
+   "fieldtype": "Int",
+   "label": "Horsepower"
+  },
+  {
+   "fieldname": "horsepower_taxation",
+   "fieldtype": "Float",
+   "label": "Horsepower Taxation"
+  },
+  {
+   "fieldname": "power",
+   "fieldtype": "Int",
+   "label": "Power"
+  },
+  {
+   "fieldname": "column_break_38",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Long Text",
+   "label": "Description"
+  },
+  {
+   "fieldname": "model",
+   "fieldtype": "Link",
+   "label": "Model",
+   "options": "Vehicles Model",
+   "reqd": 1
+  },
+  {
+   "fieldname": "workflow_state",
+   "fieldtype": "Data",
+   "label": "Workflow State"
+  },
+  {
+   "fieldname": "update_odometer",
+   "fieldtype": "Button",
+   "label": "Update Odometer"
+  },
+  {
+   "fieldname": "upload_photo",
+   "fieldtype": "Attach",
+   "label": "Upload Photo"
+  },
+  {
+   "fieldname": "image_5",
+   "fieldtype": "Image",
+   "options": "upload_photo"
+  },
+  {
+   "fieldname": "column_break_4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "driver_licence_no",
+   "fieldtype": "Data",
+   "label": "Driver Licence No"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2022-11-17 17:34:55.644058",
+ "modified_by": "Administrator",
+ "module": "LeetRental",
+ "name": "Vehicles",
+ "naming_rule": "Expression (old style)",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "show_name_in_global_search": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

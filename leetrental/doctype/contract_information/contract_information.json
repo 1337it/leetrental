@@ -1,0 +1,161 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "CC.#####",
+ "creation": "2022-11-07 15:09:48.821311",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "contract_information",
+  "responsible",
+  "type",
+  "vendor",
+  "reference",
+  "activation_cost",
+  "recurring_cost",
+  "column_break_8",
+  "vehicle_information",
+  "vehicle",
+  "current_driver",
+  "invoice_date",
+  "contract_start_date",
+  "contract_expiration_date",
+  "section_break_15",
+  "included_services",
+  "terms_and_conditions",
+  "workflow_state"
+ ],
+ "fields": [
+  {
+   "fieldname": "contract_information",
+   "fieldtype": "Heading",
+   "label": "Contract Information"
+  },
+  {
+   "fieldname": "responsible",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Responsible",
+   "options": "User",
+   "reqd": 1
+  },
+  {
+   "fieldname": "type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Type",
+   "options": "Renting\nLeasing\nReparing",
+   "reqd": 1
+  },
+  {
+   "fieldname": "vendor",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Vendor",
+   "options": "Supplier",
+   "reqd": 0
+  },
+  {
+   "fieldname": "reference",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Reference"
+  },
+  {
+   "fieldname": "activation_cost",
+   "fieldtype": "Float",
+   "label": "Activation Cost"
+  },
+  {
+   "fieldname": "recurring_cost",
+   "fieldtype": "Float",
+   "label": "Recurring Cost"
+  },
+  {
+   "fieldname": "column_break_8",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "vehicle_information",
+   "fieldtype": "Heading",
+   "label": "Vehicle Information"
+  },
+  {
+   "fieldname": "vehicle",
+   "fieldtype": "Link",
+   "label": "Vehicle",
+   "options": "Vehicles",
+   "reqd": 1
+  },
+  {
+   "fieldname": "current_driver",
+   "fieldtype": "Link",
+   "label": "Current Driver",
+   "options": "Customer"
+  },
+  {
+   "fieldname": "invoice_date",
+   "fieldtype": "Date",
+   "label": "Invoice Date"
+  },
+  {
+   "fieldname": "contract_start_date",
+   "fieldtype": "Date",
+   "label": "Contract Start Date"
+  },
+  {
+   "fieldname": "contract_expiration_date",
+   "fieldtype": "Date",
+   "label": "Contract Expiration Date"
+  },
+  {
+   "fieldname": "section_break_15",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "included_services",
+   "fieldtype": "Link",
+   "label": "Included Services",
+   "options": "Services"
+  },
+  {
+   "fieldname": "terms_and_conditions",
+   "fieldtype": "Long Text",
+   "label": "Terms and Conditions"
+  },
+  {
+   "fieldname": "workflow_state",
+   "fieldtype": "Link",
+   "label": "Workflow State",
+   "options": "Workflow State"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2022-11-15 16:35:36.709382",
+ "modified_by": "Administrator",
+ "module": "LeetRental",
+ "name": "Contract Information",
+ "naming_rule": "Expression (old style)",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "show_title_field_in_link": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "vehicle"
+}

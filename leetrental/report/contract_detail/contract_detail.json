@@ -1,0 +1,27 @@
+{
+ "add_total_row": 0,
+ "columns": [],
+ "creation": "2022-11-07 15:21:23.172788",
+ "disable_prepared_report": 0,
+ "disabled": 0,
+ "docstatus": 0,
+ "doctype": "Report",
+ "filters": [],
+ "idx": 0,
+ "is_standard": "Yes",
+ "modified": "2022-11-17 11:23:10.952351",
+ "modified_by": "Administrator",
+ "module": "LeetRental",
+ "name": "Contract Detail",
+ "owner": "Administrator",
+ "prepared_report": 0,
+ "query": "select responsible,type,vendor,reference,activation_cost,recurring_cost,vehicle,current_driver,invoice_date,contract_start_date,contract_expiration_date,included_services,terms_and_conditions,workflow_state from `tabContract Information`",
+ "ref_doctype": "Contract Information",
+ "report_name": "Contract Detail",
+ "report_type": "Query Report",
+ "roles": [
+  {
+   "role": "System Manager"
+  }
+ ]
+}
