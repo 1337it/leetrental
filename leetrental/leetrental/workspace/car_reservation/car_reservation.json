@@ -5,7 +5,7 @@
    "label": "Contract Information"
   }
  ],
- "content": "[{\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">LeetRental</span>\",\"col\":12}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Vehicles\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"LeetRentals\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Driver History\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Odometers\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Services\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Contract Information\",\"col\":3}},{\"type\":\"spacer\",\"data\":{\"col\":12}},{\"type\":\"card\",\"data\":{\"card_name\":\"Masters\",\"col\":4}},{\"type\":\"card\",\"data\":{\"card_name\":\"Reporting\",\"col\":4}},{\"type\":\"spacer\",\"data\":{\"col\":12}},{\"type\":\"chart\",\"data\":{\"chart_name\":\"Contract Information\",\"col\":12}}]",
+ "content": "[{\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">LeetRental</span>\",\"col\":12}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Vehicles\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"LeetRental\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Driver History\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Odometers\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Services\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Contract Information\",\"col\":3}},{\"type\":\"spacer\",\"data\":{\"col\":12}},{\"type\":\"card\",\"data\":{\"card_name\":\"Masters\",\"col\":4}},{\"type\":\"card\",\"data\":{\"card_name\":\"Reporting\",\"col\":4}},{\"type\":\"spacer\",\"data\":{\"col\":12}},{\"type\":\"chart\",\"data\":{\"chart_name\":\"Contract Information\",\"col\":12}}]",
  "creation": "2022-11-16 17:11:54.313736",
  "docstatus": 0,
  "doctype": "Workspace",
@@ -228,8 +228,8 @@
   {
    "color": "Green",
    "doc_view": "List",
-   "label": "LeetRentals",
-   "link_to": "LeetRentals",
+   "label": "LeetRental",
+   "link_to": "LeetRental",
    "stats_filter": "{\"name\":[\"is\",\"set\"]}",
    "type": "DocType"
   },

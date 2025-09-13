@@ -1,7 +1,7 @@
 // Copyright (c) 2022, Solufy and contributors
 // For license information, please see license.txt
 
-frappe.ui.form.on('LeetRentals',{
+frappe.ui.form.on('LeetRental',{
 	onload: function(frm) {
 		cur_frm.set_query("vehicle", function() {
 		return {

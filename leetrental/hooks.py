@@ -128,9 +128,9 @@ fixtures = [{
 # }
 
 doc_events = {
-	'LeetRentals': {
+	'LeetRental': {
         'validate': [
-            'leetrental.leetrental.doctype.leetrentals.leetrentals.validate'   
+            'leetrental.leetrental.doctype.LeetRental.LeetRental.validate'   
             ],
 	},
     'Services': {

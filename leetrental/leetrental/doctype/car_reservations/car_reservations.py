@@ -54,7 +54,7 @@ def validate(self,cdt):
 
 def validate(doc, method):
     # Check if there are existing reservations for the same car and period
-    conflicting_reservations = frappe.get_all('LeetRentals',
+    conflicting_reservations = frappe.get_all('LeetRental',
                                               filters={'vehicle': doc.vehicle,
                                                        'name': ['!=', doc.name],
                                                        'end_time': ['>=', doc.start_time],

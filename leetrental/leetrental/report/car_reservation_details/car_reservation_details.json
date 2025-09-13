@@ -31,8 +31,8 @@
  "name": "LeetRental Details",
  "owner": "Administrator",
  "prepared_report": 0,
- "query": "select vehicle,driver,approver,start_time,end_time,workflow_state from `tabLeetRentals` where start_time >= %(start_time)s and end_time <= %(end_time)s and workflow_state = 'Reserved'",
- "ref_doctype": "LeetRentals",
+ "query": "select vehicle,driver,approver,start_time,end_time,workflow_state from `tabLeetRental` where start_time >= %(start_time)s and end_time <= %(end_time)s and workflow_state = 'Reserved'",
+ "ref_doctype": "LeetRental",
  "report_name": "LeetRental Details",
  "report_type": "Query Report",
  "roles": [
