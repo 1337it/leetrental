@@ -28,12 +28,12 @@
  "modified": "2022-11-17 11:04:59.574286",
  "modified_by": "Administrator",
  "module": "leetrental",
- "name": "leetrental Details",
+ "name": "Car Reservation Details",
  "owner": "Administrator",
  "prepared_report": 0,
  "query": "select vehicle,driver,approver,start_time,end_time,workflow_state from `tableetrental` where start_time >= %(start_time)s and end_time <= %(end_time)s and workflow_state = 'Reserved'",
  "ref_doctype": "leetrental",
- "report_name": "leetrental Details",
+ "report_name": "Car Reservation Details",
  "report_type": "Query Report",
  "roles": [
   {
