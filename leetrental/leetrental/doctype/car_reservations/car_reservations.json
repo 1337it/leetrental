@@ -1,175 +1,442 @@
 {
- "actions": [],
- "allow_rename": 1,
- "autoname": "CRA.#####",
- "creation": "2022-11-01 12:15:21.308675",
- "doctype": "DocType",
- "editable_grid": 1,
- "engine": "InnoDB",
- "field_order": [
-  "reservation_name",
-  "section_break_2",
-  "vehicle",
-  "driver",
-  "employee",
-  "column_break_6",
-  "approver",
-  "contactsemployees",
-  "section_break_9",
-  "timing_information",
-  "start_time",
-  "column_break_12",
-  "end_time",
-  "section_break_14",
-  "location_information",
-  "pickup_location",
-  "drop_location",
-  "kilometer_distance",
-  "column_break_19",
-  "description",
-  "section_break_22",
-  "map_view"
- ],
- "fields": [
-  {
-   "fieldname": "reservation_name",
-   "fieldtype": "Data",
-   "in_list_view": 1,
-   "label": "Reservation Name",
-   "reqd": 1
-  },
-  {
-   "fieldname": "section_break_2",
-   "fieldtype": "Section Break"
-  },
-  {
-   "fieldname": "vehicle",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Vehicle",
-   "options": "Vehicles",
-   "reqd": 1
-  },
-  {
-   "fetch_from": "vehicle.driver",
-   "fieldname": "driver",
-   "fieldtype": "Data",
-   "in_list_view": 1,
-   "label": "Driver"
-  },
-  {
-   "fieldname": "employee",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Employee",
-   "options": "Employee"
-  },
-  {
-   "fieldname": "column_break_6",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "approver",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": " Approver",
-   "options": "User"
-  },
-  {
-   "fieldname": "contactsemployees",
-   "fieldtype": "Select",
-   "label": "Contacts/Employees",
-   "options": "Contacts\nEmployee"
-  },
-  {
-   "fieldname": "section_break_9",
-   "fieldtype": "Section Break"
-  },
-  {
-   "fieldname": "timing_information",
-   "fieldtype": "Heading",
-   "label": "Timing information"
-  },
-  {
-   "fieldname": "start_time",
-   "fieldtype": "Datetime",
-   "label": "Start Time"
-  },
-  {
-   "fieldname": "column_break_12",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "end_time",
-   "fieldtype": "Datetime",
-   "label": " End Time"
-  },
-  {
-   "fieldname": "section_break_14",
-   "fieldtype": "Section Break"
-  },
-  {
-   "fieldname": "location_information",
-   "fieldtype": "Heading",
-   "label": "Location information"
-  },
-  {
-   "fieldname": "pickup_location",
-   "fieldtype": "Data",
-   "label": "Pickup Location"
-  },
-  {
-   "fieldname": "drop_location",
-   "fieldtype": "Data",
-   "label": "Drop Location"
-  },
-  {
-   "fieldname": "kilometer_distance",
-   "fieldtype": "Float",
-   "label": "Kilometer (Distance)"
-  },
-  {
-   "fieldname": "description",
-   "fieldtype": "Long Text",
-   "label": "Description"
-  },
-  {
-   "fieldname": "column_break_19",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "section_break_22",
-   "fieldtype": "Section Break"
-  },
-  {
-   "fieldname": "map_view",
-   "fieldtype": "Geolocation",
-   "label": "Map View"
-  }
- ],
- "index_web_pages_for_search": 1,
- "links": [],
- "modified": "2022-11-16 16:34:10.667899",
- "modified_by": "Administrator",
- "module": "leetrental",
- "name": "Car Reservations",
- "naming_rule": "Expression (old style)",
- "owner": "Administrator",
- "permissions": [
-  {
-   "create": 1,
-   "delete": 1,
-   "email": 1,
-   "export": 1,
-   "print": 1,
-   "read": 1,
-   "report": 1,
-   "role": "System Manager",
-   "share": 1,
-   "write": 1
-  }
- ],
- "sort_field": "modified",
- "sort_order": "DESC",
- "states": []
+  "actions": [],
+  "allow_rename": 1,
+  "autoname": "CRA.#####",
+  "creation": "2022-11-01 12:15:21.308675",
+  "doctype": "DocType",
+  "editable_grid": 1,
+  "engine": "InnoDB",
+  "field_order": [
+    "reservation_name",
+    "section_break_2",
+    "vehicle",
+    "driver",
+    "employee",
+    "column_break_6",
+    "approver",
+    "contactsemployees",
+    "section_break_9",
+    "timing_information",
+    "start_time",
+    "column_break_12",
+    "end_time",
+    "section_break_14",
+    "location_information",
+    "pickup_location",
+    "drop_location",
+    "kilometer_distance",
+    "column_break_19",
+    "description",
+    "section_break_22",
+    "map_view",
+    "agreement_no",
+    "agreement_type",
+    "permanent_vehicle",
+    "fuel_level_out",
+    "fuel_level_in",
+    "mileage_out",
+    "mileage_in",
+    "additional_driver",
+    "sales_person",
+    "notes",
+    "section_break_charges",
+    "column_break_charges_1",
+    "rent_rate",
+    "rent_charge",
+    "discount",
+    "agreed_rent",
+    "cdw_included",
+    "cdw_deductible",
+    "cdw_charge",
+    "pai_included",
+    "pai_charge",
+    "fuel_rate",
+    "fuel_charge",
+    "mileage_included",
+    "mileage_allowed",
+    "mileage_excess",
+    "mileage_charge",
+    "tolls",
+    "tolls_surcharge",
+    "fines",
+    "fines_surcharge",
+    "delivery_charge",
+    "collection_charge",
+    "darb_tolls",
+    "darb_tolls_surcharge",
+    "other_charge",
+    "other_discount_charge",
+    "tax_rate",
+    "tax_amount",
+    "total_charges",
+    "advance",
+    "deposit",
+    "deposit_due"
+  ],
+  "fields": [
+    {
+      "fieldname": "reservation_name",
+      "fieldtype": "Data",
+      "in_list_view": 1,
+      "label": "Reservation Name",
+      "reqd": 1
+    },
+    {
+      "fieldname": "section_break_2",
+      "fieldtype": "Section Break"
+    },
+    {
+      "fieldname": "vehicle",
+      "fieldtype": "Link",
+      "in_list_view": 1,
+      "label": "Vehicle",
+      "options": "Vehicles",
+      "reqd": 1
+    },
+    {
+      "fetch_from": "vehicle.driver",
+      "fieldname": "driver",
+      "fieldtype": "Data",
+      "in_list_view": 1,
+      "label": "Driver"
+    },
+    {
+      "fieldname": "employee",
+      "fieldtype": "Link",
+      "in_list_view": 1,
+      "label": "Employee",
+      "options": "Employee"
+    },
+    {
+      "fieldname": "column_break_6",
+      "fieldtype": "Column Break"
+    },
+    {
+      "fieldname": "approver",
+      "fieldtype": "Link",
+      "in_list_view": 1,
+      "label": " Approver",
+      "options": "User"
+    },
+    {
+      "fieldname": "contactsemployees",
+      "fieldtype": "Select",
+      "label": "Contacts/Employees",
+      "options": "Contacts\nEmployee"
+    },
+    {
+      "fieldname": "section_break_9",
+      "fieldtype": "Section Break"
+    },
+    {
+      "fieldname": "timing_information",
+      "fieldtype": "Heading",
+      "label": "Timing information"
+    },
+    {
+      "fieldname": "start_time",
+      "fieldtype": "Datetime",
+      "label": "Start Time"
+    },
+    {
+      "fieldname": "column_break_12",
+      "fieldtype": "Column Break"
+    },
+    {
+      "fieldname": "end_time",
+      "fieldtype": "Datetime",
+      "label": " End Time"
+    },
+    {
+      "fieldname": "section_break_14",
+      "fieldtype": "Section Break"
+    },
+    {
+      "fieldname": "location_information",
+      "fieldtype": "Heading",
+      "label": "Location information"
+    },
+    {
+      "fieldname": "pickup_location",
+      "fieldtype": "Data",
+      "label": "Pickup Location"
+    },
+    {
+      "fieldname": "drop_location",
+      "fieldtype": "Data",
+      "label": "Drop Location"
+    },
+    {
+      "fieldname": "kilometer_distance",
+      "fieldtype": "Float",
+      "label": "Kilometer (Distance)"
+    },
+    {
+      "fieldname": "description",
+      "fieldtype": "Long Text",
+      "label": "Description"
+    },
+    {
+      "fieldname": "column_break_19",
+      "fieldtype": "Column Break"
+    },
+    {
+      "fieldname": "section_break_22",
+      "fieldtype": "Section Break"
+    },
+    {
+      "fieldname": "map_view",
+      "fieldtype": "Geolocation",
+      "label": "Map View"
+    },
+
+    /* --- Added Rental Agreement fields --- */
+    {
+      "fieldname": "agreement_no",
+      "fieldtype": "Data",
+      "label": "Manual Agreement No",
+      "in_list_view": 1,
+      "unique": 1
+    },
+    {
+      "fieldname": "agreement_type",
+      "fieldtype": "Select",
+      "label": "Type",
+      "options": "Daily\nWeekly\nMonthly\nYearly\nCorporate",
+      "in_list_view": 1
+    },
+    {
+      "fieldname": "permanent_vehicle",
+      "fieldtype": "Check",
+      "label": "Permanent Vehicle"
+    },
+    {
+      "fieldname": "fuel_level_out",
+      "fieldtype": "Select",
+      "label": "Fuel Level Out",
+      "options": "Full\nThree Quarter\nHalf\nQuarter\nEmpty"
+    },
+    {
+      "fieldname": "fuel_level_in",
+      "fieldtype": "Select",
+      "label": "Fuel Level In",
+      "options": "Full\nThree Quarter\nHalf\nQuarter\nEmpty"
+    },
+    {
+      "fieldname": "mileage_out",
+      "fieldtype": "Int",
+      "label": "Mileage Out"
+    },
+    {
+      "fieldname": "mileage_in",
+      "fieldtype": "Int",
+      "label": "Mileage In"
+    },
+    {
+      "fieldname": "additional_driver",
+      "fieldtype": "Link",
+      "label": "Additional Driver",
+      "options": "Staff"
+    },
+    {
+      "fieldname": "sales_person",
+      "fieldtype": "Link",
+      "label": "Sales Person",
+      "options": "Staff"
+    },
+    {
+      "fieldname": "notes",
+      "fieldtype": "Text",
+      "label": "Notes"
+    },
+    {
+      "fieldname": "section_break_charges",
+      "fieldtype": "Section Break",
+      "label": "Charges"
+    },
+    {
+      "fieldname": "column_break_charges_1",
+      "fieldtype": "Column Break"
+    },
+    {
+      "fieldname": "rent_rate",
+      "fieldtype": "Data",
+      "label": "Rent Rate"
+    },
+    {
+      "fieldname": "rent_charge",
+      "fieldtype": "Currency",
+      "label": "Rent Charge"
+    },
+    {
+      "fieldname": "discount",
+      "fieldtype": "Currency",
+      "label": "Discount"
+    },
+    {
+      "fieldname": "agreed_rent",
+      "fieldtype": "Currency",
+      "label": "Agreed Rent"
+    },
+    {
+      "fieldname": "cdw_included",
+      "fieldtype": "Check",
+      "label": "CDW Included"
+    },
+    {
+      "fieldname": "cdw_deductible",
+      "fieldtype": "Data",
+      "label": "CDW Deductible"
+    },
+    {
+      "fieldname": "cdw_charge",
+      "fieldtype": "Currency",
+      "label": "CDW Charge"
+    },
+    {
+      "fieldname": "pai_included",
+      "fieldtype": "Check",
+      "label": "PAI Included"
+    },
+    {
+      "fieldname": "pai_charge",
+      "fieldtype": "Currency",
+      "label": "PAI Charge"
+    },
+    {
+      "fieldname": "fuel_rate",
+      "fieldtype": "Data",
+      "label": "Fuel Rate"
+    },
+    {
+      "fieldname": "fuel_charge",
+      "fieldtype": "Currency",
+      "label": "Fuel Charge"
+    },
+    {
+      "fieldname": "mileage_included",
+      "fieldtype": "Check",
+      "label": "Mileage Included"
+    },
+    {
+      "fieldname": "mileage_allowed",
+      "fieldtype": "Data",
+      "label": "Mileage Allowed"
+    },
+    {
+      "fieldname": "mileage_excess",
+      "fieldtype": "Data",
+      "label": "Mileage Excess"
+    },
+    {
+      "fieldname": "mileage_charge",
+      "fieldtype": "Currency",
+      "label": "Mileage Charge"
+    },
+    {
+      "fieldname": "tolls",
+      "fieldtype": "Currency",
+      "label": "Tolls"
+    },
+    {
+      "fieldname": "tolls_surcharge",
+      "fieldtype": "Currency",
+      "label": "Tolls Surcharge"
+    },
+    {
+      "fieldname": "fines",
+      "fieldtype": "Currency",
+      "label": "Fines"
+    },
+    {
+      "fieldname": "fines_surcharge",
+      "fieldtype": "Currency",
+      "label": "Fines Surcharge"
+    },
+    {
+      "fieldname": "delivery_charge",
+      "fieldtype": "Currency",
+      "label": "Delivery Charge"
+    },
+    {
+      "fieldname": "collection_charge",
+      "fieldtype": "Currency",
+      "label": "Collection Charge"
+    },
+    {
+      "fieldname": "darb_tolls",
+      "fieldtype": "Currency",
+      "label": "Darb Tolls"
+    },
+    {
+      "fieldname": "darb_tolls_surcharge",
+      "fieldtype": "Currency",
+      "label": "Darb Tolls Surcharge"
+    },
+    {
+      "fieldname": "other_charge",
+      "fieldtype": "Currency",
+      "label": "Other Charge"
+    },
+    {
+      "fieldname": "other_discount_charge",
+      "fieldtype": "Currency",
+      "label": "Other Discount Charge"
+    },
+    {
+      "fieldname": "tax_rate",
+      "fieldtype": "Data",
+      "label": "Tax Rate"
+    },
+    {
+      "fieldname": "tax_amount",
+      "fieldtype": "Currency",
+      "label": "Tax Amount"
+    },
+    {
+      "fieldname": "total_charges",
+      "fieldtype": "Currency",
+      "label": "Total Charges"
+    },
+    {
+      "fieldname": "advance",
+      "fieldtype": "Currency",
+      "label": "Advance"
+    },
+    {
+      "fieldname": "deposit",
+      "fieldtype": "Currency",
+      "label": "Deposit"
+    },
+    {
+      "fieldname": "deposit_due",
+      "fieldtype": "Currency",
+      "label": "Deposit Due"
+    }
+  ],
+  "index_web_pages_for_search": 1,
+  "links": [],
+  "modified": "2025-09-15 00:00:00",
+  "modified_by": "Administrator",
+  "module": "leetrental",
+  "name": "Car Reservations",
+  "naming_rule": "Expression (old style)",
+  "owner": "Administrator",
+  "permissions": [
+    {
+      "create": 1,
+      "delete": 1,
+      "email": 1,
+      "export": 1,
+      "print": 1,
+      "read": 1,
+      "report": 1,
+      "role": "System Manager",
+      "share": 1,
+      "write": 1
+    }
+  ],
+  "sort_field": "modified",
+  "sort_order": "DESC",
+  "states": []
 }
