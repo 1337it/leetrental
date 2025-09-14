@@ -13,7 +13,7 @@
  "hide_custom": 0,
  "icon": "check",
  "idx": 0,
- "label": "leetrental",
+ "label": "Car Reservation",
  "links": [
   {
    "hidden": 0,
@@ -68,9 +68,9 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "leetrental Details",
+   "label": "Car Reservation Details",
    "link_count": 0,
-   "link_to": "leetrental Details",
+   "link_to": "Car Reservation Details",
    "link_type": "Report",
    "onboard": 0,
    "type": "Link"
@@ -154,9 +154,9 @@
   {
    "hidden": 0,
    "is_query_report": 1,
-   "label": "leetrental Details",
+   "label": "Car Reservation Details",
    "link_count": 0,
-   "link_to": "leetrental Details",
+   "link_to": "Car Reservation Details",
    "link_type": "Report",
    "onboard": 0,
    "type": "Link"
@@ -228,8 +228,8 @@
   {
    "color": "Green",
    "doc_view": "List",
-   "label": "leetrental",
-   "link_to": "leetrental",
+   "label": "Car Reservation",
+   "link_to": "Car Reservation",
    "stats_filter": "{\"name\":[\"is\",\"set\"]}",
    "type": "DocType"
   },
@@ -266,5 +266,5 @@
    "type": "DocType"
   }
  ],
- "title": "leetrental"
+ "title": "Rental"
 }
