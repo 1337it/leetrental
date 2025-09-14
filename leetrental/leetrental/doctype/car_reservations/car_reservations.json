@@ -189,8 +189,6 @@
       "fieldtype": "Geolocation",
       "label": "Map View"
     },
-
-    /* --- Added Rental Agreement fields --- */
     {
       "fieldname": "agreement_no",
       "fieldtype": "Data",
