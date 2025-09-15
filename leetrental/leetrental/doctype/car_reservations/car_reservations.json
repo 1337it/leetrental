@@ -234,13 +234,13 @@
       "fieldname": "additional_driver",
       "fieldtype": "Link",
       "label": "Additional Driver",
-      "options": "Staff"
+      "options": "Employee"
     },
     {
       "fieldname": "sales_person",
       "fieldtype": "Link",
       "label": "Sales Person",
-      "options": "Staff"
+      "options": "Employee"
     },
     {
       "fieldname": "notes",
