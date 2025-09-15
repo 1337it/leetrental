@@ -1,0 +1,11 @@
+body.full-width .container {
+width: 100%;
+max-width: 100%;
+scrollbar-width: none;
+}
+
+[data-page-route="Workspaces"] .layout-main .layout-main-section {
+border: none !important;
+padding: var(--padding-md);
+margin-bottom: var(--margin-sm);
+}
