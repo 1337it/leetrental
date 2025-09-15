@@ -130,7 +130,7 @@ fixtures = [{
 doc_events = {
 	'leetrental': {
         'validate': [
-            'leetrental.leetrental.doctype.car-reservations.car-reservations.validate'   
+            'leetrental.leetrental.doctype.car_reservations.car_reservations.validate'   
             ],
 	},
     'Services': {
