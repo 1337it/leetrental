@@ -31,8 +31,8 @@
  "name": "Car Reservation Details",
  "owner": "Administrator",
  "prepared_report": 0,
- "query": "select vehicle,driver,approver,start_time,end_time,workflow_state from `tableetrental` where start_time >= %(start_time)s and end_time <= %(end_time)s and workflow_state = 'Reserved'",
- "ref_doctype": "leetrental",
+ "query": "select vehicle,driver,approver,start_time,end_time,workflow_state from `tabCar Reservation` where start_time >= %(start_time)s and end_time <= %(end_time)s and workflow_state = 'Reserved'",
+ "ref_doctype": "Car Reservation",
  "report_name": "Car Reservation Details",
  "report_type": "Query Report",
  "roles": [
