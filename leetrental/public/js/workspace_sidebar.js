@@ -1,6 +1,4 @@
-frappe.ready(() => {
-    // Fetch the list of workspaces for the current user
-    frappe.call({
+frappe.call({
         method: 'frappe.core.doctype.workspace.workspace.get_workspaces_for_user',
         callback: (r) => {
             const workspaces = r.message || [];
@@ -27,5 +25,4 @@ frappe.ready(() => {
                 sidebarList.appendChild(li);
             });
         }
-    });
 });
