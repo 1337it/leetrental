@@ -20,7 +20,17 @@ fixtures = [{
     "doctype": "Workflow State"
     }
     ]
+# my_app/hooks.py
 
+# Include the custom JavaScript and CSS
+app_include_js = [
+    "/assets/leetrental/js/workspace_sidebar.js"
+]
+
+# Override the default desk template for all doctypes
+override_doctype_dashboards = {
+    "*": "leetrental/templates/custom_workspace_desk.html"
+}
 # include js, css files in header of desk.html
 # app_include_css = "/assets/leetrental/css/leetrental.css"
 # app_include_js = "/assets/leetrental/js/leetrental.js"
