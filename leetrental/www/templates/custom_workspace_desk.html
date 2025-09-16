@@ -1,0 +1,18 @@
+{% extends "frappe/templates/base.html" %}
+
+{% block content %}
+<div class="frappe-desk">
+    <div class="desk-container">
+        <div class="layout-side-section" id="workspace-sidebar">
+            <div class="sidebar-menu">
+                <ul class="sidebar-list">
+                    </ul>
+            </div>
+        </div>
+        
+        <div class="page-content">
+            {% block page_content %}{% endblock %}
+        </div>
+    </div>
+</div>
+{% endblock %}
