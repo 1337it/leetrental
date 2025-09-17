@@ -32,7 +32,7 @@ position: absolute;
 #page-Workspaces[style="display: none;"] .layout-side-section {
 display: block !important;
 }
-.page-head[data-page-route="Workspaces"] {
+[data-page-route="Workspaces"] .page-head {
 z-index: 6;
 top: var(--navbar-height);
 background: var(--bg-color);
