@@ -23,9 +23,6 @@ fixtures = [{
 # my_app/hooks.py
 
 # Include the custom JavaScript and CSS
-app_include_js = [
-    "/assets/leetrental/js/workspace_sidebar.js"
-]
 
 # Override the default desk template for all doctypes
 override_doctype_dashboards = {
