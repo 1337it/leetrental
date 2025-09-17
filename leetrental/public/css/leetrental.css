@@ -43,5 +43,8 @@ right: 0px;
 position: absolute;
 }
 [data-page-route="Workspaces"] .layout-main .layout-main-section-wrapper {
-margin-top: var(--page-head-height);
+padding-top: var(--page-head-height);
+}
+[data-page-route="Workspaces"] .layout-main {
+height: calc(100vh - var(--navbar-height) - 0px) !important;
 }
