@@ -5,6 +5,6 @@ def get_data():
 		{
 			"module_name": "leetrental",
 			"type": "module",
-			"label": _("leetrental")
+			"label": _("Rental")
 		}
 	]
