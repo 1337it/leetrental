@@ -9,3 +9,10 @@ border: none !important;
 padding: var(--padding-md);
 margin-bottom: var(--margin-sm);
 }
+#page-Workspaces[style="display: none;"] {
+display: block !important;
+visibility: hidden;
+}
+#page-Workspaces[style="display: none;"] .layout-main-section {
+visibility: visible;
+}
