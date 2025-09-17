@@ -33,9 +33,9 @@ app_include_css = "/assets/leetrental/css/leetrental.css"
 app_include_js = "/assets/leetrental/js/leetrental.js"
 
 app_include_html = [
-    "/assets/your_app/icons/rental-icons.svg"
+    "/assets/leetrental/icons/rental-icons.svg"
 ]
-app_include_css = ["/assets/your_app/css/rental-icons.css"]
+app_include_css = ["/assets/leetrental/css/rental-icons.css"]
 # include js, css files in header of web template
 # web_include_css = "/assets/leetrental/css/leetrental.css"
 # web_include_js = "/assets/leetrental/js/leetrental.js"
