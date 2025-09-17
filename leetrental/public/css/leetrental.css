@@ -48,3 +48,8 @@ padding-top: var(--page-head-height);
 [data-page-route="Workspaces"] .layout-main {
 height: calc(100vh - var(--navbar-height) - 0px) !important;
 }
+.form-sidebar .sidebar-image-section {
+width: min(100%, 1000px) !important;
+cursor: pointer;
+border-radius: var(--border-radius-lg);
+}
