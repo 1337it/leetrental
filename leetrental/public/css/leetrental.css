@@ -11,8 +11,23 @@ margin-bottom: var(--margin-sm);
 }
 #page-Workspaces[style="display: none;"] {
 display: block !important;
-visibility: hidden;
 }
-#page-Workspaces[style="display: none;"] .layout-main-section {
+#page-Workspaces[style="display: none;"] .layout-side-section {
 visibility: visible;
+}
+#page-Workspaces[style="display: none;"] .page-head {
+visibility: hidden;
+display: none;
+}
+#page-Workspaces[style="display: none;"] .layout-main-section-wrapper {
+min-width: 0;
+display: none;
+}
+.page-container:not(#page-Workspaces) {
+width: calc(100vw - 16.666vw) !important;
+right: 0;
+position: absolute;
+}
+#page-Workspaces[style="display: none;"] .layout-side-section {
+display: block !important;
 }
