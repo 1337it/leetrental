@@ -29,8 +29,8 @@ override_doctype_dashboards = {
     "*": "leetrental/templates/custom_workspace_desk.html"
 }
 # include js, css files in header of desk.html
-# app_include_css = "/assets/leetrental/css/leetrental.css"
-# app_include_js = "/assets/leetrental/js/leetrental.js"
+app_include_css = "/assets/leetrental/css/leetrental.css"
+app_include_js = "/assets/leetrental/js/leetrental.js"
 
 
 # include js, css files in header of web template
