@@ -228,8 +228,8 @@
   {
    "color": "Green",
    "doc_view": "List",
-   "label": "Car Reservation",
-   "link_to": "Car Reservation",
+   "label": "Car Reservations",
+   "link_to": "Car Reservations",
    "stats_filter": "{\"name\":[\"is\",\"set\"]}",
    "type": "DocType"
   },
