@@ -27,7 +27,21 @@ display: none;
 width: calc(100vw - 16.666vw) !important;
 right: 0;
 position: absolute;
+  top: var(--navbar-height) !important;
 }
 #page-Workspaces[style="display: none;"] .layout-side-section {
 display: block !important;
+}
+.page-head[data-page-route="Workspaces"] {
+z-index: 6;
+top: var(--navbar-height);
+background: var(--bg-color);
+margin-bottom: 5px;
+transition: top 0.5s;
+width: calc(83.34vw);
+right: 0px;
+position: absolute;
+}
+[data-page-route="Workspaces"] .layout-main .layout-main-section-wrapper {
+margin-top: var(--page-head-height);
 }
