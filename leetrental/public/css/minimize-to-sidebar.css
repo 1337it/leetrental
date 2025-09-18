@@ -34,3 +34,42 @@
 /* Work with your collapsed rail */
 .app.--collapsed .sidebar__minimized .minibtn__label{ opacity:0; visibility:hidden; }
 .app.--collapsed .sidebar:hover .minibtn__label{ opacity:1; visibility:visible; }
+.minibtn{
+  display: grid;
+  grid-template-columns: 24px 1fr 20px;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: rgba(148,163,184,.10);
+  color: inherit;
+  cursor: pointer;
+  border: 0;
+  transition: background .2s ease;
+}
+
+.minibtn__labels{
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.minibtn__doctype{
+  font-size: 12px;
+  font-weight: 600;
+  color: #cbd5e1; /* lighter slate */
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.minibtn__docname{
+  font-size: 13px;
+  font-weight: 400;
+  color: #f1f5f9; /* brighter */
+  line-height: 1.3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
