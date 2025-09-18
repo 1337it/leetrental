@@ -8,11 +8,10 @@
     '.page-sidebar',
     '.layout-side-section'
   ];
+  const ANCHOR_SELECTOR = '.standard-sidebar-section.nested-container';
   const LOG = (...a) => console.debug('[mini-dock]', ...a);
 
-  let dock;                       // the dock element (single instance)
-  let host;                       // where the dock is currently attached
-  let observer;                   // MutationObserver to detect sidebars
+  let dock, host, anchor, observer;
 
   function getSidebarSelectorList() {
     const first = window.MINIDOCK_SIDEBAR_SELECTOR ? [window.MINIDOCK_SIDEBAR_SELECTOR] : [];
@@ -22,50 +21,70 @@
   function findSidebar() {
     for (const sel of getSidebarSelectorList()) {
       const el = document.querySelector(sel);
-      if (el) { LOG('sidebar found via', sel); return el; }
+      if (el) return el;
     }
     return null;
   }
 
-  function createDockEl(className) {
-    const el = document.createElement('div');
-    el.id = 'minimizedDock';
-    el.className = className;
-    return el;
+  function findAnchor(sidebarEl) {
+    if (!sidebarEl) return null;
+    // anchor is the specific section inside the sidebar
+    return sidebarEl.querySelector(ANCHOR_SELECTOR);
   }
 
   function ensureDock() {
-    // Create dock if not exists (fallback on body so it’s visible)
     if (!dock) {
-      dock = document.getElementById('minimizedDock') ||
-             createDockEl('fallback__minimized');
-      if (!dock.parentElement) document.body.appendChild(dock);
+      dock = document.getElementById('minimizedDock');
+      if (!dock) {
+        dock = document.createElement('div');
+        dock.id = 'minimizedDock';
+        dock.className = 'fallback__minimized'; // start visible as fallback
+        document.body.appendChild(dock);
+      }
     }
     return dock;
   }
 
-  function moveDockTo(newHost) {
-    if (!dock) ensureDock();
-    if (!newHost || host === newHost) return;
-    dock.className = 'sidebar__minimized'; // switch to sidebar styling
-    newHost.appendChild(dock);
-    host = newHost;
-    LOG('dock moved into sidebar');
+  function moveDockTo(sidebarEl, anchorEl) {
+    ensureDock();
+    if (!sidebarEl) return; // stay fallback until sidebar exists
+
+    // If we already sit in correct spot, skip
+    const intendedParent = sidebarEl;
+    const alreadyPlaced =
+      dock.parentElement === intendedParent &&
+      (anchorEl ? dock.previousElementSibling === anchorEl : true);
+
+    if (alreadyPlaced) return;
+
+    dock.className = 'sidebar__minimized';
+    if (anchorEl && anchorEl.parentElement === intendedParent) {
+      // place directly AFTER the anchor section
+      anchorEl.insertAdjacentElement('afterend', dock);
+      LOG('dock placed after anchor', ANCHOR_SELECTOR);
+    } else {
+      // fallback: append inside sidebar
+      intendedParent.appendChild(dock);
+      LOG('dock appended at end of sidebar (anchor not found)');
+    }
+    host = sidebarEl;
+    anchor = anchorEl || null;
   }
 
   function maybeAttachToSidebarNow() {
     const s = findSidebar();
-    if (s) moveDockTo(s);
+    if (!s) return;
+    const a = findAnchor(s);
+    moveDockTo(s, a);
   }
 
   function startObserving() {
     if (observer) return;
     observer = new MutationObserver(() => {
-      // On any DOM changes, try to relocate dock into a sidebar
+      // layouts in Frappe can re-render; keep relocating
       maybeAttachToSidebarNow();
     });
     observer.observe(document.documentElement, { childList: true, subtree: true });
-    LOG('mutation observer started');
   }
 
   function routeStrOf(arr) { return (arr || []).join('/'); }
@@ -113,13 +132,14 @@
     [...dock.querySelectorAll('.minibtn')].slice(MAX_ITEMS).forEach(n => n.remove());
   }
 
-  // Manual pin for testing
-  function pinCurrentIfForm() {
+  // Manual tester
+  window.__miniDockTestPin = () => {
     const entry = parseFormTitle(getRouteArr());
     if (entry) addToDock(entry);
-  }
+    maybeAttachToSidebarNow();
+  };
 
-  // Route tracking
+  // Route tracking: minimize previous Form/* on leave
   let last = routeStrOf(getRouteArr());
   function handleRouteChange() {
     const nowArr = getRouteArr();
@@ -132,7 +152,7 @@
     }
     last = nowStr;
 
-    // Each route may render a different layout; try to move dock again
+    // Re-locate on new layout
     setTimeout(maybeAttachToSidebarNow, 0);
   }
 
@@ -141,18 +161,12 @@
     startObserving();
     maybeAttachToSidebarNow();
 
-    window.__miniDockTestPin = pinCurrentIfForm;
-
     if (window.frappe?.router?.on) {
       window.frappe.router.on('change', handleRouteChange);
-      LOG('attached to frappe.router change');
     } else {
       window.addEventListener('hashchange', handleRouteChange);
-      LOG('attached to hashchange');
     }
-
     last = routeStrOf(getRouteArr());
-    LOG('initialized; current route =', last);
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', attach);
