@@ -65,23 +65,9 @@ display: none;
 :root {
   overscroll-behavior: none;
 }
-#page-Workspaces .layout-side-section {
-display: block !important;
-}
 
 .search-bar {
 position: absolute;
 width: 33vw !important;
 left: calc((100vw - 33vw)/2);
 }
-.page-container[style="display: none;"] .layout-side-section {
-display: none;
-}
-.page-container[style="display: none;"] {
-display: block !important;
-/* visibility: hidden; */
-}
-.page-container[style="display: none;"] .page-actions {
-display: none;
-}
-
