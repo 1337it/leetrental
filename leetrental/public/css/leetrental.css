@@ -31,6 +31,7 @@ position: absolute;
 }
 #page-Workspaces[style="display: none;"] .layout-side-section {
 display: block !important;
+  position: fixed;
 }
 [data-page-route="Workspaces"] .page-head {
 z-index: 6;
@@ -52,4 +53,14 @@ height: calc(100vh - var(--navbar-height) - 0px) !important;
 width: min(100%, 1000px) !important;
 cursor: pointer;
 border-radius: var(--border-radius-lg);
+}
+.page-title .sidebar-toggle-btn {
+
+display: none;
+}
+.layout-side-section {
+display: none;
+}
+:root {
+  overscroll-behavior: none;
 }
