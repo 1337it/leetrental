@@ -64,3 +64,6 @@ display: none;
 :root {
   overscroll-behavior: none;
 }
+#page-Workspaces .layout-side-section {
+display: block !important;
+}
