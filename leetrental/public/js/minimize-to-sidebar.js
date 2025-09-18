@@ -1,13 +1,31 @@
+// assets/your_app/js/minimize-to-sidebar.js
 (() => {
+  // --- SINGLETON GUARD (prevents double init if file is included twice) ---
+  if (window.__MINIDOCK_ACTIVE) return;
+  window.__MINIDOCK_ACTIVE = true;
+
   const MAX_ITEMS = 6;
   const DEFAULT_SIDEBARS = [
     '.sidebar', '.desk-sidebar', '.standard-sidebar', '.page-sidebar', '.layout-side-section'
   ];
   const ANCHOR_SELECTOR = '.standard-sidebar-section.nested-container';
 
-  let dock, observer, lastRoute = '';
+  let dock = null;
+  let observer = null;
+  let lastRoute = '';
+  let placeScheduled = false;
 
   const log = (...a) => console.debug('[mini-dock]', ...a);
+
+  // ---- Helpers ----
+  function debouncePlace() {
+    if (placeScheduled) return;
+    placeScheduled = true;
+    requestAnimationFrame(() => {
+      placeScheduled = false;
+      placeDock();
+    });
+  }
 
   function getSidebar() {
     const prefer = window.MINIDOCK_SIDEBAR_SELECTOR ? [window.MINIDOCK_SIDEBAR_SELECTOR] : [];
@@ -18,15 +36,23 @@
     return null;
   }
 
+  function ensureSingleDockInDOM() {
+    const all = document.querySelectorAll('#minimizedDock');
+    if (all.length > 1) {
+      // Keep the first; remove extras
+      all.forEach((el, i) => { if (i > 0) el.remove(); });
+    }
+    dock = all[0] || null;
+  }
+
   function ensureDock() {
+    ensureSingleDockInDOM();
     if (!dock) {
-      dock = document.getElementById('minimizedDock');
-      if (!dock) {
-        dock = document.createElement('div');
-        dock.id = 'minimizedDock';
-        dock.className = 'fallback__minimized';          // visible until placed
-        document.body.appendChild(dock);
-      }
+      dock = document.createElement('div');
+      dock.id = 'minimizedDock';
+      dock.className = 'fallback__minimized'; // visible until placed
+      dock.setAttribute('data-minidock', '1'); // marker to ignore in observers
+      document.body.appendChild(dock);
     }
     return dock;
   }
@@ -36,18 +62,31 @@
     const sidebar = getSidebar();
     if (!sidebar) return; // keep fallback visible
 
-    // Find ALL anchors and pick the last one in DOM order
     const anchors = sidebar.querySelectorAll(ANCHOR_SELECTOR);
-    if (anchors.length > 0) {
-      const lastAnchor = anchors[anchors.length - 1];
-      dock.className = 'sidebar__minimized';
+    let targetParent = sidebar;
+    let lastAnchor = null;
+    if (anchors.length) lastAnchor = anchors[anchors.length - 1];
+
+    // Already correctly placed? (same parent AND exactly after the last anchor)
+    const correctParent = dock.parentElement === targetParent;
+    const correctOrder = lastAnchor ? dock.previousElementSibling === lastAnchor
+                                    : dock.previousElementSibling && dock.previousElementSibling.matches(ANCHOR_SELECTOR) === false;
+
+    if (correctParent && (lastAnchor ? correctOrder : dock.parentElement === targetParent)) {
+      return; // nothing to do
+    }
+
+    dock.className = 'sidebar__minimized';
+
+    if (lastAnchor && lastAnchor.parentElement === targetParent) {
+      if (dock === lastAnchor.nextElementSibling) return;
       lastAnchor.insertAdjacentElement('afterend', dock);
       log('dock placed after LAST anchor', anchors.length);
     } else {
-      // If no anchors yet, append at end of sidebar
-      dock.className = 'sidebar__minimized';
-      sidebar.appendChild(dock);
-      log('dock appended at end (no anchors found)');
+      if (dock.parentElement !== targetParent || dock.nextElementSibling !== null) {
+        targetParent.appendChild(dock);
+        log('dock appended at end (no anchors found)');
+      }
     }
   }
 
@@ -65,6 +104,7 @@
     btn.dataset.route = entry.key;
 
     const icon = document.createElement('div'); icon.className = 'minibtn__icon'; icon.textContent = '📄';
+
     const labels = document.createElement('div'); labels.className = 'minibtn__labels';
     const l1 = document.createElement('div'); l1.className = 'minibtn__doctype'; l1.textContent = entry.doctype;
     const l2 = document.createElement('div'); l2.className = 'minibtn__docname'; l2.textContent = entry.docname;
@@ -84,12 +124,20 @@
 
   function addToDock(entry) {
     ensureDock();
+
+    // De-dup by route key
     const existing = dock.querySelector(`.minibtn[data-route="${CSS.escape(entry.key)}"]`);
-    if (existing) { dock.prepend(existing); return; }
-    dock.prepend(makeMiniButton(entry));
+    if (existing) {
+      dock.prepend(existing);
+    } else {
+      dock.prepend(makeMiniButton(entry));
+    }
+
+    // Trim
     [...dock.querySelectorAll('.minibtn')].slice(MAX_ITEMS).forEach(n => n.remove());
-    // After adding, re-place to ensure it's still after the last anchor
-    placeDock();
+
+    // Re-place (debounced) to keep after last anchor
+    debouncePlace();
   }
 
   // ---- Routing / observing ----
@@ -112,13 +160,20 @@
     }
     lastRoute = nowStr;
 
-    // Layout may change after routing; re-place asynchronously
-    setTimeout(placeDock, 0);
+    // Layout may change after routing; debounce placement
+    debouncePlace();
   }
 
   function startObserver() {
     if (observer) return;
-    observer = new MutationObserver(() => placeDock());
+    observer = new MutationObserver((mutations) => {
+      // Ignore mutations originated within the dock itself to prevent loops
+      for (const m of mutations) {
+        if (dock && (dock === m.target || (m.target && dock.contains(m.target)))) continue;
+        debouncePlace();
+        break;
+      }
+    });
     observer.observe(document.documentElement, { childList: true, subtree: true });
   }
 
@@ -134,11 +189,13 @@
     }
     lastRoute = routeStr(getRouteArr());
 
-    // manual test helper
+    // Manual tester
     window.__miniDockTestPin = () => {
       const e = parseFormEntry(getRouteArr());
       if (e) addToDock(e);
     };
+
+    log('initialized');
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
