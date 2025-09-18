@@ -31,9 +31,7 @@ position: absolute;
 }
 #page-Workspaces[style="display: none;"] .layout-side-section {
 display: block !important;
-  background-image: linear-gradient(to top, rgb(228, 233, 239), white);
-  padding-top: 20px;
-padding-left: 20px;
+
   position: fixed;
 }
 [data-page-route="Workspaces"] .page-head {
@@ -68,12 +66,9 @@ display: none;
   overscroll-behavior: none;
 }
 #page-Workspaces .layout-side-section {
-  background-image: linear-gradient(to top, rgb(228, 233, 239), white);
 display: block !important;
 }
-.layout-main-section-wrapper {
-background: #f8f9fb;
-}
+
 .search-bar {
 position: absolute;
 width: 33vw !important;
