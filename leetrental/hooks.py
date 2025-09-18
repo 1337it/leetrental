@@ -31,12 +31,14 @@ override_doctype_dashboards = {
 # include js, css files in header of desk.html
 app_include_css = [
 	"/assets/leetrental/css/leetrental.css",
-	"/assets/leetrental/css/portal-settings.css"
+	"/assets/leetrental/css/portal-settings.css",
+	"/assets/leetrental/css/minimize-to-sidebar.css"
 ]
 
 app_include_js = [
 	"/assets/leetrental/js/leetrental.js",
-	"/assets/leetrental/js/portal-settings.js"
+	"/assets/leetrental/js/portal-settings.js",
+	"/assets/leetrental/js/minimize-to-sidebar.js"
 ]
 
 app_include_icons = "leetrental/icons/rental-icons.svg"
