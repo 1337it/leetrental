@@ -96,31 +96,53 @@
   }
 
   function parseFormTitle(routeArr) {
-    if (!routeArr || routeArr[0] !== 'Form') return null;
-    const [, doctype, name] = routeArr;
-    if (!doctype || !name) return null;
-    const docname = decodeURIComponent(name);
-    return { label: `${doctype}: ${docname}`, icon: '📄', key: routeArr.join('/'), route: routeArr };
+ if (!routeArr || routeArr[0] !== 'Form') return null;
+  const [, doctype, name] = routeArr;
+  if (!doctype || !name) return null;
+  const docname = decodeURIComponent(name);
+  return { doctype, docname, key: routeArr.join('/'), route: routeArr };
   }
 
-  function makeMiniButton(entry) {
-    const btn = document.createElement('div');
-    btn.className = 'minibtn';
-    btn.dataset.route = entry.key;
+ function makeMiniButton(entry) {
+  const btn = document.createElement('div');
+  btn.className = 'minibtn';
+  btn.dataset.route = entry.key;
 
-    const icon = document.createElement('div'); icon.className = 'minibtn__icon'; icon.textContent = entry.icon;
-    const label = document.createElement('div'); label.className = 'minibtn__label'; label.textContent = entry.label;
-    const close = document.createElement('button'); close.className = 'minibtn__close'; close.title = 'Remove'; close.textContent = '×';
-    close.addEventListener('click', (e) => { e.stopPropagation(); btn.remove(); });
+  const icon = document.createElement('div');
+  icon.className = 'minibtn__icon';
+  icon.textContent = '📄';
 
-    btn.append(icon, label, close);
-    btn.addEventListener('click', () => {
-      if (window.frappe?.set_route) window.frappe.set_route(entry.route);
-      else location.hash = '#' + entry.key;
-    });
+  const labelBox = document.createElement('div');
+  labelBox.className = 'minibtn__labels';
 
-    return btn;
-  }
+  const line1 = document.createElement('div');
+  line1.className = 'minibtn__doctype';
+  line1.textContent = entry.doctype;
+
+  const line2 = document.createElement('div');
+  line2.className = 'minibtn__docname';
+  line2.textContent = entry.docname;
+
+  labelBox.append(line1, line2);
+
+  const close = document.createElement('button');
+  close.className = 'minibtn__close';
+  close.title = 'Remove';
+  close.textContent = '×';
+  close.addEventListener('click', (e) => {
+    e.stopPropagation();
+    btn.remove();
+  });
+
+  btn.append(icon, labelBox, close);
+
+  btn.addEventListener('click', () => {
+    if (window.frappe?.set_route) window.frappe.set_route(entry.route);
+    else location.hash = '#' + entry.key;
+  });
+
+  return btn;
+}
 
   function addToDock(entry) {
     ensureDock();
