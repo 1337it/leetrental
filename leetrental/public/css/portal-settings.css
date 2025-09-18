@@ -29,10 +29,10 @@ width: calc(100% - 20px);
 /* Fallback fixed position if no sidebar is found */
 body > #portal-settings-launcher.portal-settings-launcher {
   position: fixed;
-  left: 16px;
-  bottom: 16px;
+  left: 20px;
+  bottom: 20px;
   z-index: 1000;
-  width: auto;
+  width: calc(16.6667% - 40px);
 }
 
 /* Panel (flyout card) */
