@@ -21,14 +21,14 @@
 /* Buttons */
 .minibtn{
   display: grid; grid-template-columns: 24px 1fr 20px; align-items: center;
-  gap: 8px; padding: 8px 10px; border-radius: 10px;
+  gap: 8px; padding: 0px 20px; border-radius: 10px;
   background: rgba(148,163,184,.10); color: inherit; border: 0; cursor: pointer;
   transition: background .2s ease;
 }
 .minibtn:hover{ background: rgba(148,163,184,.18); }
 .minibtn__icon{ width: 24px; text-align: center; opacity:.9; }
 .minibtn__label{ white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.minibtn__close{ border:0; background: transparent; color: inherit; cursor: pointer; font-size: 14px; opacity:.7; }
+.minibtn__close{ border:0; background: transparent; color: inherit; cursor: pointer; font-size: 20px; opacity:.7; }
 .minibtn__close:hover{ opacity:1; }
 
 /* Work with your collapsed rail */
