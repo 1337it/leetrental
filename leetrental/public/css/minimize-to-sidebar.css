@@ -26,26 +26,57 @@
   transition: background .2s ease;
 }
 .minibtn:hover{ background: rgba(148,163,184,.18); }
-.minibtn__icon{ width: 24px; text-align: center; opacity:.9; }
-.minibtn__label{ white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.minibtn__close{ border:0; background: transparent; color: inherit; cursor: pointer; font-size: 20px; opacity:.7; }
+.minibtn__icon {
+width: 24px;
+text-align: center;
+opacity: 0.9;
+font-size: 22px;
+/* margin-right: 5px; */
+}
+.minibtn__labels {
+display: flex;
+flex-direction: column;
+overflow: hidden;
+margin-left: 5px;
+}
+.minibtn__close {
+border: 0px;
+background-position: 0% 0%;
+background-size: auto;
+background-repeat: repeat;
+background-attachment: scroll;
+background-origin: padding-box;
+background-clip: border-box;
+color: black;
+cursor: pointer;
+font-size: 24px;
+opacity: 0.6;
+padding: 0px;
+background-color: var(--btn-group-border-color);
+width: 32px;
+height: 45px;
+background-image: radial-gradient(rgb(94, 98, 101), rgb(107, 108, 110) 13.03%, rgb(79, 83, 85));
+border-top-right-radius: 10px;
+border-bottom-right-radius: 10px;
+}
 .minibtn__close:hover{ opacity:1; }
 
 /* Work with your collapsed rail */
 .app.--collapsed .sidebar__minimized .minibtn__label{ opacity:0; visibility:hidden; }
 .app.--collapsed .sidebar:hover .minibtn__label{ opacity:1; visibility:visible; }
-.minibtn{
-  display: grid;
-  grid-template-columns: 24px 1fr 20px;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 10px;
-  border-radius: 10px;
-  background: rgba(148,163,184,.10);
-  color: inherit;
-  cursor: pointer;
-  border: 0;
-  transition: background .2s ease;
+.minibtn {
+display: grid;
+grid-template-columns: 24px 1fr 20px;
+align-items: center;
+gap: 8px;
+padding: 0px 12px;
+border-radius: 10px;
+background: rgba(148, 163, 184, 0.1);
+color: inherit;
+cursor: pointer;
+border: 0px;
+transition: background 0.2s;
+box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
 }
 
 .minibtn__labels{
