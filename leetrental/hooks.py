@@ -33,6 +33,14 @@ app_include_css = "/assets/leetrental/css/leetrental.css"
 app_include_js = "/assets/leetrental/js/leetrental.js"
 
 app_include_icons = "leetrental/icons/rental-icons.svg"
+
+# hooks.py
+website_include_js = ["assets/<your_app>/js/portal-settings.js"]
+website_include_css = ["assets/<your_app>/css/portal-settings.css"]
+
+# If you also want this in Desk (optional):
+app_include_js = "/assets/leetrental/js/portal-settings.js"
+app_include_css = "/assets/leetrental/css/portal-settings.css"
 # include js, css files in header of web template
 # web_include_css = "/assets/leetrental/css/leetrental.css"
 # web_include_js = "/assets/leetrental/js/leetrental.js"
