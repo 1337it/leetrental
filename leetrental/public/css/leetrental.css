@@ -73,6 +73,4 @@ left: calc((100vw - 33vw)/2);
 }
 #page-Workspaces .layout-side-section {
 display: block !important;
-
-  position: fixed;
 }
