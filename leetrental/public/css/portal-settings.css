@@ -6,8 +6,10 @@
   bottom: 0;
   display: block;
   margin-top: auto;
-  padding: 8px 10px;
   background: transparent;
+  padding: 20px 10px;
+background: none;
+width: calc(100% - 20px);
 }
 
 /* Launcher button (bottom-left) */
