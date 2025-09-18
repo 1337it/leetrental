@@ -1,44 +1,79 @@
 // assets/your_app/js/minimize-to-sidebar.js
 (() => {
   const MAX_ITEMS = 6;
-  const SIDEBAR_SELECTORS = [
-    '.sidebar',                 // your custom global sidebar
-    '.desk-sidebar',            // Frappe desk
-    '.standard-sidebar',        // some pages
-    '.page-sidebar',            // reports/pages
-    '.layout-side-section'      // form layout sidebar
+  const DEFAULT_SELECTORS = [
+    '.sidebar',
+    '.desk-sidebar',
+    '.standard-sidebar',
+    '.page-sidebar',
+    '.layout-side-section'
   ];
-
   const LOG = (...a) => console.debug('[mini-dock]', ...a);
 
+  let dock;                       // the dock element (single instance)
+  let host;                       // where the dock is currently attached
+  let observer;                   // MutationObserver to detect sidebars
+
+  function getSidebarSelectorList() {
+    const first = window.MINIDOCK_SIDEBAR_SELECTOR ? [window.MINIDOCK_SIDEBAR_SELECTOR] : [];
+    return [...first, ...DEFAULT_SELECTORS];
+  }
+
   function findSidebar() {
-    for (const sel of SIDEBAR_SELECTORS) {
+    for (const sel of getSidebarSelectorList()) {
       const el = document.querySelector(sel);
       if (el) { LOG('sidebar found via', sel); return el; }
     }
-    LOG('no sidebar found; using fallback dock');
     return null;
   }
 
-  function ensureDock() {
-    // prefer attaching to an existing sidebar
-    const host = findSidebar();
-    let dock = (host || document.body).querySelector('#minimizedDock');
+  function createDockEl(className) {
+    const el = document.createElement('div');
+    el.id = 'minimizedDock';
+    el.className = className;
+    return el;
+  }
 
+  function ensureDock() {
+    // Create dock if not exists (fallback on body so it’s visible)
     if (!dock) {
-      dock = document.createElement('div');
-      dock.id = 'minimizedDock';
-      dock.className = host ? 'sidebar__minimized' : 'fallback__minimized';
-      (host || document.body).appendChild(dock);
+      dock = document.getElementById('minimizedDock') ||
+             createDockEl('fallback__minimized');
+      if (!dock.parentElement) document.body.appendChild(dock);
     }
     return dock;
   }
 
-  function routeStrOf(arr) { return (arr || []).join('/'); }
+  function moveDockTo(newHost) {
+    if (!dock) ensureDock();
+    if (!newHost || host === newHost) return;
+    dock.className = 'sidebar__minimized'; // switch to sidebar styling
+    newHost.appendChild(dock);
+    host = newHost;
+    LOG('dock moved into sidebar');
+  }
 
+  function maybeAttachToSidebarNow() {
+    const s = findSidebar();
+    if (s) moveDockTo(s);
+  }
+
+  function startObserving() {
+    if (observer) return;
+    observer = new MutationObserver(() => {
+      // On any DOM changes, try to relocate dock into a sidebar
+      maybeAttachToSidebarNow();
+    });
+    observer.observe(document.documentElement, { childList: true, subtree: true });
+    LOG('mutation observer started');
+  }
+
+  function routeStrOf(arr) { return (arr || []).join('/'); }
   function getRouteArr() {
-    try { return window.frappe?.get_route ? window.frappe.get_route() : (location.hash || '').replace(/^#/, '').split('/'); }
-    catch { return []; }
+    try {
+      return window.frappe?.get_route ? window.frappe.get_route()
+        : (location.hash || '').replace(/^#/, '').split('/');
+    } catch { return []; }
   }
 
   function parseFormTitle(routeArr) {
@@ -46,18 +81,13 @@
     const [, doctype, name] = routeArr;
     if (!doctype || !name) return null;
     const docname = decodeURIComponent(name);
-    return {
-      label: `${doctype}: ${docname}`,
-      icon: '📄',
-      key: routeArr.join('/'),
-      route: routeArr
-    };
+    return { label: `${doctype}: ${docname}`, icon: '📄', key: routeArr.join('/'), route: routeArr };
   }
 
   function makeMiniButton(entry) {
     const btn = document.createElement('div');
     btn.className = 'minibtn';
-    btn.setAttribute('data-route', entry.key);
+    btn.dataset.route = entry.key;
 
     const icon = document.createElement('div'); icon.className = 'minibtn__icon'; icon.textContent = entry.icon;
     const label = document.createElement('div'); label.className = 'minibtn__label'; label.textContent = entry.label;
@@ -66,15 +96,15 @@
 
     btn.append(icon, label, close);
     btn.addEventListener('click', () => {
-      LOG('restore route', entry.route);
       if (window.frappe?.set_route) window.frappe.set_route(entry.route);
       else location.hash = '#' + entry.key;
     });
+
     return btn;
   }
 
   function addToDock(entry) {
-    const dock = ensureDock();
+    ensureDock();
     const sel = `.minibtn[data-route="${CSS.escape(entry.key)}"]`;
     const existing = dock.querySelector(sel);
     if (existing) { dock.prepend(existing); return; }
@@ -83,35 +113,34 @@
     [...dock.querySelectorAll('.minibtn')].slice(MAX_ITEMS).forEach(n => n.remove());
   }
 
-  // Manual pin (for testing on demand)
+  // Manual pin for testing
   function pinCurrentIfForm() {
-    const arr = getRouteArr();
-    const entry = parseFormTitle(arr);
-    if (entry) { LOG('pin current form', entry.key); addToDock(entry); }
-    else LOG('current route is not a Form/*', arr);
+    const entry = parseFormTitle(getRouteArr());
+    if (entry) addToDock(entry);
   }
 
   // Route tracking
   let last = routeStrOf(getRouteArr());
-
   function handleRouteChange() {
     const nowArr = getRouteArr();
     const nowStr = routeStrOf(nowArr);
-    LOG('route change', { from: last, to: nowStr });
-
-    // minimize the previous Form/* when leaving it
     const prevArr = last ? last.split('/').map(decodeURIComponent) : null;
+
     if (prevArr && prevArr[0] === 'Form' && nowStr !== last) {
       const entry = parseFormTitle(prevArr);
       if (entry) addToDock(entry);
     }
     last = nowStr;
+
+    // Each route may render a different layout; try to move dock again
+    setTimeout(maybeAttachToSidebarNow, 0);
   }
 
   function attach() {
     ensureDock();
+    startObserving();
+    maybeAttachToSidebarNow();
 
-    // expose a quick tester in console
     window.__miniDockTestPin = pinCurrentIfForm;
 
     if (window.frappe?.router?.on) {
@@ -122,7 +151,6 @@
       LOG('attached to hashchange');
     }
 
-    // initialize
     last = routeStrOf(getRouteArr());
     LOG('initialized; current route =', last);
   }
