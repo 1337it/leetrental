@@ -1,47 +1,38 @@
-// assets/your_app/js/minimize-to-sidebar.js
+// assets/your_app/js/minimize-to-bottomdock.js
 (() => {
-  // --- SINGLETON GUARD (prevents double init if file is included twice) ---
-  if (window.__MINIDOCK_ACTIVE) return;
-  window.__MINIDOCK_ACTIVE = true;
+  if (window.__MINIDOCK_BOTTOM_ACTIVE) return;
+  window.__MINIDOCK_BOTTOM_ACTIVE = true;
 
-  const MAX_ITEMS = 6;
-  const DEFAULT_SIDEBARS = [
-    '.sidebar', '.desk-sidebar', '.standard-sidebar', '.page-sidebar', '.layout-side-section'
-  ];
-  const ANCHOR_SELECTOR = '.standard-sidebar-section.nested-container';
+  const MAX_ITEMS = 12; // you can raise this
+  const HOST_SELECTOR = '.layout-main-section-wrapper';
 
   let dock = null;
   let observer = null;
   let lastRoute = '';
   let placeScheduled = false;
 
-  const log = (...a) => console.debug('[mini-dock]', ...a);
+  const log = (...a) => console.debug('[mini-bottomdock]', ...a);
 
-  // ---- Helpers ----
+  // ---------- Helpers ----------
+  const isVisible = el => !!(el && el.offsetParent !== null);
+  const routeStr = a => (a || []).join('/');
+
+  function getRouteArr() {
+    try {
+      return window.frappe?.get_route ? window.frappe.get_route()
+        : (location.hash || '').replace(/^#/, '').split('/');
+    } catch { return []; }
+  }
+
   function debouncePlace() {
     if (placeScheduled) return;
     placeScheduled = true;
-    requestAnimationFrame(() => {
-      placeScheduled = false;
-      placeDock();
-    });
-  }
-
-  function getSidebar() {
-    const prefer = window.MINIDOCK_SIDEBAR_SELECTOR ? [window.MINIDOCK_SIDEBAR_SELECTOR] : [];
-    for (const sel of [...prefer, ...DEFAULT_SIDEBARS]) {
-      const el = document.querySelector(sel);
-      if (el) return el;
-    }
-    return null;
+    requestAnimationFrame(() => { placeScheduled = false; placeDock(); });
   }
 
   function ensureSingleDockInDOM() {
     const all = document.querySelectorAll('#minimizedDock');
-    if (all.length > 1) {
-      // Keep the first; remove extras
-      all.forEach((el, i) => { if (i > 0) el.remove(); });
-    }
+    if (all.length > 1) all.forEach((el, i) => i && el.remove());
     dock = all[0] || null;
   }
 
@@ -50,47 +41,38 @@
     if (!dock) {
       dock = document.createElement('div');
       dock.id = 'minimizedDock';
-      dock.className = 'fallback__minimized'; // visible until placed
-      dock.setAttribute('data-minidock', '1'); // marker to ignore in observers
-      document.body.appendChild(dock);
+      dock.className = 'bottomdock';        // floating dock style
+      dock.setAttribute('data-minidock', '1');
     }
     return dock;
   }
 
+  function getHost() {
+    // Prefer the last visible wrapper in DOM order
+    const nodes = [...document.querySelectorAll(HOST_SELECTOR)].filter(isVisible);
+    return nodes.length ? nodes[nodes.length - 1] : null;
+  }
+
   function placeDock() {
     ensureDock();
-    const sidebar = getSidebar();
-    if (!sidebar) return; // keep fallback visible
-
-    const anchors = sidebar.querySelectorAll(ANCHOR_SELECTOR);
-    let targetParent = sidebar;
-    let lastAnchor = null;
-    if (anchors.length) lastAnchor = anchors[anchors.length - 1];
-
-    // Already correctly placed? (same parent AND exactly after the last anchor)
-    const correctParent = dock.parentElement === targetParent;
-    const correctOrder = lastAnchor ? dock.previousElementSibling === lastAnchor
-                                    : dock.previousElementSibling && dock.previousElementSibling.matches(ANCHOR_SELECTOR) === false;
-
-    if (correctParent && (lastAnchor ? correctOrder : dock.parentElement === targetParent)) {
-      return; // nothing to do
+    const host = getHost();
+    if (!host) {
+      // If host not ready yet, keep dock detached to avoid overlaying body
+      if (dock.parentElement) dock.parentElement.removeChild(dock);
+      return;
     }
 
-    dock.className = 'sidebar__minimized';
+    // Ensure host is a positioning context
+    host.classList.add('minidock-host'); // CSS sets position: relative
 
-    if (lastAnchor && lastAnchor.parentElement === targetParent) {
-      if (dock === lastAnchor.nextElementSibling) return;
-      lastAnchor.insertAdjacentElement('afterend', dock);
-      log('dock placed after LAST anchor', anchors.length);
-    } else {
-      if (dock.parentElement !== targetParent || dock.nextElementSibling !== null) {
-        targetParent.appendChild(dock);
-        log('dock appended at end (no anchors found)');
-      }
+    // Already placed correctly?
+    if (dock.parentElement !== host) {
+      host.appendChild(dock);
+      log('dock placed inside layout-main-section-wrapper');
     }
   }
 
-  // ---- Minimized button creation ----
+  // ---------- Minimized Entry ----------
   function parseFormEntry(routeArr) {
     if (!routeArr || routeArr[0] !== 'Form') return null;
     const [, doctype, name] = routeArr;
@@ -99,22 +81,27 @@
   }
 
   function makeMiniButton(entry) {
-    const btn = document.createElement('div');
+    const btn = document.createElement('button');
     btn.className = 'minibtn';
+    btn.type = 'button';
     btn.dataset.route = entry.key;
 
-    const icon = document.createElement('div'); icon.className = 'minibtn__icon'; icon.textContent = '📄';
+    const labels = document.createElement('div');
+    labels.className = 'minibtn__labels';
 
-    const labels = document.createElement('div'); labels.className = 'minibtn__labels';
-    const l1 = document.createElement('div'); l1.className = 'minibtn__doctype'; l1.textContent = entry.doctype;
-    const l2 = document.createElement('div'); l2.className = 'minibtn__docname'; l2.textContent = entry.docname;
+    const l1 = document.createElement('div');
+    l1.className = 'minibtn__doctype';
+    l1.textContent = entry.doctype;
+
+    const l2 = document.createElement('div');
+    l2.className = 'minibtn__docname';
+    l2.textContent = entry.docname;
+
     labels.append(l1, l2);
+    btn.append(labels);
 
-    const close = document.createElement('button'); close.className = 'minibtn__close'; close.title = 'Remove'; close.textContent = '×';
-    close.addEventListener('click', (e) => { e.stopPropagation(); btn.remove(); });
-
-    btn.append(icon, labels, close);
     btn.addEventListener('click', () => {
+      // Navigate, but keep the dock as-is (persistent)
       if (window.frappe?.set_route) window.frappe.set_route(entry.route);
       else location.hash = '#' + entry.key;
     });
@@ -122,54 +109,59 @@
     return btn;
   }
 
-  function addToDock(entry) {
+  function addOrBump(entry) {
     ensureDock();
+    // Add dock to host if possible
+    placeDock();
 
     // De-dup by route key
     const existing = dock.querySelector(`.minibtn[data-route="${CSS.escape(entry.key)}"]`);
     if (existing) {
+      // Move to front (leftmost)
       dock.prepend(existing);
     } else {
       dock.prepend(makeMiniButton(entry));
     }
 
-    // Trim
+    // Trim overflow
     [...dock.querySelectorAll('.minibtn')].slice(MAX_ITEMS).forEach(n => n.remove());
 
-    // Re-place (debounced) to keep after last anchor
-    debouncePlace();
+    // Update active state
+    markActive(routeStr(getRouteArr()));
   }
 
-  // ---- Routing / observing ----
-  function getRouteArr() {
-    try {
-      return window.frappe?.get_route ? window.frappe.get_route()
-        : (location.hash || '').replace(/^#/, '').split('/');
-    } catch { return []; }
+  function markActive(currentStr) {
+    const items = dock ? dock.querySelectorAll('.minibtn') : [];
+    items.forEach(btn => {
+      btn.classList.toggle('is-active', btn.dataset.route === currentStr);
+    });
   }
-  function routeStr(a){ return (a || []).join('/'); }
 
+  // ---------- Routing / Observing ----------
   function onRouteChange() {
     const nowArr = getRouteArr();
     const nowStr = routeStr(nowArr);
 
+    // When leaving a Form/*, add/update its tab
     const prevArr = lastRoute ? lastRoute.split('/').map(decodeURIComponent) : null;
     if (prevArr && prevArr[0] === 'Form' && nowStr !== lastRoute) {
       const entry = parseFormEntry(prevArr);
-      if (entry) addToDock(entry);
+      if (entry) addOrBump(entry);
     }
+
+    // Keep active highlight even when opening the same tab
+    markActive(nowStr);
     lastRoute = nowStr;
 
-    // Layout may change after routing; debounce placement
-    debouncePlace();
+    debouncePlace(); // layouts may re-render after routing
   }
 
   function startObserver() {
     if (observer) return;
-    observer = new MutationObserver((mutations) => {
-      // Ignore mutations originated within the dock itself to prevent loops
-      for (const m of mutations) {
-        if (dock && (dock === m.target || (m.target && dock.contains(m.target)))) continue;
+    observer = new MutationObserver(muts => {
+      // Ignore self-mutations
+      for (const m of muts) {
+        if (dock && (m.target === dock || (m.target && dock.contains(m.target)))) continue;
         debouncePlace();
         break;
       }
@@ -182,20 +174,20 @@
     startObserver();
     placeDock();
 
-    if (window.frappe?.router?.on) {
-      window.frappe.router.on('change', onRouteChange);
-    } else {
-      window.addEventListener('hashchange', onRouteChange);
-    }
+    // Hook router
+    if (window.frappe?.router?.on) window.frappe.router.on('change', onRouteChange);
+    else window.addEventListener('hashchange', onRouteChange);
+
     lastRoute = routeStr(getRouteArr());
+    markActive(lastRoute);
 
     // Manual tester
     window.__miniDockTestPin = () => {
       const e = parseFormEntry(getRouteArr());
-      if (e) addToDock(e);
+      if (e) addOrBump(e);
     };
 
-    log('initialized');
+    log('initialized bottom dock');
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
