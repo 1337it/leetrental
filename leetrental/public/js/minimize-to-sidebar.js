@@ -115,6 +115,11 @@ function pruneActiveDock() {
     btn.className = 'minibtn';
     btn.dataset.route = entry.key;
 
+    btn.draggable = true;
+btn.addEventListener('dragstart', (ev) => {
+  ev.dataTransfer.setData('text/plain', entry.key); // e.g., "Form/Doctype/NAME"
+  ev.dataTransfer.effectAllowed = 'copy';
+});
     const icon = document.createElement('div'); icon.className = 'minibtn__icon'; icon.textContent = '📄';
 
     const labels = document.createElement('div'); labels.className = 'minibtn__labels';
@@ -216,6 +221,70 @@ function pruneActiveDock() {
     };
 
     log('initialized');
+    function contentRoot(){
+  // Prefer your main content container; adjust selector if needed
+  return document.querySelector('.content, .page-container, .container') || document.body;
+}
+
+function routeToURL(routeStr){
+  const base = location.origin + location.pathname;
+  return `${base}#${routeStr}`;
+}
+
+function enableSplit(leftRouteStr, rightRouteStr){
+  const host = contentRoot(); if (!host) return;
+
+  // Clear current main section (preserve topbar if you have one)
+  const shell = document.createElement('div'); shell.className = 'split-shell';
+
+  const left = document.createElement('div'); left.className = 'split-pane';
+  const right = document.createElement('div'); right.className = 'split-pane';
+  const split = document.createElement('div'); split.className = 'splitter';
+  const exit = document.createElement('button'); exit.className = 'split-exit'; exit.textContent = 'Exit Split';
+
+  const i1 = document.createElement('iframe'); i1.className = 'split-iframe'; i1.src = routeToURL(leftRouteStr);
+  const i2 = document.createElement('iframe'); i2.className = 'split-iframe'; i2.src = routeToURL(rightRouteStr);
+
+  left.appendChild(i1); right.appendChild(i2);
+  shell.append(left, split, right); shell.appendChild(exit);
+
+  // Replace previous page content
+  host.innerHTML = ''; host.appendChild(shell);
+
+  // Resizer
+  let dragging=false, startX=0, startLeft=0;
+  split.addEventListener('mousedown', e => { dragging=true; startX=e.clientX; startLeft=left.getBoundingClientRect().width; e.preventDefault(); });
+  window.addEventListener('mousemove', e => {
+    if(!dragging) return;
+    const total = shell.getBoundingClientRect().width;
+    const newLeft = Math.min(Math.max(startLeft + (e.clientX - startX), 160), total-160);
+    const leftFrac = newLeft/total, rightFrac = 1-leftFrac;
+    shell.style.gridTemplateColumns = `${leftFrac}fr ${rightFrac}fr`;
+  });
+  window.addEventListener('mouseup', () => dragging=false);
+
+  // Exit split
+  exit.addEventListener('click', () => { location.reload(); }); // simplest: reload back to single view
+}
+
+function currentRouteStr(){ return (getRouteArr()||[]).join('/'); }
+
+// Allow dropping a dock tab into the main area to split
+const dropHost = document; // you can narrow to '.content' if you like
+dropHost.addEventListener('dragover', (e) => { e.preventDefault(); e.dataTransfer.dropEffect='copy'; });
+dropHost.addEventListener('drop', (e) => {
+  const routeStr = e.dataTransfer.getData('text/plain'); // dropped tab
+  if (!routeStr) return;
+  e.preventDefault();
+
+  const active = currentRouteStr();
+  // If active is a Form, use it; else, use the most recent dock item as the other pane
+  const left = active || routeStr;
+  const right = (routeStr !== left) ? routeStr : '';
+  if (!right) return;
+
+  enableSplit(left, right);
+});
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
