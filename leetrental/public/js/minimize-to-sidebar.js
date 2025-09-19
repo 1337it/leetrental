@@ -1,20 +1,16 @@
-// assets/your_app/js/minimize-to-bottomdock.js
+// assets/your_app/js/minimize-to-sidebar.js
 (() => {
-  if (window.__MINIDOCK_BOTTOM_ACTIVE) return;
-  window.__MINIDOCK_BOTTOM_ACTIVE = true;
+  // Singleton guard
+  if (window.__MINIDOCK_ACTIVE) return;
+  window.__MINIDOCK_ACTIVE = true;
 
-  const MAX_ITEMS = 12; // you can raise this
-  const HOST_SELECTOR = '.layout-main-section-wrapper';
+  const MAX_ITEMS = 12;
+  const SIDEBAR_SELECTOR = '.layout-side-section'; // <-- keep it on layout side section
+  const ANCHOR_SELECTOR = '.standard-sidebar-section.nested-container';
+  const HIDE_ACTIVE_TAB = true; // <-- new behavior
 
-  let dock = null;
-  let observer = null;
-  let lastRoute = '';
-  let placeScheduled = false;
+  let dock = null, observer = null, lastRoute = '', placeScheduled = false;
 
-  const log = (...a) => console.debug('[mini-bottomdock]', ...a);
-
-  // ---------- Helpers ----------
-  const isVisible = el => !!(el && el.offsetParent !== null);
   const routeStr = a => (a || []).join('/');
 
   function getRouteArr() {
@@ -30,49 +26,45 @@
     requestAnimationFrame(() => { placeScheduled = false; placeDock(); });
   }
 
-  function ensureSingleDockInDOM() {
-    const all = document.querySelectorAll('#minimizedDock');
-    if (all.length > 1) all.forEach((el, i) => i && el.remove());
-    dock = all[0] || null;
+  function getSidebar() {
+    // Use the last visible .layout-side-section
+    const nodes = [...document.querySelectorAll(SIDEBAR_SELECTOR)]
+      .filter(el => el && el.offsetParent !== null);
+    return nodes.length ? nodes[nodes.length - 1] : null;
   }
 
   function ensureDock() {
-    ensureSingleDockInDOM();
+    dock = document.getElementById('minimizedDock');
     if (!dock) {
       dock = document.createElement('div');
       dock.id = 'minimizedDock';
-      dock.className = 'bottomdock';        // floating dock style
-      dock.setAttribute('data-minidock', '1');
+      dock.className = 'sidebar__minimized';
     }
     return dock;
   }
 
-  function getHost() {
-    // Prefer the last visible wrapper in DOM order
-    const nodes = [...document.querySelectorAll(HOST_SELECTOR)].filter(isVisible);
-    return nodes.length ? nodes[nodes.length - 1] : null;
-  }
-
   function placeDock() {
     ensureDock();
-    const host = getHost();
-    if (!host) {
-      // If host not ready yet, keep dock detached to avoid overlaying body
-      if (dock.parentElement) dock.parentElement.removeChild(dock);
+    const sidebar = getSidebar();
+    if (!sidebar) {
+      if (dock.parentElement) dock.parentElement.remove();
       return;
     }
+    const anchors = sidebar.querySelectorAll(ANCHOR_SELECTOR);
+    const lastAnchor = anchors.length ? anchors[anchors.length - 1] : null;
 
-    // Ensure host is a positioning context
-    host.classList.add('minidock-host'); // CSS sets position: relative
+    // Already right after last anchor?
+    if (dock.parentElement === sidebar && lastAnchor && dock.previousElementSibling === lastAnchor) return;
 
-    // Already placed correctly?
-    if (dock.parentElement !== host) {
-      host.appendChild(dock);
-      log('dock placed inside layout-main-section-wrapper');
+    if (lastAnchor && lastAnchor.parentElement === sidebar) {
+      lastAnchor.insertAdjacentElement('afterend', dock);
+    } else {
+      // If no standard sections yet, append at end
+      if (dock.parentElement !== sidebar) sidebar.appendChild(dock);
     }
   }
 
-  // ---------- Minimized Entry ----------
+  // ----- entries (two-line) -----
   function parseFormEntry(routeArr) {
     if (!routeArr || routeArr[0] !== 'Form') return null;
     const [, doctype, name] = routeArr;
@@ -81,9 +73,8 @@
   }
 
   function makeMiniButton(entry) {
-    const btn = document.createElement('button');
+    const btn = document.createElement('div');
     btn.className = 'minibtn';
-    btn.type = 'button';
     btn.dataset.route = entry.key;
 
     const labels = document.createElement('div');
@@ -101,7 +92,7 @@
     btn.append(labels);
 
     btn.addEventListener('click', () => {
-      // Navigate, but keep the dock as-is (persistent)
+      // Navigate to the form. The onRouteChange handler will remove this tab if HIDE_ACTIVE_TAB is true.
       if (window.frappe?.set_route) window.frappe.set_route(entry.route);
       else location.hash = '#' + entry.key;
     });
@@ -110,58 +101,50 @@
   }
 
   function addOrBump(entry) {
-    ensureDock();
-    // Add dock to host if possible
-    placeDock();
+    ensureDock(); placeDock();
 
-    // De-dup by route key
-    const existing = dock.querySelector(`.minibtn[data-route="${CSS.escape(entry.key)}"]`);
-    if (existing) {
-      // Move to front (leftmost)
-      dock.prepend(existing);
-    } else {
-      dock.prepend(makeMiniButton(entry));
-    }
+    const sel = `.minibtn[data-route="${CSS.escape(entry.key)}"]`;
+    const existing = dock.querySelector(sel);
+    if (existing) dock.prepend(existing);
+    else dock.prepend(makeMiniButton(entry));
 
-    // Trim overflow
+    // Trim
     [...dock.querySelectorAll('.minibtn')].slice(MAX_ITEMS).forEach(n => n.remove());
 
-    // Update active state
-    markActive(routeStr(getRouteArr()));
+    // Re-place to stay after the last standard section
+    debouncePlace();
   }
 
-  function markActive(currentStr) {
-    const items = dock ? dock.querySelectorAll('.minibtn') : [];
-    items.forEach(btn => {
-      btn.classList.toggle('is-active', btn.dataset.route === currentStr);
-    });
+  function removeActiveIfNeeded(currentStr) {
+    if (!HIDE_ACTIVE_TAB || !dock) return;
+    const active = dock.querySelector(`.minibtn[data-route="${CSS.escape(currentStr)}"]`);
+    if (active) active.remove();
   }
 
-  // ---------- Routing / Observing ----------
+  // ----- routing / observing -----
   function onRouteChange() {
     const nowArr = getRouteArr();
     const nowStr = routeStr(nowArr);
 
-    // When leaving a Form/*, add/update its tab
+    // When leaving a Form/*, add it to dock
     const prevArr = lastRoute ? lastRoute.split('/').map(decodeURIComponent) : null;
     if (prevArr && prevArr[0] === 'Form' && nowStr !== lastRoute) {
       const entry = parseFormEntry(prevArr);
       if (entry) addOrBump(entry);
     }
 
-    // Keep active highlight even when opening the same tab
-    markActive(nowStr);
-    lastRoute = nowStr;
+    // When opening a tab's page, remove it from dock (requested behavior)
+    removeActiveIfNeeded(nowStr);
 
-    debouncePlace(); // layouts may re-render after routing
+    lastRoute = nowStr;
+    debouncePlace();
   }
 
   function startObserver() {
     if (observer) return;
     observer = new MutationObserver(muts => {
-      // Ignore self-mutations
       for (const m of muts) {
-        if (dock && (m.target === dock || (m.target && dock.contains(m.target)))) continue;
+        if (dock && (m.target === dock || (dock.contains && dock.contains(m.target)))) continue;
         debouncePlace();
         break;
       }
@@ -171,23 +154,15 @@
 
   function init() {
     ensureDock();
-    startObserver();
     placeDock();
+    startObserver();
 
-    // Hook router
     if (window.frappe?.router?.on) window.frappe.router.on('change', onRouteChange);
     else window.addEventListener('hashchange', onRouteChange);
 
     lastRoute = routeStr(getRouteArr());
-    markActive(lastRoute);
-
-    // Manual tester
-    window.__miniDockTestPin = () => {
-      const e = parseFormEntry(getRouteArr());
-      if (e) addOrBump(e);
-    };
-
-    log('initialized bottom dock');
+    // If you land directly on a Form, make sure its tab isn't there
+    removeActiveIfNeeded(lastRoute);
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
