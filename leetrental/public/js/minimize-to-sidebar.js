@@ -164,6 +164,12 @@
     debouncePlace();
   }
 
+  function removeActiveIfNeeded(currentStr) {
+    if (!HIDE_ACTIVE_TAB || !dock) return;
+    const active = dock.querySelector(`.minibtn[data-route="${CSS.escape(currentStr)}"]`);
+    if (active) active.remove();
+  }
+  
   function startObserver() {
     if (observer) return;
     observer = new MutationObserver((mutations) => {
@@ -188,7 +194,7 @@
       window.addEventListener('hashchange', onRouteChange);
     }
     lastRoute = routeStr(getRouteArr());
-
+removeActiveIfNeeded(lastRoute);
     // Manual tester
     window.__miniDockTestPin = () => {
       const e = parseFormEntry(getRouteArr());
