@@ -301,26 +301,34 @@ document.addEventListener('drop', (e)=>{
 
   enableSplit(leftRoute, droppedRoute);
 });
+  
   function init() {
-    ensureDock();
-    startObserver();
-    placeDock();
+  ensureDock();
+  startObserver();
+  placeDock();
 
-    if (window.frappe?.router?.on) {
-      window.frappe.router.on('change', onRouteChange);
-    } else {
-      window.addEventListener('hashchange', onRouteChange);
-    }
-    lastRoute = routeStr(getRouteArr());
-    pruneActiveDock();
-    // Manual tester
-    window.__miniDockTestPin = () => {
-      const e = parseFormEntry(getRouteArr());
-      if (e) addToDock(e);
-    };
+  if (window.frappe?.router?.on) {
+    window.frappe.router.on('change', onRouteChange);
+  } else {
+    window.addEventListener('hashchange', onRouteChange);
+  }
 
-    log('initialized');
+  lastRoute = routeStr(getRouteArr());
+  pruneActiveDock();
 
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
-  else init();
-  })();
+  // Manual tester
+  window.__miniDockTestPin = () => {
+    const e = parseFormEntry(getRouteArr());
+    if (e) addToDock(e);
+  };
+
+  log('initialized');
+} // <-- close init
+
+// Boot once DOM is ready
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', init);
+} else {
+  init();
+}
+})(); // <-- close IIFE
