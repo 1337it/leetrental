@@ -1,7 +1,7 @@
 /* assets/your_app/css/custom.css */
 /* Primary (sidebar-hosted) dock */
 .sidebar__minimized{
-  padding: 8px;
+  padding: 0px;
   display: grid;
   gap: 6px;
   border-top: 1px solid rgba(148,163,184,.12);
