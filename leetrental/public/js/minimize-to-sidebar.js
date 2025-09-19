@@ -115,11 +115,13 @@ function pruneActiveDock() {
     btn.className = 'minibtn';
     btn.dataset.route = entry.key;
 
-   btn.draggable = true;
+  btn.draggable = true;
 btn.addEventListener('dragstart', (ev) => {
-  ev.dataTransfer.setData('text/plain', entry.key); // "Form/Doctype/NAME"
+  ev.dataTransfer.setData('text/plain', entry.key);
   ev.dataTransfer.effectAllowed = 'copy';
 });
+
+// global drop
     const icon = document.createElement('div'); icon.className = 'minibtn__icon'; icon.textContent = '📄';
 
     const labels = document.createElement('div'); labels.className = 'minibtn__labels';
@@ -202,38 +204,30 @@ btn.addEventListener('dragstart', (ev) => {
     observer.observe(document.documentElement, { childList: true, subtree: true });
   }
 
-      function wrapperEl(){
-  // Main content wrapper; adjust if your shell differs
-  return document.querySelector('.layout-main-section-wrapper');
-}
+   
 
+  function wrapperEl(){
+  return document.querySelector(
+    '.layout-main-section-wrapper, .layout-main-section, .page-main, .page-content'
+  );
+}
 function pageByRoute(routeStr){
-  return document.querySelector(`.page-container[data-page-route="${routeStr}"]`);
+  return document.querySelector(`.page-container[data-page-route="${CSS.escape(routeStr)}"]`);
 }
-
+function activePage(){
+  // visible page OR route-resolved
+  return pageByRoute(currentRouteStr()) || document.querySelector('.page-container:not([style*="display: none"])');
+}
+  
 function currentRouteStr(){ return (getRouteArr()||[]).join('/'); }
-function activePage(){ return pageByRoute(currentRouteStr()) || document.querySelector('.page-container:not([style*="display: none"])'); }
 
 function ensureSplitter(wrap){
   let split = wrap.querySelector('.splitter');
   if (!split){
     split = document.createElement('div');
     split.className = 'splitter';
-    // insert between left and right on demand
   }
   return split;
-}
-
-function ensureExitButton(wrap){
-  let btn = wrap.querySelector('.split-exit');
-  if (!btn){
-    btn = document.createElement('button');
-    btn.className = 'split-exit';
-    btn.textContent = 'Exit Split';
-    btn.addEventListener('click', exitSplit);
-    wrap.appendChild(btn);
-  }
-  return btn;
 }
 
 function enableSplit(leftRoute, rightRoute){
@@ -241,31 +235,29 @@ function enableSplit(leftRoute, rightRoute){
   const left = pageByRoute(leftRoute) || activePage(); if (!left) return;
   const right = pageByRoute(rightRoute); if (!right) return;
 
-  // Prepare wrapper
   wrap.classList.add('is-split');
-  wrap.style.position = 'relative';
+  // mark + force visible
+  left.classList.add('split-left');  left.style.display = 'block';
+  right.classList.add('split-right'); right.style.display = 'block';
 
-  // Unhide both panes and mark roles
-  left.style.display = ''; right.style.display = '';
-  left.classList.add('split-left'); right.classList.add('split-right');
-
-  // Ensure DOM order: left | splitter | right
+  // put nodes in order: left (col 1), splitter (col 2), right (col 3)
   const split = ensureSplitter(wrap);
-  if (right.previousElementSibling !== split) {
+  if (left.parentElement !== wrap || left.nextElementSibling !== split || split.nextElementSibling !== right){
     wrap.insertBefore(left, wrap.firstChild);
     wrap.insertBefore(split, left.nextSibling);
     wrap.insertBefore(right, split.nextSibling);
   }
 
-  // Resizer
+  // resizer
   let dragging=false, startX=0, startLeft=0;
   split.onmousedown = (e)=>{ dragging=true; startX=e.clientX; startLeft=left.getBoundingClientRect().width; e.preventDefault(); };
   window.addEventListener('mousemove', (e)=>{
     if(!dragging) return;
     const total = wrap.getBoundingClientRect().width;
     const newLeft = Math.min(Math.max(startLeft + (e.clientX - startX), 160), total-160);
-    const lf = newLeft/total, rf = 1-lf;
-    wrap.style.gridTemplateColumns = `${lf}fr ${rf}fr`;
+    const l = newLeft/total, r = 1-l;
+    wrap.style.setProperty('--left', `${l}fr`);
+    wrap.style.setProperty('--right', `${r}fr`);
   });
   window.addEventListener('mouseup', ()=> dragging=false);
 
@@ -279,26 +271,26 @@ function exitSplit(){
   const split = wrap.querySelector('.splitter');
   const exit = wrap.querySelector('.split-exit');
 
-  // Re-hide the right pane (let Frappe control visibility normally)
   if (right){ right.style.display = 'none'; right.classList.remove('split-right'); }
   if (left){ left.classList.remove('split-left'); }
   if (split){ split.remove(); }
   if (exit){ exit.remove(); }
 
   wrap.classList.remove('is-split');
-  wrap.style.gridTemplateColumns = '';
-  wrap.style.position = '';
+  wrap.style.removeProperty('--left');
+  wrap.style.removeProperty('--right');
 }
 
 // Allow dropping a dock tab anywhere in content to split
+
+
+// global drop
 document.addEventListener('dragover', (e)=>{ e.preventDefault(); });
 document.addEventListener('drop', (e)=>{
   const droppedRoute = e.dataTransfer?.getData('text/plain'); if (!droppedRoute) return;
   e.preventDefault();
-
   const leftRoute = currentRouteStr();
-  if (!leftRoute || leftRoute === droppedRoute) return; // need two different tabs
-
+  if (!leftRoute || leftRoute === droppedRoute) return;
   enableSplit(leftRoute, droppedRoute);
 });
   
