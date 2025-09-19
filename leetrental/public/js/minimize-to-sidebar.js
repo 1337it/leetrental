@@ -90,6 +90,18 @@
     }
   }
 
+  function currentFormKey() {
+  const arr = getRouteArr();
+  return (arr && arr[0] === 'Form' && arr[1] && arr[2]) ? arr.join('/') : '';
+}
+
+function pruneActiveDock() {
+  if (!dock) return;
+  const key = currentFormKey();
+  if (!key) return;
+  const el = dock.querySelector(`.minibtn[data-route="${CSS.escape(key)}"]`);
+  if (el) el.remove();
+}
   // ---- Minimized button creation ----
   function parseFormEntry(routeArr) {
     if (!routeArr || routeArr[0] !== 'Form') return null;
@@ -125,6 +137,7 @@
   function addToDock(entry) {
     ensureDock();
 
+     if (entry.key === currentFormKey()) return;
     // De-dup by route key
     const existing = dock.querySelector(`.minibtn[data-route="${CSS.escape(entry.key)}"]`);
     if (existing) {
@@ -160,6 +173,7 @@
     }
     lastRoute = nowStr;
 
+     pruneActiveDock();       // <-- NEW
     // Layout may change after routing; debounce placement
     debouncePlace();
   }
@@ -194,7 +208,7 @@
       window.addEventListener('hashchange', onRouteChange);
     }
     lastRoute = routeStr(getRouteArr());
-removeActiveIfNeeded(lastRoute);
+    pruneActiveDock();
     // Manual tester
     window.__miniDockTestPin = () => {
       const e = parseFormEntry(getRouteArr());
