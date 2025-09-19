@@ -1,4 +1,33 @@
+/* When split mode is on, make the wrapper a 2-col grid */
+.layout-main-section-wrapper.is-split{
+  display: grid !important;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+  align-items: stretch;
+  height: calc(100vh - 64px); /* adjust if your header differs */
+}
 
+/* panes */
+.page-container.split-left,
+.page-container.split-right{
+  display: block !important;   /* override Frappe's display:none */
+  overflow: auto;
+}
+
+/* draggable divider */
+.splitter{
+  width: 6px;
+  cursor: col-resize;
+  background: rgba(148,163,184,.25);
+}
+.splitter:hover{ background: rgba(148,163,184,.4); }
+
+/* exit button */
+.split-exit{
+  position: absolute; top: 8px; right: 8px; z-index: 5;
+  padding: 6px 10px; border-radius: 8px; border: 0; cursor: pointer;
+  background: rgba(2,6,23,.78); color: #e5e7eb;
+}
 /* assets/your_app/css/custom.css */
 /* Split view shell */
 .split-shell{ position:relative; display:grid; grid-template-columns: 1fr 1fr; gap:0; height:calc(100vh - 64px); }
