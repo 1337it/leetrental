@@ -55,7 +55,7 @@ border-bottom-right-radius: 10px;
   grid-template-columns: 24px 1fr 20px;
   align-items: center;
   gap: 8px;
-  padding: 8px 10px;
+  padding: 0px 12px;
   border-radius: 10px;
   background: rgba(148,163,184,.10);
   color: inherit;
@@ -73,7 +73,7 @@ border-bottom-right-radius: 10px;
 .minibtn__doctype{
   font-size: 12px;
   font-weight: 600;
-  color: #cbd5e1; /* lighter slate */
+  color: #8cacd4; /* lighter slate */
   line-height: 1.2;
   white-space: nowrap;
   overflow: hidden;
