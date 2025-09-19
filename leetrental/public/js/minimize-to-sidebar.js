@@ -202,26 +202,7 @@ btn.addEventListener('dragstart', (ev) => {
     observer.observe(document.documentElement, { childList: true, subtree: true });
   }
 
-  function init() {
-    ensureDock();
-    startObserver();
-    placeDock();
-
-    if (window.frappe?.router?.on) {
-      window.frappe.router.on('change', onRouteChange);
-    } else {
-      window.addEventListener('hashchange', onRouteChange);
-    }
-    lastRoute = routeStr(getRouteArr());
-    pruneActiveDock();
-    // Manual tester
-    window.__miniDockTestPin = () => {
-      const e = parseFormEntry(getRouteArr());
-      if (e) addToDock(e);
-    };
-
-    log('initialized');
-    function wrapperEl(){
+      function wrapperEl(){
   // Main content wrapper; adjust if your shell differs
   return document.querySelector('.layout-main-section-wrapper');
 }
@@ -320,7 +301,26 @@ document.addEventListener('drop', (e)=>{
 
   enableSplit(leftRoute, droppedRoute);
 });
+  function init() {
+    ensureDock();
+    startObserver();
+    placeDock();
+
+    if (window.frappe?.router?.on) {
+      window.frappe.router.on('change', onRouteChange);
+    } else {
+      window.addEventListener('hashchange', onRouteChange);
+    }
+    lastRoute = routeStr(getRouteArr());
+    pruneActiveDock();
+    // Manual tester
+    window.__miniDockTestPin = () => {
+      const e = parseFormEntry(getRouteArr());
+      if (e) addToDock(e);
+    };
+
+    log('initialized');
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
   else init();
-})();
+  })();
