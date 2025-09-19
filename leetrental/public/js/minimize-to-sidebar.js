@@ -115,9 +115,9 @@ function pruneActiveDock() {
     btn.className = 'minibtn';
     btn.dataset.route = entry.key;
 
-    btn.draggable = true;
+   btn.draggable = true;
 btn.addEventListener('dragstart', (ev) => {
-  ev.dataTransfer.setData('text/plain', entry.key); // e.g., "Form/Doctype/NAME"
+  ev.dataTransfer.setData('text/plain', entry.key); // "Form/Doctype/NAME"
   ev.dataTransfer.effectAllowed = 'copy';
 });
     const icon = document.createElement('div'); icon.className = 'minibtn__icon'; icon.textContent = '📄';
@@ -221,71 +221,105 @@ btn.addEventListener('dragstart', (ev) => {
     };
 
     log('initialized');
-    function contentRoot(){
-  // Prefer your main content container; adjust selector if needed
-  return document.querySelector('.content, .page-container, .container') || document.body;
+    function wrapperEl(){
+  // Main content wrapper; adjust if your shell differs
+  return document.querySelector('.layout-main-section-wrapper');
 }
 
-function routeToURL(routeStr){
-  const base = location.origin + location.pathname;
-  return `${base}#${routeStr}`;
-}
-
-function enableSplit(leftRouteStr, rightRouteStr){
-  const host = contentRoot(); if (!host) return;
-
-  // Clear current main section (preserve topbar if you have one)
-  const shell = document.createElement('div'); shell.className = 'split-shell';
-
-  const left = document.createElement('div'); left.className = 'split-pane';
-  const right = document.createElement('div'); right.className = 'split-pane';
-  const split = document.createElement('div'); split.className = 'splitter';
-  const exit = document.createElement('button'); exit.className = 'split-exit'; exit.textContent = 'Exit Split';
-
-  const i1 = document.createElement('iframe'); i1.className = 'split-iframe'; i1.src = routeToURL(leftRouteStr);
-  const i2 = document.createElement('iframe'); i2.className = 'split-iframe'; i2.src = routeToURL(rightRouteStr);
-
-  left.appendChild(i1); right.appendChild(i2);
-  shell.append(left, split, right); shell.appendChild(exit);
-
-  // Replace previous page content
-  host.innerHTML = ''; host.appendChild(shell);
-
-  // Resizer
-  let dragging=false, startX=0, startLeft=0;
-  split.addEventListener('mousedown', e => { dragging=true; startX=e.clientX; startLeft=left.getBoundingClientRect().width; e.preventDefault(); });
-  window.addEventListener('mousemove', e => {
-    if(!dragging) return;
-    const total = shell.getBoundingClientRect().width;
-    const newLeft = Math.min(Math.max(startLeft + (e.clientX - startX), 160), total-160);
-    const leftFrac = newLeft/total, rightFrac = 1-leftFrac;
-    shell.style.gridTemplateColumns = `${leftFrac}fr ${rightFrac}fr`;
-  });
-  window.addEventListener('mouseup', () => dragging=false);
-
-  // Exit split
-  exit.addEventListener('click', () => { location.reload(); }); // simplest: reload back to single view
+function pageByRoute(routeStr){
+  return document.querySelector(`.page-container[data-page-route="${routeStr}"]`);
 }
 
 function currentRouteStr(){ return (getRouteArr()||[]).join('/'); }
+function activePage(){ return pageByRoute(currentRouteStr()) || document.querySelector('.page-container:not([style*="display: none"])'); }
 
-// Allow dropping a dock tab into the main area to split
-const dropHost = document; // you can narrow to '.content' if you like
-dropHost.addEventListener('dragover', (e) => { e.preventDefault(); e.dataTransfer.dropEffect='copy'; });
-dropHost.addEventListener('drop', (e) => {
-  const routeStr = e.dataTransfer.getData('text/plain'); // dropped tab
-  if (!routeStr) return;
+function ensureSplitter(wrap){
+  let split = wrap.querySelector('.splitter');
+  if (!split){
+    split = document.createElement('div');
+    split.className = 'splitter';
+    // insert between left and right on demand
+  }
+  return split;
+}
+
+function ensureExitButton(wrap){
+  let btn = wrap.querySelector('.split-exit');
+  if (!btn){
+    btn = document.createElement('button');
+    btn.className = 'split-exit';
+    btn.textContent = 'Exit Split';
+    btn.addEventListener('click', exitSplit);
+    wrap.appendChild(btn);
+  }
+  return btn;
+}
+
+function enableSplit(leftRoute, rightRoute){
+  const wrap = wrapperEl(); if (!wrap) return;
+  const left = pageByRoute(leftRoute) || activePage(); if (!left) return;
+  const right = pageByRoute(rightRoute); if (!right) return;
+
+  // Prepare wrapper
+  wrap.classList.add('is-split');
+  wrap.style.position = 'relative';
+
+  // Unhide both panes and mark roles
+  left.style.display = ''; right.style.display = '';
+  left.classList.add('split-left'); right.classList.add('split-right');
+
+  // Ensure DOM order: left | splitter | right
+  const split = ensureSplitter(wrap);
+  if (right.previousElementSibling !== split) {
+    wrap.insertBefore(left, wrap.firstChild);
+    wrap.insertBefore(split, left.nextSibling);
+    wrap.insertBefore(right, split.nextSibling);
+  }
+
+  // Resizer
+  let dragging=false, startX=0, startLeft=0;
+  split.onmousedown = (e)=>{ dragging=true; startX=e.clientX; startLeft=left.getBoundingClientRect().width; e.preventDefault(); };
+  window.addEventListener('mousemove', (e)=>{
+    if(!dragging) return;
+    const total = wrap.getBoundingClientRect().width;
+    const newLeft = Math.min(Math.max(startLeft + (e.clientX - startX), 160), total-160);
+    const lf = newLeft/total, rf = 1-lf;
+    wrap.style.gridTemplateColumns = `${lf}fr ${rf}fr`;
+  });
+  window.addEventListener('mouseup', ()=> dragging=false);
+
+  ensureExitButton(wrap);
+}
+
+function exitSplit(){
+  const wrap = wrapperEl(); if (!wrap) return;
+  const left = wrap.querySelector('.page-container.split-left');
+  const right = wrap.querySelector('.page-container.split-right');
+  const split = wrap.querySelector('.splitter');
+  const exit = wrap.querySelector('.split-exit');
+
+  // Re-hide the right pane (let Frappe control visibility normally)
+  if (right){ right.style.display = 'none'; right.classList.remove('split-right'); }
+  if (left){ left.classList.remove('split-left'); }
+  if (split){ split.remove(); }
+  if (exit){ exit.remove(); }
+
+  wrap.classList.remove('is-split');
+  wrap.style.gridTemplateColumns = '';
+  wrap.style.position = '';
+}
+
+// Allow dropping a dock tab anywhere in content to split
+document.addEventListener('dragover', (e)=>{ e.preventDefault(); });
+document.addEventListener('drop', (e)=>{
+  const droppedRoute = e.dataTransfer?.getData('text/plain'); if (!droppedRoute) return;
   e.preventDefault();
 
-  const active = currentRouteStr();
-  // If active is a Form, use it; else, use the most recent dock item as the other pane
-  const left = active || routeStr;
-  const right = (routeStr !== left) ? routeStr : '';
-  if (!right) return;
+  const leftRoute = currentRouteStr();
+  if (!leftRoute || leftRoute === droppedRoute) return; // need two different tabs
 
-  enableSplit(left, right);
+  enableSplit(leftRoute, droppedRoute);
 });
-  }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
   else init();
