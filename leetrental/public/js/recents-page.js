@@ -1,4 +1,8 @@
-frappe.pages['recents'].on_page_load = function(wrapper) {
+// your_app/public/js/recents_page.js
+frappe.provide('frappe.pages');                 // ensure namespace exists
+frappe.pages['recents'] = frappe.pages['recents'] || {};  // create page object
+
+frappe.pages['recents'].on_page_load = function (wrapper) {
   const page = frappe.ui.make_app_page({
     parent: wrapper,
     title: 'Recents',
@@ -34,8 +38,8 @@ frappe.pages['recents'].on_page_load = function(wrapper) {
 
   function fmtTime(iso) {
     try {
-      const d = dayjs ? dayjs(iso) : new Date(iso);
-      if (dayjs) return d.fromNow();
+      if (window.dayjs) return window.dayjs(iso).fromNow();
+      const d = new Date(iso);
       return d.toLocaleString();
     } catch { return iso; }
   }
@@ -44,10 +48,7 @@ frappe.pages['recents'].on_page_load = function(wrapper) {
     const q = ($search.val() || '').toLowerCase().trim();
     const data = api ? api.load() : [];
     const rows = data
-      .filter(x => {
-        if (!q) return true;
-        return [x.doctype, x.title, x.name].some(s => (s || '').toLowerCase().includes(q));
-      })
+      .filter(x => !q || [x.doctype, x.title, x.name].some(s => (s || '').toLowerCase().includes(q)))
       .map(x => {
         const url = frappe.utils.get_form_link(x.doctype, x.name);
         return `
@@ -74,7 +75,7 @@ frappe.pages['recents'].on_page_load = function(wrapper) {
 
   $wrap.on('click', 'button[data-act="copy"]', async (e) => {
     const url = location.origin + '/app/' + e.currentTarget.getAttribute('data-url').replace(/^#\/app\//,'');
-    try { await navigator.clipboard.writeText(url); frappe.show_alert({message:"Link copied", indicator:"green"}); }
+    try { await navigator.clipboard.writeText(url); frappe.show_alert({ message: "Link copied", indicator: "green" }); }
     catch { frappe.msgprint(url); }
   });
 
