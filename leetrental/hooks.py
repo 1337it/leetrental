@@ -40,9 +40,9 @@ app_include_js = [
 	"/assets/leetrental/js/leetrental.js",
 	"/assets/leetrental/js/portal-settings.js",
 	"/assets/leetrental/js/minimize-to-sidebar.js",
-	"/assets/leetrental/js/recents_tracker.js",
-	"/assets/leetrental/js/recents_page.js",
-	"/assets/leetrental/js/recents_toolbar.js"
+	"/assets/leetrental/js/recents-tracker.js",
+	"/assets/leetrental/js/recents-page.js",
+	"/assets/leetrental/js/recents-toolbar.js"
 ]
 
 app_include_icons = "leetrental/icons/rental-icons.svg"
