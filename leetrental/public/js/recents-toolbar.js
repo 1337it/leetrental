@@ -1,4 +1,4 @@
-frappe.ready(() => {
+
   const addBtn = () => {
     const bar = document.querySelector('.navbar .navbar-nav');
     if (!bar || document.querySelector('#recents-topbar-btn')) return;
@@ -11,4 +11,3 @@ frappe.ready(() => {
   // In case header re-renders
   const obs = new MutationObserver(addBtn);
   obs.observe(document.body, { childList: true, subtree: true });
-});
