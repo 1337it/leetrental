@@ -117,8 +117,9 @@ function pruneActiveDock() {
 
   btn.draggable = true;
 btn.addEventListener('dragstart', (ev) => {
-  ev.dataTransfer.setData('text/plain', entry.key);
+  ev.dataTransfer.setData('text/plain', entry.key); // e.g. "Form/Doctype/NAME"
   ev.dataTransfer.effectAllowed = 'copy';
+  console.debug('[mini-dock] dragstart', entry.key);
 });
 
 // global drop
@@ -298,7 +299,7 @@ document.addEventListener('drop', (e)=>{
   ensureDock();
   startObserver();
   placeDock();
-
+ attachDrop();
   if (window.frappe?.router?.on) {
     window.frappe.router.on('change', onRouteChange);
   } else {
@@ -323,4 +324,7 @@ if (document.readyState === 'loading') {
 } else {
   init();
 }
+
+  const DROP_ZONE_SEL = '.layout-main-section-wrapper, .layout-main-section, .page-main, .page-content';
+function dropZone(){ return document.querySelector(DROP_ZONE_SEL) || document; }
 })(); // <-- close IIFE
