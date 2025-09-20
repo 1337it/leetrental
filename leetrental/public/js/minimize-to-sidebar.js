@@ -327,4 +327,21 @@ if (document.readyState === 'loading') {
 
   const DROP_ZONE_SEL = '.layout-main-section-wrapper, .layout-main-section, .page-main, .page-content';
 function dropZone(){ return document.querySelector(DROP_ZONE_SEL) || document; }
+
+  function attachDrop(){
+  const zone = dropZone();
+  zone.addEventListener('dragover', (e) => { e.preventDefault(); e.dataTransfer.dropEffect = 'copy'; });
+  zone.addEventListener('drop', (e) => {
+    const droppedRoute = e.dataTransfer?.getData('text/plain');
+    console.debug('[mini-dock] drop', { droppedRoute });
+    if (!droppedRoute) return;
+    e.preventDefault(); e.stopPropagation();
+
+    const leftRoute = currentRouteStr();
+    if (!leftRoute || leftRoute === droppedRoute) return;
+
+    // ⬇️ THIS is where the split happens
+    enableSplit(leftRoute, droppedRoute);
+  });
+}
 })(); // <-- close IIFE
