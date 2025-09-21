@@ -214,6 +214,9 @@ def extract_and_update_customer_via_read(customer: str, file_url: str, use_urlso
     if mapped.get("full_name") and not mapped.get("customer_name"):
         mapped["customer_name"] = mapped["full_name"]
 
+     if file_url:
+        mapped["passport_image"] = file_url
+
     # Clean empties
     mapped = {k:v for k,v in mapped.items() if v not in ("", None)}
 
