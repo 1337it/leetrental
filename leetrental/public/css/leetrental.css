@@ -3,7 +3,18 @@ width: 100%;
 max-width: 100%;
 scrollbar-width: none;
 }
-
+.missing-image {
+background-color: var(--bg-light-gray);
+line-height: 300px !important;
+vertical-align: middle;
+text-align: center;
+width: auto !important;
+height: 100% !important;
+border-radius: var(--border-radius-sm);
+aspect-ratio: 1/1 !important;
+max-height: 300px !important;
+  box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
+}
 [data-page-route="Workspaces"] .layout-main .layout-main-section {
 border: none !important;
 padding: var(--padding-md);
