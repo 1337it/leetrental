@@ -371,7 +371,9 @@ function dropZone(){ return document.querySelector(DROP_ZONE_SEL) || document; }
   zone.addEventListener('drop', (e) => {
     const droppedRoute = e.dataTransfer?.getData('text/plain');
     console.debug('[mini-dock] drop', { droppedRoute });
-    if (!droppedRoute) return;
+    if (!droppedRoute) 
+      console.log('not drpped');
+      return;
     e.preventDefault(); e.stopPropagation();
 
     const leftRoute = currentRouteStr();
