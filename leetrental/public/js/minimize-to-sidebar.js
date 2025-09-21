@@ -375,9 +375,10 @@ function dropZone(){ return document.querySelector(DROP_ZONE_SEL) || document; }
     e.preventDefault(); e.stopPropagation();
 
     const leftRoute = currentRouteStr();
-    if (!leftRoute || leftRoute === droppedRoute) return;
-
-    // ⬇️ THIS is where the split happens
+    if (!leftRoute || leftRoute === droppedRoute)
+    console.log('return');
+      return;
+ console.log('split');
     enableSplit(leftRoute, droppedRoute);
   });
 }
