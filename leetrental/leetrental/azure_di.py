@@ -36,6 +36,12 @@ def extract_and_update_customer(customer: str, file_url: str):
         j = res.json()
         if j.get("status") in ("succeeded","failed"):
             result = j
+            # right after `result = j` in your polling loop:
+            frappe.log_error(json.dumps({
+                "status": result.get("status"),
+                "doc_count": len((result.get("analyzeResult") or {}).get("documents") or []),
+                "field_keys": list(((result.get("analyzeResult") or {}).get("documents") or [{}])[0].get("fields", {}).keys())
+            }, ensure_ascii=False, indent=2), "Azure ID OCR – debug")
             break
         time.sleep(1.0)
     else:
@@ -66,54 +72,63 @@ def _attach(customer, file_url):
     f.insert(ignore_permissions=True)
 
 def map_azure_id_to_customer(analysis_json: dict) -> dict:
-    """
-    Azure DI ID response has 'documents' with fields like FirstName, LastName, DocumentNumber, DateOfBirth, ExpirationDate, etc.
-    We normalize to your Customer fields.
-    Docs: Identity Document (ID) prebuilt model.  [oai_citation:4‡Microsoft Learn](https://learn.microsoft.com/en-us/azure/ai-services/document-intelligence/prebuilt/id-document?view=doc-intel-4.0.0&utm_source=chatgpt.com)
-    """
     out = {}
     docs = (analysis_json.get("analyzeResult") or {}).get("documents") or []
     if not docs:
         return out
-    d0 = docs[0]
-    fields = d0.get("fields", {})
+    f = docs[0].get("fields", {}) or {}
 
-    def getv(key):
-        v = fields.get(key) or {}
-        # value can be under 'content' or typed 'valueString'/'valueDate'
-        return v.get("valueString") or v.get("content") or v.get("valueDate")
+    def val(*candidates):
+        for k in candidates:
+            v = f.get(k) or {}
+            x = v.get("valueString") or v.get("content") or v.get("valueDate")
+            if x: return str(x).strip()
+        return None
 
-    # Common
-    out["first_name"]  = getv("FirstName")
-    out["last_name"]   = getv("LastName")
-    out["customer_name"]   = getv("FullName")
-    out["date_of_birth"] = str(getv("DateOfBirth") or "")[:10] or None
-    out["nationality"] = getv("Nationality")
-    out["gender"]      = getv("Sex") or getv("Gender")
-    out["address_line1"]= getv("Address")
-    out["city"]        = getv("PlaceOfBirth") or None
-    out["country"]     = getv("CountryRegion") or None
+    # Names (try multiple aliases)
+    first = val("FirstName","GivenName","GivenNames","Forename")
+    last  = val("LastName","Surname","FamilyName")
+    full  = val("FullName","Name") or ("{} {}".format(first or "", last or "").strip() or None)
 
-    # Passport
-    out["passport_number"] = getv("DocumentNumber")
-    out["passport_expiry"] = str(getv("DateOfExpiration") or "")[:10] or None
-    out["passport_issuer"] = getv("IssuingCountry")
+    out["first_name"] = first
+    out["last_name"]  = last
+    out["full_name"]  = full
+    out["customer_name"] = full or first or last
 
-    # Driving License
-    out["driver_license_number"] = getv("DocumentNumber") if not out.get("passport_number") else None
-    out["license_expiry"] = out.get("passport_expiry")  # reuse if DL
-    out["issuing_authority"] = getv("Authority")
+    # DOB / Gender
+    dob = val("DateOfBirth","BirthDate","DOB")
+    out["date_of_birth"] = (dob[:10] if dob else None)
+    g = (val("Sex","Gender") or "").upper()
+    out["gender"] = "Male" if g in ("M","MALE") else ("Female" if g in ("F","FEMALE") else None)
 
-    # National ID
-    out["national_id_number"] = getv("DocumentNumber") if not (out.get("passport_number") or out.get("driver_license_number")) else None
-    out["id_expiry"] = out.get("passport_expiry")  # reuse if ID
+    # Nationality, Country, Address
+    out["nationality"]   = val("Nationality","Nationalities")
+    out["country"]       = val("CountryRegion","Country","IssuingCountry","IssuingState")
+    out["address_line1"] = val("Address","AddressLine","Address1")
+    out["city"]          = val("PlaceOfBirth","City")
 
-    # Optional: confidence (overall or per-field)
-    conf = d0.get("confidence")
+    # Document number & expiry (cover passports, DL, IDs)
+    doc_no = val("DocumentNumber","IDNumber","LicenseNumber","PersonalNumber")
+    exp    = val("DateOfExpiration","ExpirationDate","ExpiryDate","ValidUntil")
+    out["passport_number"]          = doc_no
+    out["passport_expiry"]          = (exp[:10] if exp else None)
+    out["passport_issuer"]          = val("IssuingCountry","IssuingAuthority","Authority")
+
+    # If it looks like a DL instead of passport, copy to DL fields
+    if out["passport_number"] and "license" in (val("DocumentType","Description") or "").lower():
+        out["driver_license_number"] = out["passport_number"]
+        out["license_expiry"]        = out["passport_expiry"]
+        out["issuing_authority"]     = out["passport_issuer"]
+
+    # If it looks like a National ID, map accordingly
+    if val("DocumentType") and "id" in val("DocumentType").lower():
+        out["national_id_number"] = out["passport_number"]
+        out["id_expiry"]          = out["passport_expiry"]
+
+    # Confidence (overall document)
+    conf = docs[0].get("confidence")
     if conf is not None:
         out["ocr_confidence"] = round(float(conf), 3)
 
-    # Normalize gender
-    g = (out.get("gender") or "").strip().upper()
-    out["gender"] = "Male" if g in ("M","MALE") else ("Female" if g in ("F","FEMALE") else None)
-    return out
+    # Strip empties
+    return {k:v for k,v in out.items() if v not in (None, "")}
