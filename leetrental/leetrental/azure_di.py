@@ -10,7 +10,7 @@ def _cfg():
     return sc.get("azure_di_endpoint"), sc.get("azure_di_key")
 
 @frappe.whitelist()
-def extract_and_update_customer(customer: str, file_url: str):
+def extract_and_update_customer(customer: str, file_url: str, rename_customer: int = 0, debug: int = 0):
     frappe.only_for(("System Manager","Sales Manager","Sales User","Administrator"))
     endpoint, key = _cfg()
     if not (endpoint and key):
@@ -49,6 +49,25 @@ def extract_and_update_customer(customer: str, file_url: str):
 
     if result.get("status") != "succeeded":
         raise frappe.ValidationError("Azure analysis failed")
+    analyze = result.get("analyzeResult") or {}
+    docs = analyze.get("documents") or []
+    f = (docs[0].get("fields", {}) if docs else {}) or {}
+
+    if int(debug):
+        # Log keys + a few short values
+        sample = {}
+        for k, v in list(f.items())[:10]:
+            txt = v.get("valueString") or v.get("content") or v.get("valueDate") or ""
+            sample[k] = (txt[:24] + "…") if isinstance(txt, str) and len(txt) > 25 else txt
+            frappe.log_error(f"""
+    Azure ID OCR DEBUG
+    status: {result.get('status')}
+    doc_count: {len(docs)}
+    field_keys: {list(f.keys())}
+    sample: {sample}
+    """, "Azure ID OCR")
+        # also return to client
+        return {"debug_keys": list(f.keys()), "debug_sample": sample}
 
     # 4) Map fields → Frappe
     mapped = map_azure_id_to_customer(result)
@@ -71,64 +90,94 @@ def _attach(customer, file_url):
     f.attached_to_name = customer
     f.insert(ignore_permissions=True)
 
+ALIASES = {
+    "first_name":  ["FirstName","GivenName","GivenNames","Forename","NameFirst"],
+    "last_name":   ["LastName","Surname","FamilyName","NameLast"],
+    "full_name":   ["FullName","Name","NameFull"],
+    "dob":         ["DateOfBirth","BirthDate","DOB"],
+    "gender":      ["Sex","Gender"],
+    "nationality": ["Nationality","Nationalities"],
+    "country":     ["CountryRegion","Country","IssuingCountry","IssuingState"],
+    "address":     ["Address","AddressLine","Address1","AddressLine1"],
+    "city":        ["PlaceOfBirth","City","Town"],
+    "doc_no":      ["DocumentNumber","IDNumber","LicenseNumber","PersonalNumber","CardNumber","Number"],
+    "expiry":      ["DateOfExpiration","ExpirationDate","ExpiryDate","ValidUntil","ValidTo"],
+    "issuer":      ["IssuingCountry","IssuingAuthority","Authority","Issuer","IssuingState"],
+    "doctype":     ["DocumentType","Type","Category"]
+}
+
+def _v(fields, *keys):
+    for k in keys:
+        d = fields.get(k) or {}
+        val = d.get("valueString") or d.get("content") or d.get("valueDate")
+        if val: return str(val).strip()
+    return None
+
+def _first_present(fields, candidates):
+    return _v(fields, *candidates)
+
+def _any_text_match(fields, pattern):
+    rx = re.compile(pattern, re.I)
+    for k, d in fields.items():
+        if rx.search(k):
+            val = d.get("valueString") or d.get("content") or d.get("valueDate")
+            if val: return str(val).strip()
+    return None
 def map_azure_id_to_customer(analysis_json: dict) -> dict:
     out = {}
     docs = (analysis_json.get("analyzeResult") or {}).get("documents") or []
     if not docs:
         return out
-    f = docs[0].get("fields", {}) or {}
+    fields = docs[0].get("fields", {}) or {}
 
-    def val(*candidates):
-        for k in candidates:
-            v = f.get(k) or {}
-            x = v.get("valueString") or v.get("content") or v.get("valueDate")
-            if x: return str(x).strip()
-        return None
+    # Preferred via aliases
+    first = _first_present(fields, ALIASES["first_name"]) or _any_text_match(fields, r"first|given")
+    last  = _first_present(fields, ALIASES["last_name"])  or _any_text_match(fields, r"last|family|sur")
+    full  = _first_present(fields, ALIASES["full_name"])  or ("{} {}".format(first or "", last or "").strip() or None)
 
-    # Names (try multiple aliases)
-    first = val("FirstName","GivenName","GivenNames","Forename")
-    last  = val("LastName","Surname","FamilyName")
-    full  = val("FullName","Name") or ("{} {}".format(first or "", last or "").strip() or None)
+    dob   = _first_present(fields, ALIASES["dob"]) or _any_text_match(fields, r"birth|dob")
+    g     = (_first_present(fields, ALIASES["gender"]) or "").upper()
 
-    out["first_name"] = first
-    out["last_name"]  = last
-    out["full_name"]  = full
+    nat   = _first_present(fields, ALIASES["nationality"])
+    ctry  = _first_present(fields, ALIASES["country"])
+    addr  = _first_present(fields, ALIASES["address"])
+    city  = _first_present(fields, ALIASES["city"])
+
+    docno = _first_present(fields, ALIASES["doc_no"]) or _any_text_match(fields, r"(document|license|card).*(no|number)")
+    exp   = _first_present(fields, ALIASES["expiry"]) or _any_text_match(fields, r"(expir|valid).*")
+    issu  = _first_present(fields, ALIASES["issuer"])
+    dtype = (_first_present(fields, ALIASES["doctype"]) or "").lower()
+
+    # Assign
+    out["first_name"] = first or None
+    out["last_name"]  = last or None
+    out["full_name"]  = full or None
     out["customer_name"] = full or first or last
 
-    # DOB / Gender
-    dob = val("DateOfBirth","BirthDate","DOB")
     out["date_of_birth"] = (dob[:10] if dob else None)
-    g = (val("Sex","Gender") or "").upper()
     out["gender"] = "Male" if g in ("M","MALE") else ("Female" if g in ("F","FEMALE") else None)
+    out["nationality"] = nat
+    out["country"] = ctry
+    out["address_line1"] = addr
+    out["city"] = city
 
-    # Nationality, Country, Address
-    out["nationality"]   = val("Nationality","Nationalities")
-    out["country"]       = val("CountryRegion","Country","IssuingCountry","IssuingState")
-    out["address_line1"] = val("Address","AddressLine","Address1")
-    out["city"]          = val("PlaceOfBirth","City")
+    # Map to all three doc types; whichever applies will be non-empty
+    out["passport_number"] = docno
+    out["passport_expiry"] = (exp[:10] if exp else None)
+    out["passport_issuer"] = issu
+    if "license" in dtype:
+        out["driver_license_number"] = docno
+        out["license_expiry"] = out["passport_expiry"]
+        out["issuing_authority"] = issu
+    if "id" in dtype or "emirates" in dtype:
+        out["national_id_number"] = docno
+        out["id_expiry"] = out["passport_expiry"]
+        out["id_issuer"] = issu
 
-    # Document number & expiry (cover passports, DL, IDs)
-    doc_no = val("DocumentNumber","IDNumber","LicenseNumber","PersonalNumber")
-    exp    = val("DateOfExpiration","ExpirationDate","ExpiryDate","ValidUntil")
-    out["passport_number"]          = doc_no
-    out["passport_expiry"]          = (exp[:10] if exp else None)
-    out["passport_issuer"]          = val("IssuingCountry","IssuingAuthority","Authority")
-
-    # If it looks like a DL instead of passport, copy to DL fields
-    if out["passport_number"] and "license" in (val("DocumentType","Description") or "").lower():
-        out["driver_license_number"] = out["passport_number"]
-        out["license_expiry"]        = out["passport_expiry"]
-        out["issuing_authority"]     = out["passport_issuer"]
-
-    # If it looks like a National ID, map accordingly
-    if val("DocumentType") and "id" in val("DocumentType").lower():
-        out["national_id_number"] = out["passport_number"]
-        out["id_expiry"]          = out["passport_expiry"]
-
-    # Confidence (overall document)
+    # Confidence
     conf = docs[0].get("confidence")
     if conf is not None:
         out["ocr_confidence"] = round(float(conf), 3)
 
-    # Strip empties
-    return {k:v for k,v in out.items() if v not in (None, "")}
+    # Remove empties
+    return {k:v for k,v in out.items() if v not in (None,"")}
