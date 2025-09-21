@@ -21,7 +21,7 @@ def extract_and_update_customer(customer: str, file_url: str):
     with open(path, "rb") as f: data = f.read()
 
     # 2) Submit analyze request (async)
-    url = f"{endpoint}documentintelligence/documentModels/prebuilt-layout:analyze?_overload=analyzeDocument&api-version=2024-11-30"
+    url = f"{endpoint}documentintelligence/documentModels/prebuilt-read:analyze?_overload=analyzeDocument&api-version=2024-11-30"
     headers = {"Ocp-Apim-Subscription-Key": key, "Content-Type": "application/octet-stream"}
     post = requests.post(url, headers=headers, data=data)
     post.raise_for_status()
