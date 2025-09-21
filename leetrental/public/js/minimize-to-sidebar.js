@@ -9,6 +9,15 @@
     '.sidebar', '.desk-sidebar', '.standard-sidebar', '.page-sidebar', '.layout-side-section'
   ];
   const ANCHOR_SELECTOR = '.standard-sidebar-section.nested-container';
+  const STORAGE_KEY = 'minidock.tabs.v1';
+
+function loadState(){
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); }
+  catch { return []; }
+}
+function saveState(list){
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(list.slice(0, MAX_ITEMS))); } catch {}
+}
 
   let dock = null;
   let observer = null;
@@ -95,12 +104,14 @@
   return (arr && arr[0] === 'Form' && arr[1] && arr[2]) ? arr.join('/') : '';
 }
 
-function pruneActiveDock() {
+function pruneActiveDock(){
   if (!dock) return;
-  const key = currentFormKey();
-  if (!key) return;
+  const key = currentFormKey(); if (!key) return;
   const el = dock.querySelector(`.minibtn[data-route="${CSS.escape(key)}"]`);
-  if (el) el.remove();
+  if (el) {
+    el.remove();
+    saveState(loadState().filter(x => x.key !== key));
+  }
 }
   // ---- Minimized button creation ----
   function parseFormEntry(routeArr) {
@@ -131,7 +142,9 @@ btn.addEventListener('dragstart', (ev) => {
     labels.append(l1, l2);
 
     const close = document.createElement('button'); close.className = 'minibtn__close'; close.title = 'Remove'; close.textContent = '×';
-    close.addEventListener('click', (e) => { e.stopPropagation(); btn.remove(); });
+    close.addEventListener('click', (e) => { e.stopPropagation(); btn.remove(); const next = loadState().filter(x => x.key !== entry.key);
+  saveState(next);
+});
 
     btn.append(icon, labels, close);
     btn.addEventListener('click', () => {
@@ -142,24 +155,36 @@ btn.addEventListener('dragstart', (ev) => {
     return btn;
   }
 
-  function addToDock(entry) {
-    ensureDock();
+  function addToDock(entry){
+  ensureDock();
+  if (entry.key === currentFormKey()) return;
 
-     if (entry.key === currentFormKey()) return;
-    // De-dup by route key
-    const existing = dock.querySelector(`.minibtn[data-route="${CSS.escape(entry.key)}"]`);
-    if (existing) {
-      dock.prepend(existing);
-    } else {
-      dock.prepend(makeMiniButton(entry));
-    }
-
-    // Trim
-    [...dock.querySelectorAll('.minibtn')].slice(MAX_ITEMS).forEach(n => n.remove());
-
-    // Re-place (debounced) to keep after last anchor
-    debouncePlace();
+  const existing = dock.querySelector(`.minibtn[data-route="${CSS.escape(entry.key)}"]`);
+  if (existing) {
+    dock.prepend(existing);
+  } else {
+    dock.prepend(makeMiniButton(entry));
   }
+
+  // Trim DOM
+  [...dock.querySelectorAll('.minibtn')].slice(MAX_ITEMS).forEach(n => n.remove());
+
+  // Save current order to storage
+  const list = [...dock.querySelectorAll('.minibtn')].map(el => {
+    const key = el.dataset.route;
+    // Prefer latest metadata if provided
+    if (key === entry.key) return entry;
+    // else recover from storage
+    return loadState().find(x => x.key === key) || {
+      key, route: key.split('/'),
+      doctype: el.querySelector('.minibtn__doctype')?.textContent || '',
+      docname: el.querySelector('.minibtn__docname')?.textContent || ''
+    };
+  });
+  saveState(list);
+
+  debouncePlace();
+}
 
   // ---- Routing / observing ----
   function getRouteArr() {
@@ -297,9 +322,21 @@ document.addEventListener('drop', (e)=>{
   
   function init() {
   ensureDock();
+    function rebuildDockFromState(){
+  ensureDock();
+  const items = loadState();
+  items.slice(0, MAX_ITEMS).forEach(e => {
+    // skip current active form
+    if (e.key !== currentFormKey() && !dock.querySelector(`.minibtn[data-route="${CSS.escape(e.key)}"]`)) {
+      dock.appendChild(makeMiniButton(e));   // keep saved order (append)
+    }
+  });
+  debouncePlace();
+}
   startObserver();
   placeDock();
  attachDrop();
+    rebuildDockFromState();
   if (window.frappe?.router?.on) {
     window.frappe.router.on('change', onRouteChange);
   } else {
