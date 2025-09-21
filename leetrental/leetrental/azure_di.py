@@ -86,7 +86,7 @@ def map_azure_id_to_customer(analysis_json: dict) -> dict:
     # Common
     out["first_name"]  = getv("FirstName")
     out["last_name"]   = getv("LastName")
-    out["full_name"]   = getv("FullName")
+    out["customer_name"]   = getv("FullName")
     out["date_of_birth"] = str(getv("DateOfBirth") or "")[:10] or None
     out["nationality"] = getv("Nationality")
     out["gender"]      = getv("Sex") or getv("Gender")
