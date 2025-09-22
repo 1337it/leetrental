@@ -1,0 +1,113 @@
+{
+  "doctype": "DocType",
+  "name": "Vehicle Movement",
+  "module": "leetrental",
+  "custom": 0,
+  "istable": 0,
+  "document_type": "Transaction",
+  "editable_grid": 0,
+  "track_changes": 1,
+  "track_seen": 1,
+  "allow_import": 1,
+  "autoname": "naming_series:",
+  "title_field": "title",
+  "naming_rule": "By fieldname",
+  "image_field": "",
+  "fields": [
+    /* ---------- Header ---------- */
+    { "fieldname": "section_header", "label": "Header", "fieldtype": "Section Break" },
+    { "fieldname": "naming_series", "label": "Naming Series", "fieldtype": "Select", "options": "NRM-.YYYY.-\nVM-.YYYY.-", "default": "NRM-.YYYY.-" },
+    { "fieldname": "title", "label": "Title", "fieldtype": "Data", "read_only": 1, "in_list_view": 1, "in_standard_filter": 1 },
+    { "fieldname": "vehicle", "label": "Vehicle", "fieldtype": "Link", "options": "Vehicle", "reqd": 1, "in_list_view": 1, "in_standard_filter": 1 },
+
+    /* Full movement list from screenshots */
+    { "fieldname": "movement_type", "label": "Type", "fieldtype": "Select", "reqd": 1,
+      "options": "Agreement\nNRM\nWorkshop\nTotal Loss\nDue For Sale\nStatus Change\nMileage Update\nGarageJob\nNRM/Staff Movement\nStaff Car\nSold Car Customer Movement\nNRT\nAgreement Delivery\nReplacement Delivery\nNRM/Customer Movement\nNRM_AgreementCollection\nOther",
+      "in_list_view": 1, "in_standard_filter": 1
+    },
+
+    /* Agreement fields (Custody/Agreement screens) */
+    { "fieldname": "agreement_no", "label": "Agreement No", "fieldtype": "Data",
+      "depends_on": "eval:in_list(['Agreement','Agreement Delivery','Replacement Delivery','NRM/Customer Movement','NRM_AgreementCollection','Sold Car Customer Movement'], doc.movement_type)" },
+    { "fieldname": "manual_agreement_no", "label": "Manual Agreement No", "fieldtype": "Data",
+      "depends_on": "eval:in_list(['Agreement','Agreement Delivery','Replacement Delivery','NRM/Customer Movement','NRM_AgreementCollection','Sold Car Customer Movement'], doc.movement_type)" },
+
+    /* Workshop add-ons (seen in Workshop Movement) */
+    { "fieldname": "purchase_order_no", "label": "Purchase Order No", "fieldtype": "Data",
+      "depends_on": "eval:in_list(['Workshop','GarageJob'], doc.movement_type)" },
+    { "fieldname": "workshop", "label": "Workshop", "fieldtype": "Link", "options": "Supplier",
+      "depends_on": "eval:in_list(['Workshop','GarageJob'], doc.movement_type)" },
+    { "fieldname": "company", "label": "Company", "fieldtype": "Link", "options": "Company" },
+
+    /* ---------- Out Detail ---------- */
+    { "fieldname": "section_out", "label": "Out Detail", "fieldtype": "Section Break" },
+    { "fieldname": "out_datetime", "label": "Date and Time (Out)", "fieldtype": "Datetime", "reqd": 1, "in_list_view": 1 },
+    { "fieldname": "out_fuel_eighths", "label": "Fuel Level (Out) 0–8", "fieldtype": "Int", "default": 8, "description": "Enter 0–8 (eighths)" },
+    { "fieldname": "out_fuel_percent", "label": "Fuel % (Out)", "fieldtype": "Float", "precision": 2, "read_only": 1 },
+    { "fieldname": "out_mileage", "label": "KMs (Out)", "fieldtype": "Float", "reqd": 1, "in_list_view": 1 },
+    { "fieldname": "col_out_2", "fieldtype": "Column Break" },
+
+    /* Party/Person according to type */
+    { "fieldname": "out_staff", "label": "Staff (Out)", "fieldtype": "Link", "options": "Employee",
+      "depends_on": "eval:in_list(['NRM','NRM/Staff Movement','Staff Car','NRT'], doc.movement_type)" },
+    { "fieldname": "out_customer", "label": "Customer (Out)", "fieldtype": "Link", "options": "Customer",
+      "depends_on": "eval:in_list(['Agreement','Agreement Delivery','Replacement Delivery','NRM/Customer Movement','NRM_AgreementCollection','Sold Car Customer Movement'], doc.movement_type)" },
+    { "fieldname": "out_driver", "label": "Driver (Out)", "fieldtype": "Link", "options": "Employee",
+      "depends_on": "eval:in_list(['Workshop','GarageJob','Total Loss','Status Change','Mileage Update','Due For Sale','Other'], doc.movement_type)" },
+
+    { "fieldname": "out_notes", "label": "Notes (Out)", "fieldtype": "Small Text" },
+    { "fieldname": "out_from", "label": "From", "fieldtype": "Data" },
+    { "fieldname": "out_branch", "label": "Branch (Out)", "fieldtype": "Link", "options": "Branch" },
+
+    /* ---------- In Detail ---------- */
+    { "fieldname": "section_in", "label": "In Detail", "fieldtype": "Section Break" },
+    { "fieldname": "in_datetime", "label": "Date and Time (In)", "fieldtype": "Datetime" },
+    { "fieldname": "in_fuel_eighths", "label": "Fuel Level (In) 0–8", "fieldtype": "Int", "default": 8, "description": "Enter 0–8 (eighths)" },
+    { "fieldname": "in_fuel_percent", "label": "Fuel % (In)", "fieldtype": "Float", "precision": 2, "read_only": 1 },
+    { "fieldname": "in_mileage", "label": "KMs (In)", "fieldtype": "Float" },
+    { "fieldname": "col_in_2", "fieldtype": "Column Break" },
+
+    { "fieldname": "in_staff", "label": "Staff (In)", "fieldtype": "Link", "options": "Employee",
+      "depends_on": "eval:in_list(['NRM','NRM/Staff Movement','Staff Car','NRT'], doc.movement_type)" },
+    { "fieldname": "in_customer", "label": "Customer (In)", "fieldtype": "Link", "options": "Customer",
+      "depends_on": "eval:in_list(['Agreement','Agreement Delivery','Replacement Delivery','NRM/Customer Movement','NRM_AgreementCollection','Sold Car Customer Movement'], doc.movement_type)" },
+    { "fieldname": "in_driver", "label": "Driver (In)", "fieldtype": "Link", "options": "Employee",
+      "depends_on": "eval:in_list(['Workshop','GarageJob','Total Loss','Status Change','Mileage Update','Due For Sale','Other'], doc.movement_type)" },
+
+    { "fieldname": "in_notes", "label": "Notes (In)", "fieldtype": "Small Text" },
+    { "fieldname": "in_to", "label": "To", "fieldtype": "Data" },
+    { "fieldname": "in_branch", "label": "Branch (In)", "fieldtype": "Link", "options": "Branch" },
+
+    /* ---------- Service Info (for Workshop/Garage jobs) ---------- */
+    { "fieldname": "section_service", "label": "Service Info", "fieldtype": "Section Break",
+      "depends_on": "eval:in_list(['Workshop','GarageJob'], doc.movement_type)", "collapsible": 1 },
+    { "fieldname": "service_type", "label": "Type", "fieldtype": "Select",
+      "options": "Maintenance\nRepair\nAccident\nOther" },
+    { "fieldname": "service_done", "label": "Service Done", "fieldtype": "Data", "description": "e.g., 4th Service" },
+
+    /* ---------- Calculated & Controls ---------- */
+    { "fieldname": "section_calc", "label": "Calculated / Controls", "fieldtype": "Section Break", "collapsible": 1 },
+    { "fieldname": "duration_hours", "label": "Duration (Hours)", "fieldtype": "Float", "precision": 2, "read_only": 1 },
+    { "fieldname": "odometer_correction", "label": "Odometer Correction?", "fieldtype": "Check" },
+    { "fieldname": "odo_from", "label": "Correction From", "fieldtype": "Float",
+      "depends_on": "eval:doc.odometer_correction==1" },
+    { "fieldname": "odo_to", "label": "Correction To", "fieldtype": "Float",
+      "depends_on": "eval:doc.odometer_correction==1" },
+    { "fieldname": "status", "label": "Status", "fieldtype": "Select", "options": "Draft\nOut\nReturned", "default": "Draft", "in_list_view": 1 },
+
+    /* ---------- Footer ---------- */
+    { "fieldname": "section_footer", "label": "Notes", "fieldtype": "Section Break", "collapsible": 1 },
+    { "fieldname": "remarks", "label": "Internal Remarks", "fieldtype": "Small Text" }
+  ],
+  "permissions": [
+    { "role": "System Manager", "read": 1, "write": 1, "create": 1, "delete": 1, "submit": 1, "print": 1, "email": 1, "share": 1 },
+    { "role": "Car Rental Manager", "read": 1, "write": 1, "create": 1, "delete": 1, "submit": 1, "print": 1, "email": 1, "share": 1 },
+    { "role": "Car Rental User", "read": 1, "write": 1, "create": 1, "print": 1, "email": 1 }
+  ],
+  "actions": [],
+  "links": [],
+  "has_web_view": 0,
+  "quick_entry": 0,
+  "show_name_in_global_search": 1,
+  "index_web_pages_for_search": 0
+}
