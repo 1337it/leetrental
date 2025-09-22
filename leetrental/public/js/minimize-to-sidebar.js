@@ -142,16 +142,24 @@ btn.addEventListener('dragstart', (ev) => {
     labels.append(l1, l2);
 
     const close = document.createElement('button'); close.className = 'minibtn__close'; close.title = 'Remove'; close.textContent = '×';
-    close.addEventListener('click', (e) => { e.stopPropagation(); btn.remove(); const next = loadState().filter(x => x.key !== entry.key);
-  saveState(next);
+    close.addEventListener('click', (e) => {
+  e.stopPropagation();
+  animateDestroy(btn, () => {
+    btn.remove();
+    const next = loadState().filter(x => x.key !== entry.key);
+    saveState(next);
+  });
 });
 
     btn.append(icon, labels, close);
     btn.addEventListener('click', () => {
-      if (window.frappe?.set_route) window.frappe.set_route(entry.route);
-      else location.hash = '#' + entry.key;
-    });
-
+  // target will be current wrapper center (or the visible page)
+  const wrap = wrapperEl() || document.body;
+  animateMaximize(btn, wrap, () => {
+    if (window.frappe?.set_route) window.frappe.set_route(entry.route);
+    else location.hash = '#' + entry.key;
+  });
+});
     return btn;
   }
 
@@ -165,7 +173,12 @@ btn.addEventListener('dragstart', (ev) => {
   } else {
     dock.prepend(makeMiniButton(entry));
   }
-
+const el = dock.querySelector(`.minibtn[data-route="${CSS.escape(entry.key)}"]`);
+if (el) {
+  // animate from the active page → to the new dock btn
+  const ap = activePage();
+  if (ap) animateMinimize(ap, el, entry);
+}
   // Trim DOM
   [...dock.querySelectorAll('.minibtn')].slice(MAX_ITEMS).forEach(n => n.remove());
 
