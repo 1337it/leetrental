@@ -1,3 +1,4 @@
+@media only screen and (min-width: 992px) {
 body.full-width .container {
 width: 100%;
 max-width: 100%;
@@ -88,4 +89,5 @@ left: calc((100vw - 33vw)/2);
 }
 #page-Workspaces .layout-side-section {
 display: block !important;
+}
 }
