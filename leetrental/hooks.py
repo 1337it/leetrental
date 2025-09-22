@@ -44,8 +44,6 @@ app_include_js = [
 app_include_icons = "leetrental/icons/rental-icons.svg"
 
 # hooks.py
-website_include_js = ["assets/<your_app>/js/portal-settings.js"]
-website_include_css = ["assets/<your_app>/css/portal-settings.css"]
 
 # If you also want this in Desk (optional):
 # include js, css files in header of web template
@@ -68,7 +66,7 @@ website_include_css = ["assets/<your_app>/css/portal-settings.css"]
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}
 doctype_js = {
-    "Customer": "public/js/customer_quick_scan.js"
+    "Customer": "/assets/leetrental/js/customer_quick_scan.js"
 }
 # Home Pages
 # ----------
