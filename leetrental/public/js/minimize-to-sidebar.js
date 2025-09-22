@@ -384,4 +384,65 @@ function dropZone(){ return document.querySelector(DROP_ZONE_SEL) || document; }
     enableSplit(leftRoute, droppedRoute);
   });
 }
+
+  function rect(el){ return el?.getBoundingClientRect?.(); }
+function centerRect(r){ return r ? { x:r.left + r.width/2, y:r.top + r.height/2, w:r.width, h:r.height } : null; }
+
+function makeGhost(doctype, docname){
+  const g = document.createElement('div');
+  g.className = 'minidock-ghost';
+  g.innerHTML = `<div class="g-icon">📄</div>
+                 <div class="g-labels"><div class="g-top">${doctype}</div><div class="g-bot">${docname}</div></div>`;
+  document.body.appendChild(g);
+  return g;
+}
+
+/* Core FLIP driver. If any rect is missing, returns false so you can fallback */
+function flipAnimate(fromEl, toEl, doctype, docname, onDone){
+  const rf = rect(fromEl), rt = rect(toEl);
+  if (!rf || !rt) return false;
+
+  const gf = centerRect(rf), gt = centerRect(rt);
+  const ghost = makeGhost(doctype, docname);
+
+  // place ghost over FROM
+  const scaleX = Math.max(gf.w,1) / Math.max(gt.w,1);
+  const scaleY = Math.max(gf.h,1) / Math.max(gt.h,1);
+  ghost.style.transform = `translate(${gf.x - gt.w/2}px, ${gf.y - gt.h/2}px) scale(${scaleX}, ${scaleY})`;
+  ghost.style.opacity = '1';
+
+  // next frame → move to TO
+  requestAnimationFrame(() => {
+    ghost.style.transform = `translate(${gt.x - gt.w/2}px, ${gt.y - gt.h/2}px) scale(1,1)`;
+    ghost.addEventListener('transitionend', () => { ghost.remove(); onDone?.(); }, { once:true });
+  });
+
+  return true;
+}
+
+/* Convenience wrappers */
+function animateMinimize(activePageEl, targetBtnEl, entry){
+  // Try FLIP; if not possible, just fade the button in
+  const ok = flipAnimate(activePageEl, targetBtnEl, entry.doctype, entry.docname, () => {
+    targetBtnEl.classList.add('minidock-fade-in');
+    setTimeout(()=>targetBtnEl.classList.remove('minidock-fade-in'), 220);
+  });
+  if (!ok) {
+    targetBtnEl.classList.add('minidock-fade-in');
+    setTimeout(()=>targetBtnEl.classList.remove('minidock-fade-in'), 200);
+  }
+}
+
+function animateMaximize(sourceBtnEl, destinationEl, after){
+  const ok = flipAnimate(sourceBtnEl, destinationEl, 
+                         sourceBtnEl.querySelector('.minibtn__doctype')?.textContent || '',
+                         sourceBtnEl.querySelector('.minibtn__docname')?.textContent || '',
+                         after);
+  if (!ok) after?.();
+}
+
+function animateDestroy(btnEl, after){
+  btnEl.classList.add('minidock-fade-out');
+  btnEl.addEventListener('animationend', () => { after?.(); }, { once:true });
+}
 })(); // <-- close IIFE
