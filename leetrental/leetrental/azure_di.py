@@ -181,17 +181,21 @@ def _map_read_text(text):
 
     return out
 
-def _norm_date(s: str) -> str | None:
-    """Convert dd-mm-yyyy (and common variants) to yyyy-mm-dd for Frappe Date fields."""
-    if not s or not isinstance(s, str):
+def _norm_date(s):
+    """Return YYYY-MM-DD from inputs like YYYY/MM/DD, DD-MM-YYYY, etc."""
+    if not s: return None
+    s = s.replace(".", "/").replace("-", "/")
+    parts = s.split("/")
+    if len(parts) != 3: return None
+
+    a, b, c = parts
+    if len(a) == 4:   # YYYY/MM/DD
+        yyyy, mm, dd = a, b.zfill(2), c.zfill(2)
+    elif len(c) == 4: # DD/MM/YYYY
+        yyyy, mm, dd = c, b.zfill(2), a.zfill(2)
+    else:
         return None
-    s = s.strip()
-    for fmt in ("%d-%m-%Y", "%d/%m/%Y", "%d.%m.%Y", "%Y-%m-%d"):
-        try:
-            return datetime.datetime.strptime(s, fmt).strftime("%Y-%m-%d")
-        except Exception:
-            pass
-    return None
+    return f"{yyyy}-{mm}-{dd}"
 
 @frappe.whitelist()
 def analyze_scan(file_url: str, use_urlsource: int = 0, debug: int = 0):
