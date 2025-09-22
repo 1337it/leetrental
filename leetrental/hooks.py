@@ -67,7 +67,9 @@ website_include_css = ["assets/<your_app>/css/portal-settings.css"]
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}
-
+doctype_js = {
+    "Customer": "public/js/customer_quick_scan.js"
+}
 # Home Pages
 # ----------
 
