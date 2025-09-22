@@ -3,8 +3,8 @@ import frappe
 from frappe.utils.file_manager import get_file_path
 
 API_VERSION = "2024-11-30"
-MODEL_ID    = "prebuilt-id"
-MODEL_READ  = "prebuilt-read"
+MODEL_ID    = "prebuilt-idDocument"
+MODEL_READ  = "prebuilt-idDocument"
 
 def _cfg():
     sc = frappe.get_site_config()
