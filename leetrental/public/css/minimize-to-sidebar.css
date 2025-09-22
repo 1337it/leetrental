@@ -1,4 +1,4 @@
-
+@media only screen and (min-width: 992px) {
 /* ensure hidden pages become visible in split */
 
 /* splitter (the middle column) */
@@ -153,4 +153,5 @@ border-bottom-right-radius: 10px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
 }
