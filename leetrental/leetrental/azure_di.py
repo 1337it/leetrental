@@ -198,6 +198,17 @@ def _norm_date(s):
     return f"{yyyy}-{mm}-{dd}"
 
 @frappe.whitelist()
+def create_customer_from_scan(file_url: str, use_urlsource: int = 0, set_docname_to_name: int = 1, debug: int = 0):
+    """TEMP STUB just to verify routing. Replace with your real implementation after test."""
+    # Create a minimal Customer so we prove the dotted path works
+    doc = frappe.get_doc({
+        "doctype": "Customer",
+        "customer_type": "Individual",
+        "customer_name": "Scanned Customer (stub)"
+    }).insert()
+    return {"name": doc.name}
+
+@frappe.whitelist()
 def analyze_scan(file_url: str, use_urlsource: int = 0, debug: int = 0):
     """
     NEW-FORM helper: analyze the scan and RETURN values mapped to your fields
