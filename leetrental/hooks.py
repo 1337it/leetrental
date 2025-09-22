@@ -38,7 +38,8 @@ app_include_css = [
 app_include_js = [
 	"/assets/leetrental/js/leetrental.js",
 	"/assets/leetrental/js/portal-settings.js",
-	"/assets/leetrental/js/minimize-to-sidebar.js"
+	"/assets/leetrental/js/minimize-to-sidebar.js",
+	"/assets/leetrental/js/customer_quick_scan.js"
 ]
 
 app_include_icons = "leetrental/icons/rental-icons.svg"
@@ -65,9 +66,7 @@ app_include_icons = "leetrental/icons/rental-icons.svg"
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}
-doctype_js = {
-    "Customer": "/assets/leetrental/js/customer_quick_scan.js"
-}
+
 # Home Pages
 # ----------
 
