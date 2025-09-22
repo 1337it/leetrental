@@ -1,91 +1,80 @@
-frappe.provide("frappe.ui.form");
+(() => {
+    const orig_make_quick_entry = frappe.ui.form.make_quick_entry;
+    if (orig_make_quick_entry.__patched_for_customer_scan) return;
 
-// Keep a reference to the original class
-const _QuickEntryForm = frappe.ui.form.QuickEntryForm;
-
-// Override only for Customer
-frappe.ui.form.QuickEntryForm = class QuickEntryFormPatched extends _QuickEntryForm {
-  constructor(doctype, after_insert, init_callback, doc) {
-    super(doctype, after_insert, init_callback, doc);
-    this.__is_customer_quick = (doctype === "Customer");
-  }
-
-  // Build a custom dialog for Customer quick entry
-  make() {
-    if (!this.__is_customer_quick) {
-      return super.make();
-    }
-
-    // Minimal dialog
-    this.dialog = new frappe.ui.Dialog({
-      title: __("Create Customer from Scan"),
-      fields: [
-        { fieldtype: "Section Break" },
-        { fieldtype: "Attach", fieldname: "file", label: __("Image/PDF"), reqd: 1 },
-        { fieldtype: "Check", fieldname: "use_urlsource", label: __("Use urlSource (public URL)") },
-        { fieldtype: "Check", fieldname: "debug", label: __("Debug log") },
-      ],
-      primary_action_label: __("Analyze & Create"),
-      primary_action: () => this._analyze_and_create()
-    });
-
-    this.dialog.show();
-  }
-
-  // Skip default Quick Entry behaviors
-  setup() { if (!this.__is_customer_quick) return super.setup(); }
-  render_dialog() { if (!this.__is_customer_quick) return super.render_dialog(); }
-  is_valid() { if (!this.__is_customer_quick) return super.is_valid(); return true; }
-
-  async _analyze_and_create() {
-    const v = this.dialog.get_values();
-    if (!v || !v.file) {
-      frappe.msgprint(__("Please attach an image or PDF.")); return;
-    }
-
-    try {
-      frappe.dom.freeze(__("Analyzing…"));
-
-      // 1) Analyze-only to get fields + doc_type and assign attach/image fields
-      const r = await frappe.call({
-        method: "leetrental.leetrental.azure_di.analyze_scan", // make sure this dotted path matches your app/module
-        args: {
-          file_url: v.file,
-          use_urlsource: v.use_urlsource ? 1 : 0,
-          debug: v.debug ? 1 : 0
-        }
-      });
-
-      const out = r.message || {};
-      const f = out.fields || {};
-
-      // 2) Build a new Customer on server using create_from_scan (ensures DB save)
-      // If you already have create_customer_from_scan, call that directly.
-      const c = await frappe.call({
-        method: "leetrental.leetrental.azure_di.create_customer_from_scan",
-        args: {
-          file_url: f.attach_passport || f.attach_license || f.attach_id || v.file,
-          use_urlsource: v.use_urlsource ? 1 : 0,
-          set_docname_to_name: 1,   // optional: make docname = extracted name if you enabled autoname via field
-          debug: v.debug ? 1 : 0
-        }
-      });
-
-      const name = c.message && c.message.name;
-      if (!name) {
-        throw new Error("Customer was not created. Check server logs.");
+    frappe.ui.form.make_quick_entry = async function(doctype, after_insert, init_callback, doc, force) {
+      if (doctype !== "Customer") {
+        return orig_make_quick_entry.apply(this, arguments);
       }
 
-      frappe.show_alert({ message: __("Created: {0}", [name]), indicator: "green" });
-      this.dialog.hide();
-      frappe.dom.unfreeze();
+      // Custom Customer Quick Entry dialog
+      const d = new frappe.ui.Dialog({
+        title: __("Create Customer from Scan"),
+        fields: [
+          { fieldtype: "HTML", fieldname: "upload_ui" },
+          { fieldtype: "Data", fieldname: "file_url", hidden: 1 },
+          { fieldtype: "Check", fieldname: "use_urlsource", label: __("Use urlSource (public URL)") },
+          { fieldtype: "Check", fieldname: "debug", label: __("Debug log") }
+        ],
+        primary_action_label: __("Analyze & Create"),
+        primary_action: async () => {
+          const v = d.get_values();
+          if (!v || !v.file_url) {
+            frappe.msgprint(__("Please upload a file first.")); 
+            return;
+          }
+          try {
+            frappe.dom.freeze(__("Analyzing…"));
 
-      // Route to the created Customer
-      frappe.set_route("Form", "Customer", name);
+            const c = await frappe.call({
+              method: "leetrental.leetrental.azure_di.create_customer_from_scan",
+              args: {
+                file_url: v.file_url,
+                use_urlsource: v.use_urlsource ? 1 : 0,
+                set_docname_to_name: 1,
+                debug: v.debug ? 1 : 0
+              }
+            });
 
-    } catch (e) {
-      frappe.dom.unfreeze();
-      frappe.msgprint(__("Failed: {0}", [e.message || e]));
-    }
-  }
-};
+            frappe.dom.unfreeze();
+            const name = c.message && c.message.name;
+            if (!name) throw new Error("Customer was not created.");
+
+            d.hide();
+            if (typeof after_insert === "function") after_insert(name);
+            frappe.set_route("Form", "Customer", name);
+
+          } catch (e) {
+            frappe.dom.unfreeze();
+            frappe.msgprint(__("Failed: {0}", [e.message || e]));
+          }
+        }
+      });
+
+      // Build uploader UI
+      const wrapper = d.get_field("upload_ui").$wrapper.get(0);
+      wrapper.innerHTML = `
+        <div class="flex items-center gap-2">
+          <button class="btn btn-default" id="choose-file">${__("Choose File")}</button>
+          <span id="chosen-file" class="text-muted"></span>
+        </div>
+      `;
+      wrapper.querySelector("#choose-file").addEventListener("click", () => {
+        new frappe.ui.FileUploader({
+          allow_multiple: false,
+          as_dataurl: false,
+          restrictions: { allowed_file_types: [".jpg",".jpeg",".png",".pdf"] },
+          on_success: (file_doc) => {
+            d.set_value("file_url", file_doc.file_url);
+            wrapper.querySelector("#chosen-file").textContent =
+              `${file_doc.file_name} (${file_doc.file_url})`;
+            frappe.show_alert({ message: __("Uploaded"), indicator: "green" });
+          }
+        });
+      });
+
+      d.show();
+    };
+
+    frappe.ui.form.make_quick_entry.__patched_for_customer_scan = true;
+})();
