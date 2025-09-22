@@ -69,7 +69,7 @@ def _norm_date(s):
 def _extract_fields(text):
     out={}
     m=re.search(r"(Full\s*Name|Name)\s*[:\-]\s*([A-Za-z' ]{3,})", text, re.I)
-    if m: out["full_name"]=m.group(2).strip()
+    if m: out["customer_name"]=m.group(2).strip()
     else:
         lines=[ln.strip() for ln in text.splitlines() if ln.strip()]
         cand=[ln for ln in lines if ln.replace(" ","").isalpha() and len(ln.split())>=2 and ln.isupper()]
@@ -134,7 +134,7 @@ def analyze_scan(file_url: str, use_urlsource: int = 0, debug: int = 0):
 
     fields=_extract_fields(text)
     # echo back the uploaded file URL so client can set Attach Image field
-    fields["passport_image"] = file_url
+    fields["attach_passport"] = file_url
     # prefer using full_name for the visible title
     if fields.get("full_name") and not fields.get("customer_name"):
         fields["customer_name"] = fields["full_name"]
