@@ -181,32 +181,17 @@ def _map_read_text(text):
 
     return out
 
-def _norm_date(s):
-    """
-    Normalize any date string into dd-mm-yyyy for Frappe date fields.
-    Accepts yyyy/mm/dd, dd/mm/yyyy, yyyy-mm-dd, etc.
-    """
-    if not s:
+def _norm_date(s: str) -> str | None:
+    """Convert dd-mm-yyyy (and common variants) to yyyy-mm-dd for Frappe Date fields."""
+    if not s or not isinstance(s, str):
         return None
-
-    s = s.replace(".", "/").replace("-", "/")
-    parts = s.split("/")
-    if len(parts) != 3:
-        return None
-
-    a, b, c = parts
-
-    # If first part is 4 digits, assume YYYY/MM/DD
-    if len(a) == 4:
-        yyyy, mm, dd = a, b.zfill(2), c.zfill(2)
-    # If last part is 4 digits, assume DD/MM/YYYY
-    elif len(c) == 4:
-        yyyy, mm, dd = c, b.zfill(2), a.zfill(2)
-    else:
-        # fallback: just force ordering a-b-c
-        yyyy, mm, dd = a.zfill(4), b.zfill(2), c.zfill(2)
-
-    return f"{dd}-{mm}-{yyyy}"
+    s = s.strip()
+    for fmt in ("%d-%m-%Y", "%d/%m/%Y", "%d.%m.%Y", "%Y-%m-%d"):
+        try:
+            return datetime.datetime.strptime(s, fmt).strftime("%Y-%m-%d")
+        except Exception:
+            pass
+    return None
 
 @frappe.whitelist()
 def analyze_scan(file_url: str, use_urlsource: int = 0, debug: int = 0):
