@@ -1,3 +1,4 @@
+@media only screen and (min-width: 992px) {
 /* Container to pin launcher at sidebar bottom if sidebar exists */
 .website-sidebar .portal-settings-holder,
 .layout-side-section .portal-settings-holder,
@@ -109,4 +110,5 @@ html[data-theme="dark"] #portal-settings-launcher {
 .layout-side-section #portal-settings-launcher .psl-text,
 .desk-sidebar #portal-settings-launcher .psl-text {
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
 }
