@@ -1,7 +1,7 @@
 {
   "doctype": "DocType",
   "name": "Vehicle Movement",
-  "module": "Fleet Management",
+  "module": "leetrental",
   "custom": 1,
   "fields": [
     {
