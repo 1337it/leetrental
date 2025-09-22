@@ -68,7 +68,10 @@ def _norm_date(s):
     return None
 
 def _map_prebuilt_id(res):
-    """Map Azure prebuilt-id result to your exact fields + doc_type."""
+    """
+    Map Azure prebuilt-id result to YOUR fields + doc_type.
+    All dates -> dd-mm-yyyy for Frappe.
+    """
     out = {k: None for k in [
         "id_expiry","id_number","license_expiry","license_number","date_of_birth",
         "passport_expiry","passport_number","national_id","driving_license",
@@ -77,7 +80,8 @@ def _map_prebuilt_id(res):
     out["doc_type"] = None
 
     docs = (res.get("analyzeResult") or {}).get("documents") or []
-    if not docs: return out
+    if not docs:
+        return out
     d = docs[0]
     fields = d.get("fields", {}) or {}
 
@@ -88,26 +92,26 @@ def _map_prebuilt_id(res):
             if val: return str(val).strip()
         return None
 
-    # docType e.g. idDocument.passport / idDocument.driverLicense / idDocument.nationalIdentityCard
+    # docType e.g. idDocument.passport/driverLicense/nationalIdentityCard
     dt = (d.get("docType") or "").lower()
     if "passport" in dt: out["doc_type"] = "passport"
     elif "driver" in dt: out["doc_type"] = "driving_license"
     elif "identity" in dt or "idcard" in dt: out["doc_type"] = "national_id"
 
-    # names
-    full = v("FullName","Name")
+    # Names
+    full  = v("FullName","Name")
     first = v("FirstName","GivenName","GivenNames","Forename")
     last  = v("LastName","Surname","FamilyName")
     out["customer_name"] = full or (f"{first or ''} {last or ''}".strip() or None)
 
-    # shared
-    dob = v("DateOfBirth","BirthDate","DOB")
-    out["date_of_birth"] = (str(dob)[:10] if dob else None)
+    # DOB (normalize)
+    dob_raw = v("DateOfBirth","BirthDate","DOB")
+    out["date_of_birth"] = _norm_date(dob_raw)
 
-    # numbers/expiries (generic first)
+    # Number / Expiry generic
     num = v("DocumentNumber","IDNumber","LicenseNumber","PersonalNumber","CardNumber","Number")
-    exp = v("DateOfExpiration","ExpirationDate","ExpiryDate","ValidUntil","ValidTo")
-    exp = (str(exp)[:10] if exp else None)
+    exp_raw = v("DateOfExpiration","ExpirationDate","ExpiryDate","ValidUntil","ValidTo")
+    exp = _norm_date(exp_raw)
 
     if out["doc_type"] == "passport":
         out["passport_number"] = num
@@ -124,58 +128,85 @@ def _map_prebuilt_id(res):
     return out
 
 def _map_read_text(text):
-    """Fallback regex mapping to your fields + doc_type."""
+    """
+    Fallback regex mapping to YOUR fields + doc_type.
+    All dates -> dd-mm-yyyy for Frappe.
+    """
     out = {k: None for k in [
         "id_expiry","id_number","license_expiry","license_number","date_of_birth",
         "passport_expiry","passport_number","national_id","driving_license",
         "customer_name"
     ]}
-    out["doc_type"] = "passport"  # default
-    # doc type hints
-    if re.search(r"License", text, re.I):
-        out["doc_type"] = "driving_license"
-    if re.search(r"\bID\b|\bEmirates\b|\bNational\b", text, re.I):
-        out["doc_type"] = "national_id"
+    # Doc type hints
+    dtype = "passport"
+    if re.search(r"License", text, re.I): dtype = "driving_license"
+    if re.search(r"\bID\b|\bEmirates\b|\bNational\b", text, re.I): dtype = "national_id"
+    out["doc_type"] = dtype
 
-    # customer_name
+    # Name
     m = re.search(r"(Full\s*Name|Name)\s*[:\-]\s*([A-Za-z' ]{3,})", text, re.I)
     if m:
         out["customer_name"] = m.group(2).strip()
     else:
-        # uppercase heuristic
         lines = [ln.strip() for ln in text.splitlines() if ln.strip()]
         cand = [ln for ln in lines if ln.replace(" ","").isalpha() and len(ln.split())>=2 and ln.isupper()]
-        if cand:
-            out["customer_name"] = cand[0].title()
+        if cand: out["customer_name"] = cand[0].title()
 
-    # date_of_birth
+    # DOB -> dd-mm-yyyy
     DATE_RX = r"(\d{4}[./-]\d{1,2}[./-]\d{1,2}|\d{1,2}[./-]\d{1,2}[./-]\d{2,4})"
     m = re.search(r"(DOB|Date\s*of\s*Birth)\s*[:\-]?\s*"+DATE_RX, text, re.I)
     if m:
         out["date_of_birth"] = _norm_date(m.group(2) if m.lastindex>=2 else m.group(1))
 
-    # number + expiry generic
-    doc_m = re.search(r"(Passport|Document|ID|Card|License)\s*(No\.?|Number)\s*[:\-]?\s*([A-Z0-9\-]+)", text, re.I)
-    if not doc_m:
-        doc_m = re.search(r"\b([A-Z]\d{6,9})\b", text)
-    generic_num = (doc_m.group(3) if (doc_m and doc_m.lastindex and doc_m.lastindex>=3) else (doc_m.group(1) if doc_m else None))
+    # Number + Expiry (generic)
+    mnum = re.search(r"(Passport|Document|ID|Card|License)\s*(No\.?|Number)\s*[:\-]?\s*([A-Z0-9\-]+)", text, re.I)
+    if not mnum:
+        mnum = re.search(r"\b([A-Z]\d{6,9})\b", text)
+    generic_num = (mnum.group(3) if (mnum and mnum.lastindex and mnum.lastindex>=3) else (mnum.group(1) if mnum else None))
 
-    m = re.search(r"(Expiry|Expiration|Exp\. Date|Valid\s*Until)\s*[:\-]?\s*"+DATE_RX, text, re.I)
-    generic_exp = _norm_date(m.group(2) if (m and m.lastindex>=2) else (m.group(1) if m else None))
+    mexp = re.search(r"(Expiry|Expiration|Exp\. Date|Valid\s*Until)\s*[:\-]?\s*"+DATE_RX, text, re.I)
+    generic_exp = _norm_date(mexp.group(2) if (mexp and mexp.lastindex>=2) else (mexp.group(1) if mexp else None))
 
-    if out["doc_type"] == "passport":
+    if dtype == "passport":
         out["passport_number"] = generic_num
         out["passport_expiry"] = generic_exp
-    elif out["doc_type"] == "driving_license":
+    elif dtype == "driving_license":
         out["license_number"] = generic_num
         out["license_expiry"] = generic_exp
         out["driving_license"] = generic_num
-    elif out["doc_type"] == "national_id":
+    elif dtype == "national_id":
         out["id_number"] = generic_num
         out["id_expiry"] = generic_exp
         out["national_id"] = generic_num
 
     return out
+
+def _norm_date(s):
+    """
+    Normalize any date string into dd-mm-yyyy for Frappe date fields.
+    Accepts yyyy/mm/dd, dd/mm/yyyy, yyyy-mm-dd, etc.
+    """
+    if not s:
+        return None
+
+    s = s.replace(".", "/").replace("-", "/")
+    parts = s.split("/")
+    if len(parts) != 3:
+        return None
+
+    a, b, c = parts
+
+    # If first part is 4 digits, assume YYYY/MM/DD
+    if len(a) == 4:
+        yyyy, mm, dd = a, b.zfill(2), c.zfill(2)
+    # If last part is 4 digits, assume DD/MM/YYYY
+    elif len(c) == 4:
+        yyyy, mm, dd = c, b.zfill(2), a.zfill(2)
+    else:
+        # fallback: just force ordering a-b-c
+        yyyy, mm, dd = a.zfill(4), b.zfill(2), c.zfill(2)
+
+    return f"{dd}-{mm}-{yyyy}"
 
 @frappe.whitelist()
 def analyze_scan(file_url: str, use_urlsource: int = 0, debug: int = 0):
