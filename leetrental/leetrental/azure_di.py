@@ -61,7 +61,7 @@ def create_customer_from_scan(file_url: str, use_urlsource: int = 0, set_docname
 
     # --- Build Customer doc payload ---
     # Ensure Date fields are YYYY-MM-DD
-    def iso(v): return _norm_date_iso(v) if isinstance(v, str) else v
+    def iso(v): return _norm_date(v) if isinstance(v, str) else v
 
     customer_name = mapped.get("customer_name") or "New Customer"
     doc_type = mapped.get("doc_type") or "passport"
