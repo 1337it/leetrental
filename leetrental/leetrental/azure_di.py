@@ -6,6 +6,128 @@ API_VERSION = "2024-11-30"
 MODEL_ID    = "prebuilt-idDocument"
 MODEL_READ  = "prebuilt-idDocument"
 
+def _ensure_field(dt, fieldname):
+    """Skip setting a field that doesn't exist on this doctype."""
+    return frappe.db.has_column(dt, fieldname)
+
+@frappe.whitelist()
+def create_customer_from_scan(file_url: str, use_urlsource: int = 0, set_docname_to_name: int = 1, debug: int = 0):
+    """
+    1) Sends image/PDF to Azure (ID -> Read fallback)
+    2) Maps to your Customer fields
+    3) Creates & saves the Customer
+    4) Sets appropriate attach/image fields for that doc type
+    5) Attaches original file
+    """
+    frappe.only_for(("System Manager","Sales Manager","Sales User","Administrator"))
+
+    endpoint, key = _cfg()
+    if not (endpoint and key):
+        raise frappe.ValidationError("Azure endpoint/key missing in site_config.json")
+
+    # Prepare input (private files => bytes; public URLs => urlSource)
+    url_source, file_bytes = None, None
+    if int(use_urlsource) and file_url.lower().startswith(("http://", "https://")):
+        url_source = file_url
+    else:
+        path = get_file_path(file_url)
+        if not os.path.exists(path):
+            raise frappe.ValidationError(f"File not found: {path}")
+        with open(path, "rb") as f:
+            file_bytes = f.read()
+
+    # --- Analyze with prebuilt-id then fallback to prebuilt-read ---
+    mapped = {}
+    try:
+        op = _post_analyze(endpoint, key, MODEL_ID, url_source=url_source, file_bytes=file_bytes)
+        res = _poll(op, key)
+        if res.get("status") == "succeeded":
+            mapped = _map_prebuilt_id(res) or {}
+    except Exception as e:
+        if int(debug):
+            frappe.log_error(f"prebuilt-id failed: {e}", "Azure DI create_customer_from_scan")
+
+    if not mapped.get("customer_name") and not any(mapped.get(k) for k in ("passport_number","license_number","id_number")):
+        # Fallback: prebuilt-read
+        op = _post_analyze(endpoint, key, MODEL_READ, url_source=url_source, file_bytes=file_bytes, overload="analyzeDocument")
+        res = _poll(op, key)
+        if res.get("status") != "succeeded":
+            raise frappe.ValidationError("Azure reading failed")
+        text = _read_text(res)
+        if int(debug):
+            blob = text[:3000] + ("…" if len(text) > 3000 else "")
+            frappe.log_error(blob, "Azure Read – raw text (create)")
+        mapped = _map_read_text(text) or {}
+
+    # --- Build Customer doc payload ---
+    # Ensure Date fields are YYYY-MM-DD
+    def iso(v): return _norm_date_iso(v) if isinstance(v, str) else v
+
+    customer_name = mapped.get("customer_name") or "New Customer"
+    doc_type = mapped.get("doc_type") or "passport"
+
+    payload = {
+        "doctype": "Customer",
+        "customer_type": "Individual",
+        "customer_name": customer_name,
+        # common
+        "date_of_birth": iso(mapped.get("date_of_birth")) or None,
+        # passport set
+        "passport_number": mapped.get("passport_number") or None,
+        "passport_expiry": iso(mapped.get("passport_expiry")) or None,
+        # license set
+        "license_number": mapped.get("license_number") or None,
+        "license_expiry": iso(mapped.get("license_expiry")) or None,
+        "driving_license": mapped.get("driving_license") or None,
+        # national id set
+        "id_number": mapped.get("id_number") or None,
+        "id_expiry": iso(mapped.get("id_expiry")) or None,
+        "national_id": mapped.get("national_id") or None,
+    }
+
+    # attach/image fields per doc type (only if fields exist)
+    image_map = {
+        "passport":   [("attach_passport", "passport_image")],
+        "driving_license": [("attach_license", "license_image")],
+        "national_id":     [("attach_id", "id_image")]
+    }
+    for attach_fn, image_fn in image_map.get(doc_type, []):
+        if _ensure_field("Customer", attach_fn):
+            payload[attach_fn] = file_url
+        if _ensure_field("Customer", image_fn):
+            payload[image_fn] = file_url
+
+    # Prune None/empty
+    payload = {k: v for k, v in payload.items() if v not in (None, "", [])}
+
+    # --- Create Customer ---
+    customer = frappe.get_doc(payload).insert(ignore_permissions=False)
+    created_name = customer.name
+
+    # --- Attach original file for audit ---
+    try:
+        f = frappe.new_doc("File")
+        f.file_url = file_url
+        f.attached_to_doctype = "Customer"
+        f.attached_to_name = created_name
+        f.insert(ignore_permissions=True)
+    except Exception as e:
+        if int(debug):
+            frappe.log_error(f"Attach failed: {e}", "create_customer_from_scan")
+
+    # --- Optional: rename docname to customer_name (if requested + no conflict) ---
+    if int(set_docname_to_name) and customer_name and customer_name != created_name:
+        # Only if you configured autoname by field: if not, we can still rename safely if no collision
+        if not frappe.db.exists("Customer", customer_name):
+            try:
+                frappe.rename_doc("Customer", created_name, customer_name, force=True)
+                created_name = customer_name
+            except Exception as e:
+                if int(debug):
+                    frappe.log_error(f"Rename failed: {e}", "create_customer_from_scan")
+
+    return {"name": created_name, "doc_type": doc_type, "customer_name": customer_name}
+
 def _cfg():
     sc = frappe.get_site_config()
     return sc.get("azure_di_endpoint"), sc.get("azure_di_key")
@@ -196,17 +318,6 @@ def _norm_date(s):
     else:
         return None
     return f"{yyyy}-{mm}-{dd}"
-
-@frappe.whitelist()
-def create_customer_from_scan(file_url: str, use_urlsource: int = 0, set_docname_to_name: int = 1, debug: int = 0):
-    """TEMP STUB just to verify routing. Replace with your real implementation after test."""
-    # Create a minimal Customer so we prove the dotted path works
-    doc = frappe.get_doc({
-        "doctype": "Customer",
-        "customer_type": "Individual",
-        "customer_name": "Scanned Customer (stub)"
-    }).insert()
-    return {"name": doc.name}
 
 @frappe.whitelist()
 def analyze_scan(file_url: str, use_urlsource: int = 0, debug: int = 0):
