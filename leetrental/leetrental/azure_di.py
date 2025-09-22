@@ -12,6 +12,10 @@ def _cfg():
     sc = frappe.get_site_config()
     return sc.get("azure_di_endpoint"), sc.get("azure_di_key")
 
+@frappe.whitelist()
+def analyze_scan(file_url: str, use_urlsource: int = 0, debug: int = 0):
+    return {"fields": {}, "op_location": None}  # temp body just to test
+
 # ---------- Azure calls ----------
 def _post_analyze_id(endpoint, key, *, url_source=None, file_bytes=None):
     base = f"{endpoint}/documentintelligence/documentModels/{MODEL_ID}:analyze"
