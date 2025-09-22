@@ -26,15 +26,15 @@
           try {
             frappe.dom.freeze(__("Analyzing…"));
 
-            const c = await frappe.call({
-              method: "leetrental.leetrental.azure_di.create_customer_from_scan",
-              args: {
-                file_url: v.file_url,
-                use_urlsource: v.use_urlsource ? 1 : 0,
-                set_docname_to_name: 1,
-                debug: v.debug ? 1 : 0
-              }
-            });
+           const c = await frappe.call({
+  method: "leetrental.leetrental.azure_di.create_customer_from_scan",
+  args: {
+    file_url: v.file_url,
+    use_urlsource: v.use_urlsource ? 1 : 0,
+    set_docname_to_name: 1,
+    debug: v.debug ? 1 : 0
+  }
+});
 
             frappe.dom.unfreeze();
             const name = c.message && c.message.name;
