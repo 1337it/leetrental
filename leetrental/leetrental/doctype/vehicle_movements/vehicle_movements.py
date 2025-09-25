@@ -1,5 +1,9 @@
 import frappe
+from frappe.model.document import Document
 from frappe.utils import cint
+
+class VehicleMovements(Document):
+	pass
 
 @frappe.whitelist()
 def get_vehicle_movements(vehicle: str, from_date=None, to_date=None, movement_type=None, page=1, page_len=10):
