@@ -97,6 +97,7 @@
   },
 
   {
+    "fieldname": "general_section",
     "fieldtype": "Section Break",
     "label": "General Info"
   },
@@ -129,6 +130,7 @@
   },
 
   {
+    "fieldname": "out_section",
     "fieldtype": "Section Break",
     "label": "Out Details"
   },
@@ -183,6 +185,7 @@
   },
 
   {
+    "fieldname": "in_section",
     "fieldtype": "Section Break",
     "label": "In Details"
   },
@@ -237,6 +240,7 @@
   },
 
   {
+    "fieldname": "workshop_section",
     "fieldtype": "Section Break",
     "label": "Workshop / Service"
   },
