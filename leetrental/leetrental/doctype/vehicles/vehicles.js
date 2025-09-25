@@ -2,7 +2,7 @@
 // For license information, please see license.txt
 
 // Vehicle doctype client script
-frappe.ui.form.on('Vehicle', {
+frappe.ui.form.on('Vehicles', {
   refresh(frm) {
     // Ensure HTML container exists
     if (!frm.doc.__islocal) {
@@ -71,7 +71,7 @@ function render_panel(frm) {
     const { message } = await frappe.call({
       method: 'frappe.client.call',
       args: {
-        method: 'your_app.your_app.doctype.vehicle_movement.vehicle_movement.get_vehicle_movements',
+        method: 'leetrental.leetrental.vehicle_movements.vehicle_movements.get_vehicle_movements',
         args: {
           vehicle: frm.doc.name,
           from_date: from,
