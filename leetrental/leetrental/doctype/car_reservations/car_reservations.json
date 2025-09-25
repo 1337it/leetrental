@@ -1,4 +1,6 @@
 {
+ "doctype": "Car Reservations",
+ "name": "Car Reservations",
  "custom_fields": [
   {
    "_assign": null,
