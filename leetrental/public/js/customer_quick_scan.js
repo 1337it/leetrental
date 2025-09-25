@@ -105,8 +105,7 @@
         });
       });
 
-      // Start with choice screen (primary disabled until Auto chosen)
-      d.set_primary_action_label(__("Continue"));
+      // Start with choice screen (primary disabled until Auto chosen
       d.set_primary_action(() => revealAuto()); // If user clicks primary without choosing, default to Auto
       d.show();
     };
