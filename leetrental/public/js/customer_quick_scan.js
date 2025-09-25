@@ -1,5 +1,4 @@
 (() => {
-  frappe.ready(() => {
     const orig_make_quick_entry = frappe.ui.form.make_quick_entry;
     if (!orig_make_quick_entry || orig_make_quick_entry.__patched_for_customer_scan_v2) return;
 
@@ -113,5 +112,4 @@
     };
 
     frappe.ui.form.make_quick_entry.__patched_for_customer_scan_v2 = true;
-  });
 })();
