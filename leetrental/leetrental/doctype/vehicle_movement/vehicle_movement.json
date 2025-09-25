@@ -198,4 +198,5 @@
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": []
+ "sync_on_migrate": 1
 }
