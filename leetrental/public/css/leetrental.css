@@ -1,4 +1,14 @@
 @media only screen and (min-width: 992px) {
+
+  .form-links .document-link .btn-new, .form-links .document-link .open-notification {
+margin-left: 0 !important;
+background: rgb(136, 182, 207);
+border-radius: 0;
+}
+  .form-links .document-link .document-link-badge, .form-links .document-link .report-link-badge {
+border-radius: 2px !important;
+background-color: rgba(148,163,184,.10);
+}
 body.full-width .container {
 width: 100%;
 max-width: 100%;
