@@ -1,4 +1,6 @@
 {
+ "doctype": "Vehicles",
+ "name": "Vehicles",
  "custom_fields": [
   {
    "_assign": null,
