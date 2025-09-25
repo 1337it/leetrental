@@ -106,7 +106,7 @@ function render_panel(frm) {
             ${rows.map(r => `
               <tr>
                 <td>${frappe.datetime.str_to_user(r.date || '') || ''}</td>
-                <td><a class="bold" href="#Form/Vehicle Movement/${encodeURIComponent(r.name)}">${r.movement_id || r.name}</a></td>
+                <td><a class="bold" href="/app/vehicle-movements/${encodeURIComponent(r.name)}">${r.movement_id || r.name}</a></td>
                 <td>${frappe.utils.escape_html(r.movement_type || '')}</td>
                 <td>${frappe.utils.escape_html(r.out_from || '')} → ${frappe.utils.escape_html(r.in_to || r.drop_location || '')}</td>
                 <td>
