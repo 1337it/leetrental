@@ -68,21 +68,18 @@ function render_panel(frm) {
     const to = $('#vm_to').val() || null;
     const mtype = $('#vm_type').val() || null;
 
-    const { message } = await frappe.call({
-      method: 'frappe.client.call',
-      args: {
-        method: 'leetrental.leetrental.vehicle_movements.vehicle_movements.get_vehicle_movements',
-        args: {
-          vehicle: frm.doc.name,
-          from_date: from,
-          to_date: to,
-          movement_type: mtype,
-          page,
-          page_len
-        }
-      },
-      freeze: false
-    });
+	const { message } = await frappe.call({
+  method: 'leetrental.leetrental.vehicle_movements.vehicle_movements.get_vehicle_movements',
+  args: {
+    vehicle: frm.doc.name,
+    from_date: from,
+    to_date: to,
+    movement_type: mtype,
+    page,
+    page_len
+  },
+  freeze: false
+});
 
     const rows = message?.data || [];
     const total = message?.total || 0;
