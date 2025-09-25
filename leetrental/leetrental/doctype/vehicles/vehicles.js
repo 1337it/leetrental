@@ -69,7 +69,7 @@ function render_panel(frm) {
     const mtype = $('#vm_type').val() || null;
 
 	const { message } = await frappe.call({
-  method: 'leetrental.leetrental.vehicle_movements.vehicle_movements.get_vehicle_movements',
+  method: 'leetrental.leetrental.doctype.vehicle_movements.vehicle_movements.get_vehicle_movements',
   args: {
     vehicle: frm.doc.name,
     from_date: from,
