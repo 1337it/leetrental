@@ -1,4 +1,6 @@
 {
+ "doctype": "Customer",
+ "name": "Customer",
  "custom_fields": [
   {
    "_assign": null,
