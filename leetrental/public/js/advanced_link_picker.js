@@ -106,6 +106,9 @@
       this.dlg.show();
       setTimeout(() => this.$search.trigger("focus"), 0);
       this._load(); // initial
+      this.dlg.on_page_show = () => {
+  this.$search.trigger("focus");
+};
     }
 
     _freshSearch() {
