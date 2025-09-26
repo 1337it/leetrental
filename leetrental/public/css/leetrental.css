@@ -1,5 +1,9 @@
 @media only screen and (min-width: 992px) {
 
+.advanced-link-results tbody tr.active {
+  background: var(--bg-green-extra-light, #eefcf3);
+}
+  
   .form-links .document-link .btn-new, .form-links .document-link .open-notification {
 margin-left: 0 !important;
 background: rgb(136, 182, 207);
