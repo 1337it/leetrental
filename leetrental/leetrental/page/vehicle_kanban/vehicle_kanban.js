@@ -138,7 +138,7 @@ leetrental.vehicle_kanban.Page = class {
 
   _card_html(v) {
     const title = v.license_plate || v.name;
-    const subtitle = [v.make, v.model, v.year].filter(Boolean).join(" ");
+    const subtitle = [v.model, v.year].filter(Boolean).join(" ");
     const meta = [
       v.current_agreement ? `Agr: ${frappe.utils.escape_html(v.current_agreement)}` : "",
       v.odometer ? `Odo: ${v.odometer}` : "",
