@@ -2,6 +2,7 @@
   "doctype": "Page",
   "name": "vehicle-kanban",
   "module": "leetrental",
+  "page_name": "Vehicle Kanban",
   "title": "Vehicle Kanban",
   "standard": "Yes",
   "beta": 0,
