@@ -114,6 +114,7 @@
         <div class="psp-label">Account</div>
         <div class="psp-links">
           <a href="/me" class="psp-link">My Account</a>
+          <a id="fullscreen-button" href= class="psp-link">Fullscreen</a>
           <a href="/update-password" class="psp-link">Change Password</a>
           <a href="/app?cmd=frappe.auth.logout" class="psp-link">Logout</a>
         </div>
@@ -121,6 +122,24 @@
     `;
     document.body.appendChild(panel);
 
+    const fullscreenButton = document.getElementById('fullscreen-button');
+const myElement = document.getElementsByClassName('main-section')[0];
+
+fullscreenButton.addEventListener('click', () => {
+  if (!document.fullscreenElement) {
+    myElement.requestFullscreen();
+  } else {
+    document.exitFullscreen();
+  }
+});
+
+myElement.addEventListener('fullscreenchange', () => {
+  if (document.fullscreenElement === myElement) {
+    console.log('Element is now full screen');
+  } else {
+    console.log('Element is no longer full screen');
+  }
+});
     // Wire actions
     panel.querySelector(".psp-close").onclick = togglePanel;
     panel.querySelector("#psp-dec").onclick = () => { decScale(); updateFontHint(); };
