@@ -4,7 +4,7 @@ from frappe import _
 from frappe.utils import now_datetime, now
 
 VEHICLE_MOVEMENTS_DT = "vehicle_movements"   # your Movement doctype name
-AGREEMENT_DT = "Agreements"                  # change if your doctype name differs
+AGREEMENT_DT = "agreements"                  # change if your doctype name differs
 
 @frappe.whitelist()
 def fetch_vehicles():
@@ -13,12 +13,12 @@ def fetch_vehicles():
         "status", "odometer", "current_agreement"
     ]
     # add your own filters here if needed
-    return {"vehicles": frappe.get_all("Vehicle", fields=fields, order_by="license_plate asc")}
+    return {"vehicles": frappe.get_all("Vehicles", fields=fields, order_by="license_plate asc")}
 
 @frappe.whitelist()
 def transition_vehicle_status(vehicle: str, from_status: str, to_status: str, payload: dict | None = None):
     payload = payload or {}
-    v = frappe.get_doc("Vehicle", vehicle)
+    v = frappe.get_doc("Vehicles", vehicle)
 
     if from_status == to_status:
         return {"ok": True, "message": _("No status change.")}
@@ -177,4 +177,4 @@ def _maybe_create_or_update_agreement(vehicle_doc, p):
     ag.insert(ignore_permissions=True)
 
     # hand back the agreement number to the UI via payload echo
-    frappe.db.set_value("Vehicle", vehicle_doc.name, "current_agreement", ag.name)
+    frappe.db.set_value("Vehicles", vehicle_doc.name, "current_agreement", ag.name)
