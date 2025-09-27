@@ -37,7 +37,7 @@ def transition_vehicle_status(vehicle: str, from_status: str, to_status: str, pa
     # --- Update Vehicle status / convenience data ---
     v.db_set("status", to_status)
     if payload.get("odometer_value"):
-        v.db_set("odometer", payload.get("odometer_value"))
+        v.db_set("last_odometer_value", payload.get("odometer_value"))
 
     if payload.get("agreement_no"):
         # if vehicle has a convenience link, update it
@@ -106,7 +106,7 @@ def _make_movement_doc(vehicle_doc, from_status, to_status, p):
         "unit": p.get("unit"),
         "purchase_order_no": p.get("purchase_order_no"),
         "workshop": p.get("workshop"),
-        "odometer_value": p.get("odometer_value") or vehicle_doc.get("odometer"),
+        "odometer_value": p.get("odometer_value") or vehicle_doc.get("last_odometer_value"),
         # travel locations
         "out_from": p.get("out_from"),
         "in_to": p.get("in_to"),
