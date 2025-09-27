@@ -13,7 +13,7 @@ app_license = "MIT"
 fixtures = [{
     "doctype": "Workflow",
         "filters": {
-            "name": [ "in", ["Vehicles Workflow","Car Reservations Workflow","Service Workflow","Contract Information"]]
+            "name": [ "in", ["Vehicles Workflow","Vehicle Movements Workflow","Service Workflow","Contract Information"]]
             }
         },
         {
