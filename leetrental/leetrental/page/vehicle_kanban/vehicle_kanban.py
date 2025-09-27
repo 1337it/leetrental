@@ -9,8 +9,8 @@ AGREEMENT_DT = "agreements"                  # change if your doctype name diffe
 @frappe.whitelist()
 def fetch_vehicles():
     fields = [
-        "name", "license_plate", "make", "model", "year",
-        "status", "odometer", "current_agreement"
+        "name", "license_plate", "model", "year",
+        "vehicle_status", "last_odometer_value", "current_agreement"
     ]
     # add your own filters here if needed
     return {"vehicles": frappe.get_all("Vehicles", fields=fields, order_by="license_plate asc")}
