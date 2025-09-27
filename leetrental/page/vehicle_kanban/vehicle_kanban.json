@@ -1,0 +1,18 @@
+{
+  "doctype": "Page",
+  "name": "vehicle-kanban",
+  "module": "leetrental",
+  "title": "Vehicle Kanban",
+  "standard": "Yes",
+  "beta": 0,
+  "content": "",
+  "icon": "octicon octicon-tasklist",
+  "system_page": 0,
+  "restrict_to_domain": "",
+  "roles": [
+    {"role": "System Manager"},
+    {"role": "Fleet Manager"},
+    {"role": "Sales User"},
+    {"role": "Maintenance User"}
+  ]
+}
