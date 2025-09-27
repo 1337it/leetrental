@@ -100,7 +100,7 @@ leetrental.vehicle_kanban.Page = class {
   async refresh() {
     try {
       const r = await frappe.call({
-        method: "leetrental.leetrental.leetrental.page.vehicle_kanban.vehicle_kanban.fetch_vehicles",
+        method: "leetrental.leetrental.page.vehicle_kanban.vehicle_kanban.fetch_vehicles",
       });
       this.all = (r.message && r.message.vehicles) || [];
       this._render();
@@ -209,7 +209,7 @@ leetrental.vehicle_kanban.Page = class {
     try {
       frappe.dom.freeze(__("Updating…"));
       const r = await frappe.call({
-        method: "leetrental.leetrental.leetrental.page.vehicle_kanban.vehicle_kanban.transition_vehicle_status",
+        method: "leetrental.leetrental.page.vehicle_kanban.vehicle_kanban.transition_vehicle_status",
         args: {
           vehicle: v.name,
           from_status: v.status,
