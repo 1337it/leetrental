@@ -1,0 +1,260 @@
+/* leetrental/leetrental/page/vehicles_kanban/vehicles_kanban.css */
+
+.vehicles-kanban-wrapper {
+    padding: 15px;
+    height: calc(100vh - 200px);
+    overflow-x: auto;
+}
+
+.kanban-container {
+    display: flex;
+    gap: 20px;
+    min-height: 100%;
+    align-items: flex-start;
+}
+
+.kanban-column {
+    flex: 0 0 320px;
+    background: var(--bg-color);
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    display: flex;
+    flex-direction: column;
+    max-height: calc(100vh - 220px);
+}
+
+.kanban-column-header {
+    padding: 15px;
+    border-bottom: 2px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: var(--bg-color);
+    border-radius: 8px 8px 0 0;
+}
+
+.kanban-column-header.bg-success {
+    background: #d4edda;
+    border-color: #28a745;
+}
+
+.kanban-column-header.bg-danger {
+    background: #f8d7da;
+    border-color: #dc3545;
+}
+
+.kanban-column-header.bg-warning {
+    background: #fff3cd;
+    border-color: #ffc107;
+}
+
+.kanban-column-header.bg-info {
+    background: #d1ecf1;
+    border-color: #17a2b8;
+}
+
+.kanban-column-header.bg-primary {
+    background: #cce5ff;
+    border-color: #007bff;
+}
+
+.kanban-column-header h4 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.kanban-column-header .badge {
+    background: var(--primary);
+    color: white;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+}
+
+.kanban-column-body {
+    padding: 15px;
+    overflow-y: auto;
+    flex: 1;
+    min-height: 200px;
+}
+
+.kanban-column-body.drag-over {
+    background: var(--bg-light-gray);
+    border: 2px dashed var(--primary);
+    border-radius: 4px;
+}
+
+.kanban-column-body .empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--text-muted);
+    font-style: italic;
+}
+
+.kanban-card {
+    background: white;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    padding: 12px;
+    margin-bottom: 12px;
+    cursor: move;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.kanban-card:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    transform: translateY(-2px);
+}
+
+.kanban-card.dragging {
+    opacity: 0.5;
+    transform: rotate(3deg);
+}
+
+.kanban-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.vehicle-license strong {
+    font-size: 16px;
+    color: var(--primary);
+}
+
+.vehicle-actions .btn {
+    padding: 4px 8px;
+}
+
+.kanban-card-body {
+    margin-bottom: 10px;
+}
+
+.vehicle-image {
+    width: 100%;
+    height: 140px;
+    overflow: hidden;
+    border-radius: 4px;
+    margin-bottom: 10px;
+    background: var(--bg-light-gray);
+}
+
+.vehicle-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.vehicle-info {
+    font-size: 13px;
+}
+
+.info-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 6px;
+    padding: 4px 0;
+}
+
+.info-row .label {
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+.info-row .value {
+    color: var(--text-color);
+    font-weight: 400;
+    text-align: right;
+    max-width: 60%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.kanban-card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 8px;
+    border-top: 1px solid var(--border-color);
+    font-size: 11px;
+    color: var(--text-muted);
+}
+
+.vehicle-tag {
+    background: var(--bg-light-gray);
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-weight: 500;
+}
+
+.vehicle-meta {
+    font-style: italic;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .kanban-container {
+        flex-direction: column;
+    }
+    
+    .kanban-column {
+        flex: 1 1 100%;
+        max-height: none;
+    }
+    
+    .vehicles-kanban-wrapper {
+        height: auto;
+    }
+}
+
+/* Dark mode support */
+html[data-theme="dark"] .kanban-card {
+    background: var(--bg-dark);
+    border-color: var(--border-dark);
+}
+
+html[data-theme="dark"] .kanban-column {
+    background: var(--bg-dark);
+}
+
+html[data-theme="dark"] .kanban-column-header {
+    background: var(--bg-dark);
+}
+
+/* Loading state */
+.kanban-loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 40px;
+    font-size: 14px;
+    color: var(--text-muted);
+}
+
+/* Scroll styling */
+.kanban-column-body::-webkit-scrollbar {
+    width: 6px;
+}
+
+.kanban-column-body::-webkit-scrollbar-track {
+    background: var(--bg-light-gray);
+    border-radius: 3px;
+}
+
+.kanban-column-body::-webkit-scrollbar-thumb {
+    background: var(--gray-500);
+    border-radius: 3px;
+}
+
+.kanban-column-body::-webkit-scrollbar-thumb:hover {
+    background: var(--gray-600);
+}
