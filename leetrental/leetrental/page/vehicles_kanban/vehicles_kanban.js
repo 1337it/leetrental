@@ -100,7 +100,7 @@ class VehiclesKanban {
         const me = this;
         
         frappe.call({
-            method: 'leetrental.leetrental.leetrental.api.vehicles_kanban.get_kanban_data',
+            method: 'leetrental.leetrental.api.vehicles_kanban.get_kanban_data',
             args: { filters: filters },
             freeze: true,
             freeze_message: __('Loading vehicles...'),
@@ -345,7 +345,7 @@ class VehiclesKanban {
         
         // Call backend to check if transition is allowed and get required fields
         frappe.call({
-            method: 'leetrental.leetrental.leetrental.api.vehicles_kanban.move_vehicle',
+            method: 'leetrental.leetrental.api.vehicles_kanban.move_vehicle',
             args: {
                 vehicle_name: vehicle.name,
                 from_state: vehicle.from_state,
@@ -399,7 +399,7 @@ class VehiclesKanban {
         const me = this;
         
         frappe.call({
-            method: 'leetrental.leetrental.leetrental.api.vehicles_kanban.complete_vehicle_move',
+            method: 'leetrental.leetrental.api.vehicles_kanban.complete_vehicle_move',
             args: {
                 vehicle_name: vehicle_name,
                 from_state: from_state,
@@ -475,7 +475,7 @@ class VehiclesKanban {
         }
         
         frappe.call({
-            method: 'leetrental.leetrental.leetrental.api.vehicles_kanban.search_vehicles',
+            method: 'leetrental.leetrental.api.vehicles_kanban.search_vehicles',
             args: { 
                 query: query,
                 filters: me.filters
