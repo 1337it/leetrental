@@ -18,21 +18,77 @@ def get_kanban_data(filters=None):
         order_by="idx"
     )
     
-    # Build base query filters
-    base_filters = {"doctype": "Vehicles"}
-    if filters:
-        base_filters.update(filters)
+    # Get meta to check available fields
+    vehicles_meta = frappe.get_meta("Vehicles")
+    available_fields = {field.fieldname for field in vehicles_meta.fields}
+    available_fields.add("name")  # Always available
     
-    # Get vehicles with relevant fields
-    vehicles = frappe.get_all(
-        "Vehicles",
-        fields=[
-            "name", "license_plate", "model", "chassis_number",
-            "workflow_state", "driver", "location", "last_odometer_value",
-            "color", "model_year", "fuel_type", "tags", "image"
-        ],
-        order_by="modified desc"
-    )
+    # Build field list dynamically
+    base_fields = ["name", "license_plate", "chassis_number", "workflow_state"]
+    optional_fields = {
+        "model": "model",
+        "driver": "driver", 
+        "location": "location",
+        "last_odometer_value": "last_odometer_value",
+        "color": "color",
+        "model_year": "model_year",
+        "fuel_type": "fuel_type",
+        "tags": "tags",
+        "upload_photo": "image",  # Map upload_photo to image
+        "image_5": "image"  # Alternative image field
+    }
+    
+    fields_to_fetch = base_fields.copy()
+    image_field = None
+    
+    for field, alias in optional_fields.items():
+        if field in available_fields:
+            if alias == "image" and not image_field:
+                image_field = field
+                fields_to_fetch.append(field)
+            elif alias != "image":
+                fields_to_fetch.append(field)
+    
+    # Build filters
+    query_filters = {}
+    if filters:
+        for key, value in filters.items():
+            if value and key in available_fields:
+                query_filters[key] = value
+    
+    # Get vehicles
+    try:
+        vehicles = frappe.get_all(
+            "Vehicles",
+            fields=fields_to_fetch,
+            filters=query_filters,
+            order_by="modified desc"
+        )
+        
+        # Normalize data
+        for vehicle in vehicles:
+            # Handle image field
+            if image_field and image_field in vehicle:
+                vehicle["image"] = vehicle.get(image_field)
+                if image_field != "image":
+                    del vehicle[image_field]
+            else:
+                vehicle["image"] = None
+            
+            # Ensure all expected fields exist with defaults
+            vehicle.setdefault("model", None)
+            vehicle.setdefault("driver", None)
+            vehicle.setdefault("location", None)
+            vehicle.setdefault("last_odometer_value", 0)
+            vehicle.setdefault("color", None)
+            vehicle.setdefault("model_year", None)
+            vehicle.setdefault("fuel_type", None)
+            vehicle.setdefault("tags", None)
+            vehicle.setdefault("workflow_state", "Draft")
+        
+    except Exception as e:
+        frappe.log_error(frappe.get_traceback(), "Get Kanban Data Error")
+        vehicles = []
     
     # Group vehicles by workflow state
     kanban_data = {}
@@ -45,7 +101,7 @@ def get_kanban_data(filters=None):
     
     # Add vehicles to their respective columns
     for vehicle in vehicles:
-        state = vehicle.workflow_state or "Draft"
+        state = vehicle.get("workflow_state") or "Draft"
         if state in kanban_data:
             kanban_data[state]["vehicles"].append(vehicle)
         else:
@@ -153,7 +209,7 @@ def complete_vehicle_move(vehicle_name, from_state, to_state, form_data=None):
         
         return {
             "success": True,
-            "message": f"Vehicle {vehicle.license_plate} moved to {to_state}",
+            "message": _("Vehicle {0} moved to {1}").format(vehicle.license_plate or vehicle.name, to_state),
             "created_docs": created_docs
         }
         
@@ -196,7 +252,7 @@ def validate_transition(vehicle, from_state, to_state):
     if to_state not in allowed_states:
         return {
             "valid": False,
-            "message": f"Transition from {from_state} to {to_state} is not allowed"
+            "message": _("Transition from {0} to {1} is not allowed").format(from_state, to_state)
         }
     
     return {"valid": True, "message": "Transition allowed"}
@@ -208,27 +264,27 @@ def get_required_fields_for_transition(from_state, to_state):
     """
     fields_map = {
         ("Registered", "Reserve"): [
-            {"fieldname": "driver", "fieldtype": "Link", "options": "Customer", "label": "Customer", "reqd": 1},
-            {"fieldname": "start_time", "fieldtype": "Datetime", "label": "Start Time", "reqd": 1},
-            {"fieldname": "end_time", "fieldtype": "Datetime", "label": "End Time", "reqd": 1},
-            {"fieldname": "pickup_location", "fieldtype": "Link", "options": "Reservation Locations", "label": "Pickup Location"},
-            {"fieldname": "drop_location", "fieldtype": "Link", "options": "Reservation Locations", "label": "Drop Location"},
+            {"fieldname": "driver", "fieldtype": "Link", "options": "Customer", "label": _("Customer"), "reqd": 1},
+            {"fieldname": "start_time", "fieldtype": "Datetime", "label": _("Start Time"), "reqd": 1},
+            {"fieldname": "end_time", "fieldtype": "Datetime", "label": _("End Time"), "reqd": 1},
+            {"fieldname": "pickup_location", "fieldtype": "Link", "options": "Reservation Locations", "label": _("Pickup Location")},
+            {"fieldname": "drop_location", "fieldtype": "Link", "options": "Reservation Locations", "label": _("Drop Location")},
         ],
         ("Reserve", "Waiting List"): [
-            {"fieldname": "agreement_no", "fieldtype": "Data", "label": "Agreement No", "reqd": 1},
-            {"fieldname": "out_customer", "fieldtype": "Link", "options": "Customer", "label": "Customer", "reqd": 1},
-            {"fieldname": "out_date_time", "fieldtype": "Datetime", "label": "Out Date & Time", "reqd": 1},
-            {"fieldname": "out_mileage", "fieldtype": "Int", "label": "Out Mileage (KM)", "reqd": 1},
-            {"fieldname": "out_fuel_level", "fieldtype": "Data", "label": "Out Fuel Level"},
-            {"fieldname": "out_from", "fieldtype": "Data", "label": "From Location"},
+            {"fieldname": "agreement_no", "fieldtype": "Data", "label": _("Agreement No"), "reqd": 1},
+            {"fieldname": "out_customer", "fieldtype": "Link", "options": "Customer", "label": _("Customer"), "reqd": 1},
+            {"fieldname": "out_date_time", "fieldtype": "Datetime", "label": _("Out Date & Time"), "reqd": 1},
+            {"fieldname": "out_mileage", "fieldtype": "Int", "label": _("Out Mileage (KM)"), "reqd": 1},
+            {"fieldname": "out_fuel_level", "fieldtype": "Data", "label": _("Out Fuel Level")},
+            {"fieldname": "out_from", "fieldtype": "Data", "label": _("From Location")},
         ],
         ("Registered", "Downgraded"): [
-            {"fieldname": "service_type", "fieldtype": "Link", "options": "Service Types", "label": "Service Type", "reqd": 1},
-            {"fieldname": "description", "fieldtype": "Data", "label": "Description", "reqd": 1},
-            {"fieldname": "date", "fieldtype": "Date", "label": "Service Date", "reqd": 1},
-            {"fieldname": "cost", "fieldtype": "Currency", "label": "Estimated Cost"},
-            {"fieldname": "vendor", "fieldtype": "Link", "options": "Supplier", "label": "Vendor"},
-            {"fieldname": "note", "fieldtype": "Small Text", "label": "Notes"},
+            {"fieldname": "service_type", "fieldtype": "Link", "options": "Service Types", "label": _("Service Type"), "reqd": 1},
+            {"fieldname": "description", "fieldtype": "Data", "label": _("Description"), "reqd": 1},
+            {"fieldname": "date", "fieldtype": "Date", "label": _("Service Date"), "reqd": 1},
+            {"fieldname": "cost", "fieldtype": "Currency", "label": _("Estimated Cost")},
+            {"fieldname": "vendor", "fieldtype": "Link", "options": "Supplier", "label": _("Vendor")},
+            {"fieldname": "note", "fieldtype": "Small Text", "label": _("Notes")},
         ],
     }
     
@@ -300,28 +356,58 @@ def search_vehicles(query, filters=None):
     if filters and isinstance(filters, str):
         filters = json.loads(filters)
     
+    # Get available fields
+    vehicles_meta = frappe.get_meta("Vehicles")
+    available_fields = {field.fieldname for field in vehicles_meta.fields}
+    available_fields.add("name")
+    
+    # Build safe field list
+    select_fields = ["name"]
+    search_fields = []
+    
+    if "license_plate" in available_fields:
+        select_fields.append("license_plate")
+        search_fields.append("license_plate")
+    if "model" in available_fields:
+        select_fields.append("model")
+        search_fields.append("model")
+    if "chassis_number" in available_fields:
+        select_fields.append("chassis_number")
+        search_fields.append("chassis_number")
+    if "workflow_state" in available_fields:
+        select_fields.append("workflow_state")
+    if "driver" in available_fields:
+        select_fields.append("driver")
+    if "location" in available_fields:
+        select_fields.append("location")
+    
     conditions = ["1=1"]
     values = {}
     
-    if query:
-        conditions.append("(license_plate LIKE %(query)s OR model LIKE %(query)s OR chassis_number LIKE %(query)s)")
+    if query and search_fields:
+        search_conditions = [f"`{field}` LIKE %(query)s" for field in search_fields]
+        conditions.append(f"({' OR '.join(search_conditions)})")
         values["query"] = f"%{query}%"
     
     if filters:
         for key, value in filters.items():
-            conditions.append(f"`{key}` = %({key})s")
-            values[key] = value
+            if key in available_fields and value:
+                conditions.append(f"`{key}` = %({key})s")
+                values[key] = value
     
     where_clause = " AND ".join(conditions)
+    select_clause = ", ".join([f"`{f}`" for f in select_fields])
     
-    vehicles = frappe.db.sql(f"""
-        SELECT 
-            name, license_plate, model, chassis_number,
-            workflow_state, driver, location
-        FROM `tabVehicles`
-        WHERE {where_clause}
-        ORDER BY modified DESC
-        LIMIT 20
-    """, values, as_dict=True)
-    
-    return vehicles
+    try:
+        vehicles = frappe.db.sql(f"""
+            SELECT {select_clause}
+            FROM `tabVehicles`
+            WHERE {where_clause}
+            ORDER BY modified DESC
+            LIMIT 20
+        """, values, as_dict=True)
+        
+        return vehicles
+    except Exception as e:
+        frappe.log_error(frappe.get_traceback(), "Search Vehicles Error")
+        return []
