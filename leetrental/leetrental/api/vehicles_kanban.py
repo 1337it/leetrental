@@ -117,32 +117,34 @@ def get_kanban_data(filters=None):
         vehicles = []
     
     # Group vehicles by workflow state
-    kanban_data = {}
-    for state in workflow_states:
-        kanban_data[state.name] = {
-            "label": state.name,
-            "style": state.style or "default",
-            "vehicles": []
-        }
-    
-    # Add vehicles to their respective columns
-    default_state = workflow_states[0]["name"] if workflow_states else "Draft"
-    for vehicle in vehicles:
-        state = vehicle.get("workflow_state") or default_state
-        if state in kanban_data:
-            kanban_data[state]["vehicles"].append(vehicle)
+ norm_states = []
+    for s in (workflow_states or []):
+        if isinstance(s, dict):
+            norm_states.append({
+                "name": s.get("name") or s.get("state") or s.get("value"),
+                "style": s.get("style") or "default",
+            })
         else:
-            # Handle vehicles with states not in the options list
-            if "Other" not in kanban_data:
-                kanban_data["Other"] = {
-                    "label": "Other",
-                    "style": "default",
-                    "vehicles": []
-                }
-            kanban_data["Other"]["vehicles"].append(vehicle)
-    
-    return kanban_data
+            # If someone passed strings/objects accidentally
+            norm_states.append({"name": str(s), "style": "default"})
 
+    # 2) Initialize columns in declared order
+    kanban_data = {}
+    for s in norm_states:
+        if not s.get("name"):
+            continue
+        kanban_data[s["name"]] = {
+            "label": s["name"],
+            "style": s.get("style") or "default",
+            "vehicles": [],
+        }
+
+    # Ensure there's at least one column to avoid index errors
+    if not kanban_data:
+        kanban_data["Draft"] = {"label": "Draft", "style": "default", "vehicles": []}
+
+    # 3) Default state = first declared, else "Draft"
+    default_state = norm_states[0]["name"] if norm_states and norm_states[0].get("name") else "Draft"
 
 def get_default_style_for_state(state):
     """
