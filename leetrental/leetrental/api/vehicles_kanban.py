@@ -365,34 +365,6 @@ def validate_transition(vehicle, from_state, to_state):
         }
     
     return {"valid": True, "message": "Transition allowed"}
-        filters={"document_type": "Vehicles", "is_active": 1},
-        fields=["name"],
-        limit=1
-    )
-    
-    if not workflow:
-        return {"valid": True, "message": "No workflow defined"}
-    
-    # Get allowed transitions
-    transitions = frappe.get_all(
-        "Workflow Transition",
-        filters={
-            "parent": workflow[0].name,
-            "state": from_state
-        },
-        fields=["next_state", "action"]
-    )
-    
-    allowed_states = [t.next_state for t in transitions]
-    
-    if to_state not in allowed_states:
-        return {
-            "valid": False,
-            "message": _("Transition from {0} to {1} is not allowed").format(from_state, to_state)
-        }
-    
-    return {"valid": True, "message": "Transition allowed"}
-
 
 def get_required_fields_for_transition(from_state, to_state):
     """
