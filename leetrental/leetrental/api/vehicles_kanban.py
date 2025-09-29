@@ -116,7 +116,7 @@ def get_kanban_data(filters=None):
         frappe.log_error(frappe.get_traceback(), "Get Kanban Data Error")
         vehicles = []
 
-norm_states = []
+    norm_states = []
     for s in (workflow_states or []):
         if isinstance(s, dict):
             norm_states.append({
