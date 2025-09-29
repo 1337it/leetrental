@@ -115,9 +115,8 @@ def get_kanban_data(filters=None):
     except Exception as e:
         frappe.log_error(frappe.get_traceback(), "Get Kanban Data Error")
         vehicles = []
-    
-    # Group vehicles by workflow state
- norm_states = []
+
+norm_states = []
     for s in (workflow_states or []):
         if isinstance(s, dict):
             norm_states.append({
@@ -145,6 +144,9 @@ def get_kanban_data(filters=None):
 
     # 3) Default state = first declared, else "Draft"
     default_state = norm_states[0]["name"] if norm_states and norm_states[0].get("name") else "Draft"
+    
+    # Group vehicles by workflow state
+
 
 def get_default_style_for_state(state):
     """
