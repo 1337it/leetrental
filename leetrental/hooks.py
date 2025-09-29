@@ -41,8 +41,7 @@ app_include_js = [
 	"/assets/leetrental/js/minimize-to-sidebar.js",
 	"/assets/leetrental/js/customer_quick_scan.js",
 	"/assets/leetrental/js/enter-to-next-and-focus-first.js",
-	"/assets/leetrental/js/advanced_link_picker.js",
-	"/assets/leetrental/js/vehicle_listview.js"
+	"/assets/leetrental/js/advanced_link_picker.js"
 ]
 
 app_include_icons = "leetrental/icons/rental-icons.svg"
