@@ -16,6 +16,7 @@ class VehiclesKanban {
         this.kanban_data = {};
         this.dragged_vehicle = null;
         this.filters = {};
+        this.status_field = 'vehicle_status'; // Default, will be detected from backend
         
         this.setup_toolbar();
         this.setup_kanban();
@@ -43,7 +44,12 @@ class VehiclesKanban {
             placeholder: __('Search vehicles...'),
             change: () => {
                 const query = me.page.fields_dict.search.get_value();
-                me.filter_vehicles(query);
+                if (query && query.trim()) {
+                    me.filter_vehicles(query);
+                } else {
+                    // Reload data to show all
+                    me.load_data(me.filters);
+                }
             }
         });
         
@@ -204,11 +210,14 @@ class VehiclesKanban {
     create_vehicle_card(vehicle) {
         const me = this;
         
+        // The backend normalizes both vehicle_status and workflow_state to workflow_state
+        const currentState = vehicle.workflow_state || 'Available';
+        
         const card = $(`
             <div class="kanban-card" 
                  draggable="true" 
                  data-vehicle="${vehicle.name}"
-                 data-state="${vehicle.workflow_state || 'Draft'}">
+                 data-state="${currentState}">
                 <div class="kanban-card-header">
                     <div class="vehicle-license">
                         <strong>${vehicle.license_plate || __('N/A')}</strong>
@@ -288,7 +297,7 @@ class VehiclesKanban {
         card.on('dragstart', (e) => {
             me.dragged_vehicle = {
                 name: vehicle.name,
-                from_state: vehicle.workflow_state || 'Draft',
+                from_state: currentState,
                 element: card
             };
             card.addClass('dragging');
@@ -365,6 +374,13 @@ class VehiclesKanban {
                         indicator: 'red'
                     });
                 }
+            },
+            error: (r) => {
+                frappe.msgprint({
+                    title: __('Error'),
+                    message: __('Failed to validate transition. Please try again.'),
+                    indicator: 'red'
+                });
             }
         });
     }
@@ -429,6 +445,13 @@ class VehiclesKanban {
                         indicator: 'red'
                     });
                 }
+            },
+            error: (r) => {
+                frappe.msgprint({
+                    title: __('Error'),
+                    message: __('An error occurred while moving the vehicle. Please try again.'),
+                    indicator: 'red'
+                });
             }
         });
     }
@@ -468,12 +491,6 @@ class VehiclesKanban {
     filter_vehicles(query) {
         const me = this;
         
-        if (!query || query.trim() === '') {
-            // Show all cards
-            $('.kanban-card').show();
-            return;
-        }
-        
         frappe.call({
             method: 'leetrental.leetrental.api.vehicles_kanban.search_vehicles',
             args: { 
@@ -481,7 +498,7 @@ class VehiclesKanban {
                 filters: me.filters
             },
             callback: (r) => {
-                if (r.message) {
+                if (r.message && r.message.length > 0) {
                     const found_names = r.message.map(v => v.name);
                     
                     $('.kanban-card').each(function() {
@@ -497,12 +514,27 @@ class VehiclesKanban {
                         message: __('Found {0} vehicles', [found_names.length]),
                         indicator: 'blue'
                     }, 2);
+                } else {
+                    // No results found
+                    $('.kanban-card').hide();
+                    frappe.show_alert({
+                        message: __('No vehicles found'),
+                        indicator: 'orange'
+                    }, 2);
                 }
+            },
+            error: (r) => {
+                frappe.show_alert({
+                    message: __('Search failed. Please try again.'),
+                    indicator: 'red'
+                }, 3);
             }
         });
     }
     
     quick_edit_vehicle(vehicle_name) {
+        const me = this;
+        
         frappe.call({
             method: 'frappe.client.get',
             args: {
@@ -514,7 +546,7 @@ class VehiclesKanban {
                     const vehicle = r.message;
                     
                     const d = new frappe.ui.Dialog({
-                        title: __('Quick Edit: {0}', [vehicle.license_plate]),
+                        title: __('Quick Edit: {0}', [vehicle.license_plate || vehicle.name]),
                         fields: [
                             {
                                 fieldtype: 'Link',
@@ -559,7 +591,7 @@ class VehiclesKanban {
                                         indicator: 'green'
                                     });
                                     d.hide();
-                                    this.load_data(this.filters);
+                                    me.load_data(me.filters);
                                 }
                             });
                         }
