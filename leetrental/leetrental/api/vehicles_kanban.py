@@ -3,112 +3,118 @@ import frappe
 from frappe import _
 import json
 
-def _vehicle_meta():
-    return frappe.get_meta("Vehicle")  # << singular
-
 @frappe.whitelist()
 def get_kanban_data(filters=None):
-    """Fetch vehicles grouped by workflow state for Kanban view."""
+    """
+    Fetch vehicles grouped by workflow state for Kanban view
+    """
     if filters and isinstance(filters, str):
         filters = json.loads(filters)
-
-    # --- Column definitions (hardcoded list; keep if you don't use Workflow/Select options) ---
-    workflow_states = [
-        {"name": "Available", "style": "Success", "idx": 0},
-        {"name": "Reserved", "style": "Info", "idx": 1},
-        {"name": "Out for Delivery", "style": "Warning", "idx": 2},
-        {"name": "Rented Out", "style": "Primary", "idx": 3},
-        {"name": "Due for Return", "style": "Warning", "idx": 4},
-        {"name": "Returned (Inspection)", "style": "Info", "idx": 5},
-        {"name": "At Garage", "style": "default", "idx": 6},
-        {"name": "Under Maintenance", "style": "Warning", "idx": 7},
-        {"name": "Accident/Repair", "style": "Danger", "idx": 8},
-        {"name": "Deactivated", "style": "Danger", "idx": 9},
-    ]
-
-    # --- Status field detection on Vehicle ---
-    vmeta = _vehicle_meta()
-    status_field_name = "workflow_state"
-    for df in vmeta.fields:
-        if df.fieldname in {"vehicle_status", "workflow_state", "status"}:
-            status_field_name = df.fieldname
-            break
-
-    # --- Build fields list safely ---
-    available = {df.fieldname for df in vmeta.fields} | {"name"}
-    fields = ["name"]
-    for f in ["license_plate", "chassis_number", "make", "model", "year", "odometer", "current_agreement"]:
-        if f in available: fields.append(f)
-    if status_field_name in available: fields.append(status_field_name)
-
-    # image (first one that exists)
-    image_field = next((f for f in ["image", "upload_photo", "image_5"] if f in available), None)
-    if image_field and image_field not in fields:
-        fields.append(image_field)
-
-    # --- Filters (only allow existing fields) ---
-    query_filters = {}
-    if isinstance(filters, dict):
-        for k, v in filters.items():
-            if v and k in available:
-                query_filters[k] = v
-
-    # --- Fetch vehicles ---
-    vehicles = frappe.get_all("Vehicle", fields=fields, filters=query_filters, order_by="modified desc")
-
-    # Normalize for UI (ensure keys exist and map status to `workflow_state`)
-    for v in vehicles:
-        if image_field:
-            v["image"] = v.get(image_field)
-            if image_field != "image":
-                v.pop(image_field, None)
-        if status_field_name != "workflow_state" and status_field_name in v:
-            v["workflow_state"] = v.get(status_field_name)
-            v.pop(status_field_name, None)
-
-        v.setdefault("make", None); v.setdefault("model", None); v.setdefault("year", None)
-        v.setdefault("odometer", 0); v.setdefault("current_agreement", None)
-        if not v.get("workflow_state"):
-            v["workflow_state"] = workflow_states[0]["name"]
-
-    # --- Build Kanban buckets & RETURN ---
-    return kanban_data(workflow_states, vehicles)
     
-    # Group vehicles by workflow state
-
-
-def get_default_style_for_state(state):
-    """
-    Get default style based on state name
-    """
-    state_lower = state.lower()
+    # Get all workflow states for Vehicles
+    workflow_states = frappe.get_all(
+        "Workflow State",
+        fields=["name", "style"],
+        order_by="idx"
+    )
     
-    # Map common state names to styles
-    style_mapping = {
-        "draft": "Primary",
-        "registered": "Success",
-        "reserve": "Info",
-        "reserved": "Info",
-        "downgraded": "Danger",
-        "waiting": "Warning",
-        "waiting list": "Warning",
-        "completed": "Success",
-        "done": "Success",
-        "cancelled": "Danger",
-        "closed": "Danger",
-        "in progress": "Info",
-        "workshop": "Warning",
-        "maintenance": "Warning",
-        "available": "Success",
-        "rented": "Info",
-        "out of service": "Danger"
+    # Get meta to check available fields
+    vehicles_meta = frappe.get_meta("Vehicles")
+    available_fields = {field.fieldname for field in vehicles_meta.fields}
+    available_fields.add("name")  # Always available
+    
+    # Build field list dynamically
+    base_fields = ["name", "license_plate", "chassis_number", "workflow_state"]
+    optional_fields = {
+        "model": "model",
+        "driver": "driver", 
+        "location": "location",
+        "last_odometer_value": "last_odometer_value",
+        "color": "color",
+        "model_year": "model_year",
+        "fuel_type": "fuel_type",
+        "tags": "tags",
+        "upload_photo": "image",  # Map upload_photo to image
+        "image_5": "image"  # Alternative image field
     }
     
-    for key, style in style_mapping.items():
-        if key in state_lower:
-            return style
+    fields_to_fetch = base_fields.copy()
+    image_field = None
     
-    return "default"
+    for field, alias in optional_fields.items():
+        if field in available_fields:
+            if alias == "image" and not image_field:
+                image_field = field
+                fields_to_fetch.append(field)
+            elif alias != "image":
+                fields_to_fetch.append(field)
+    
+    # Build filters
+    query_filters = {}
+    if filters:
+        for key, value in filters.items():
+            if value and key in available_fields:
+                query_filters[key] = value
+    
+    # Get vehicles
+    try:
+        vehicles = frappe.get_all(
+            "Vehicles",
+            fields=fields_to_fetch,
+            filters=query_filters,
+            order_by="modified desc"
+        )
+        
+        # Normalize data
+        for vehicle in vehicles:
+            # Handle image field
+            if image_field and image_field in vehicle:
+                vehicle["image"] = vehicle.get(image_field)
+                if image_field != "image":
+                    del vehicle[image_field]
+            else:
+                vehicle["image"] = None
+            
+            # Ensure all expected fields exist with defaults
+            vehicle.setdefault("model", None)
+            vehicle.setdefault("driver", None)
+            vehicle.setdefault("location", None)
+            vehicle.setdefault("last_odometer_value", 0)
+            vehicle.setdefault("color", None)
+            vehicle.setdefault("model_year", None)
+            vehicle.setdefault("fuel_type", None)
+            vehicle.setdefault("tags", None)
+            vehicle.setdefault("workflow_state", "Draft")
+        
+    except Exception as e:
+        frappe.log_error(frappe.get_traceback(), "Get Kanban Data Error")
+        vehicles = []
+    
+    # Group vehicles by workflow state
+    kanban_data = {}
+    for state in workflow_states:
+        kanban_data[state.name] = {
+            "label": state.name,
+            "style": state.style or "default",
+            "vehicles": []
+        }
+    
+    # Add vehicles to their respective columns
+    for vehicle in vehicles:
+        state = vehicle.get("workflow_state") or "Draft"
+        if state in kanban_data:
+            kanban_data[state]["vehicles"].append(vehicle)
+        else:
+            # Handle vehicles with states not in workflow
+            if "Other" not in kanban_data:
+                kanban_data["Other"] = {
+                    "label": "Other",
+                    "style": "default",
+                    "vehicles": []
+                }
+            kanban_data["Other"]["vehicles"].append(vehicle)
+    
+    return kanban_data
 
 
 @frappe.whitelist()
@@ -160,70 +166,42 @@ def complete_vehicle_move(vehicle_name, from_state, to_state, form_data=None):
     try:
         vehicle = frappe.get_doc("Vehicles", vehicle_name)
         
-        # Find the status field name
-        vehicles_meta = frappe.get_meta("Vehicles")
-        status_field_name = "workflow_state"
-        
-        for field in vehicles_meta.fields:
-            if field.fieldname in ["vehicle_status", "workflow_state", "status"]:
-                status_field_name = field.fieldname
-                break
-        
         # Create documents based on transition
         created_docs = []
         
-        # Available -> Reserved: Create Car Reservation
-        if from_state == "Available" and to_state == "Reserved":
+        # Draft -> Registered: Just update workflow state
+        if from_state == "Draft" and to_state == "Registered":
+            vehicle.workflow_state = to_state
+            vehicle.save(ignore_permissions=True)
+            created_docs.append({"doctype": "Vehicles", "name": vehicle.name})
+        
+        # Registered -> Reserve: Create Car Reservation
+        elif from_state == "Registered" and to_state == "Reserve":
             if form_data:
                 reservation = create_car_reservation(vehicle, form_data)
                 created_docs.append({"doctype": "Car Reservations", "name": reservation.name})
-            vehicle.set(status_field_name, to_state)
+            vehicle.workflow_state = to_state
             vehicle.save(ignore_permissions=True)
         
-        # Reserved -> Out for Delivery or Rented Out: Create Vehicle Movement
-        elif from_state == "Reserved" and to_state in ["Out for Delivery", "Rented Out"]:
+        # Reserve -> Waiting List: Create movement record
+        elif to_state == "Waiting List":
             if form_data:
                 movement = create_vehicle_movement(vehicle, form_data, "NRM - Customer")
                 created_docs.append({"doctype": "Vehicle Movements", "name": movement.name})
-            vehicle.set(status_field_name, to_state)
+            vehicle.workflow_state = to_state
             vehicle.save(ignore_permissions=True)
         
-        # Out for Delivery -> Rented Out: Update movement or create agreement
-        elif from_state == "Out for Delivery" and to_state == "Rented Out":
-            if form_data and form_data.get("agreement_no"):
-                # Update existing movement or create new
-                movement = create_vehicle_movement(vehicle, form_data, "NRM - Customer")
-                created_docs.append({"doctype": "Vehicle Movements", "name": movement.name})
-            vehicle.set(status_field_name, to_state)
-            vehicle.save(ignore_permissions=True)
-        
-        # Due for Return -> Returned (Inspection): Create return movement
-        elif from_state == "Due for Return" and to_state == "Returned (Inspection)":
-            if form_data:
-                movement = create_vehicle_movement(vehicle, form_data, "NRM - Customer")
-                created_docs.append({"doctype": "Vehicle Movements", "name": movement.name})
-            vehicle.set(status_field_name, to_state)
-            vehicle.save(ignore_permissions=True)
-        
-        # Any state -> Under Maintenance: Create Service record
-        elif to_state == "Under Maintenance":
+        # Any -> Workshop (Downgraded): Create Service record
+        elif to_state == "Downgraded":
             if form_data:
                 service = create_service_record(vehicle, form_data)
                 created_docs.append({"doctype": "Services", "name": service.name})
-            vehicle.set(status_field_name, to_state)
-            vehicle.save(ignore_permissions=True)
-        
-        # Any state -> Accident/Repair: Create Service record with accident details
-        elif to_state == "Accident/Repair":
-            if form_data:
-                service = create_accident_service_record(vehicle, form_data)
-                created_docs.append({"doctype": "Services", "name": service.name})
-            vehicle.set(status_field_name, to_state)
+            vehicle.workflow_state = to_state
             vehicle.save(ignore_permissions=True)
         
         else:
             # Default: just update state
-            vehicle.set(status_field_name, to_state)
+            vehicle.workflow_state = to_state
             vehicle.save(ignore_permissions=True)
             created_docs.append({"doctype": "Vehicles", "name": vehicle.name})
         
@@ -246,29 +224,9 @@ def complete_vehicle_move(vehicle_name, from_state, to_state, form_data=None):
 
 def validate_transition(vehicle, from_state, to_state):
     """
-    Validate if the transition is allowed based on workflow or field options
+    Validate if the transition is allowed based on workflow
     """
-    # Get the Vehicles meta to check field options
-    vehicles_meta = frappe.get_meta("Vehicles")
-    status_field = None
-    
-    for field in vehicles_meta.fields:
-        if field.fieldname in ["vehicle_status", "workflow_state", "status"]:
-            status_field = field
-            break
-    
-    # If using Select field with options, validate against options
-    if status_field and status_field.fieldtype == "Select" and status_field.options:
-        valid_states = [opt.strip() for opt in status_field.options.split("\n") if opt.strip()]
-        if to_state not in valid_states:
-            return {
-                "valid": False,
-                "message": _("{0} is not a valid state").format(to_state)
-            }
-        # For Select fields, any transition is allowed
-        return {"valid": True, "message": "Transition allowed"}
-    
-    # Otherwise, check workflow
+    # Get workflow for Vehicles
     workflow = frappe.get_all(
         "Workflow",
         filters={"document_type": "Vehicles", "is_active": 1},
@@ -299,110 +257,34 @@ def validate_transition(vehicle, from_state, to_state):
     
     return {"valid": True, "message": "Transition allowed"}
 
+
 def get_required_fields_for_transition(from_state, to_state):
     """
     Return required fields based on the transition
     """
     fields_map = {
-        # Available -> Reserved
-        ("Available", "Reserved"): [
+        ("Registered", "Reserve"): [
             {"fieldname": "driver", "fieldtype": "Link", "options": "Customer", "label": _("Customer"), "reqd": 1},
             {"fieldname": "start_time", "fieldtype": "Datetime", "label": _("Start Time"), "reqd": 1},
             {"fieldname": "end_time", "fieldtype": "Datetime", "label": _("End Time"), "reqd": 1},
             {"fieldname": "pickup_location", "fieldtype": "Link", "options": "Reservation Locations", "label": _("Pickup Location")},
             {"fieldname": "drop_location", "fieldtype": "Link", "options": "Reservation Locations", "label": _("Drop Location")},
         ],
-        
-        # Reserved -> Out for Delivery
-        ("Reserved", "Out for Delivery"): [
-            {"fieldname": "out_driver", "fieldtype": "Link", "options": "Driver", "label": _("Driver")},
-            {"fieldname": "out_date_time", "fieldtype": "Datetime", "label": _("Delivery Date & Time"), "reqd": 1},
-            {"fieldname": "out_mileage", "fieldtype": "Int", "label": _("Out Mileage (KM)"), "reqd": 1},
-            {"fieldname": "out_fuel_level", "fieldtype": "Data", "label": _("Out Fuel Level")},
-        ],
-        
-        # Out for Delivery -> Rented Out
-        ("Out for Delivery", "Rented Out"): [
+        ("Reserve", "Waiting List"): [
             {"fieldname": "agreement_no", "fieldtype": "Data", "label": _("Agreement No"), "reqd": 1},
             {"fieldname": "out_customer", "fieldtype": "Link", "options": "Customer", "label": _("Customer"), "reqd": 1},
-            {"fieldname": "out_from", "fieldtype": "Data", "label": _("Delivery Location")},
+            {"fieldname": "out_date_time", "fieldtype": "Datetime", "label": _("Out Date & Time"), "reqd": 1},
+            {"fieldname": "out_mileage", "fieldtype": "Int", "label": _("Out Mileage (KM)"), "reqd": 1},
+            {"fieldname": "out_fuel_level", "fieldtype": "Data", "label": _("Out Fuel Level")},
+            {"fieldname": "out_from", "fieldtype": "Data", "label": _("From Location")},
         ],
-        
-        # Rented Out -> Due for Return
-        ("Rented Out", "Due for Return"): [
-            {"fieldname": "expected_return_date", "fieldtype": "Datetime", "label": _("Expected Return Date"), "reqd": 1},
-            {"fieldname": "return_location", "fieldtype": "Link", "options": "Reservation Locations", "label": _("Return Location")},
-        ],
-        
-        # Due for Return -> Returned (Inspection)
-        ("Due for Return", "Returned (Inspection)"): [
-            {"fieldname": "in_date_time", "fieldtype": "Datetime", "label": _("Return Date & Time"), "reqd": 1},
-            {"fieldname": "in_mileage", "fieldtype": "Int", "label": _("Return Mileage (KM)"), "reqd": 1},
-            {"fieldname": "in_fuel_level", "fieldtype": "Data", "label": _("Return Fuel Level")},
-            {"fieldname": "in_notes", "fieldtype": "Small Text", "label": _("Inspection Notes")},
-        ],
-        
-        # Returned (Inspection) -> Available
-        ("Returned (Inspection)", "Available"): [
-            {"fieldname": "inspection_status", "fieldtype": "Select", "options": "Pass\nFail", "label": _("Inspection Status"), "reqd": 1},
-            {"fieldname": "inspection_notes", "fieldtype": "Small Text", "label": _("Inspection Comments")},
-        ],
-        
-        # Returned (Inspection) -> At Garage
-        ("Returned (Inspection)", "At Garage"): [
-            {"fieldname": "garage_reason", "fieldtype": "Data", "label": _("Reason"), "reqd": 1},
-            {"fieldname": "damage_description", "fieldtype": "Small Text", "label": _("Damage Description")},
-        ],
-        
-        # Any state -> Under Maintenance
-        ("Available", "Under Maintenance"): [
+        ("Registered", "Downgraded"): [
             {"fieldname": "service_type", "fieldtype": "Link", "options": "Service Types", "label": _("Service Type"), "reqd": 1},
             {"fieldname": "description", "fieldtype": "Data", "label": _("Description"), "reqd": 1},
             {"fieldname": "date", "fieldtype": "Date", "label": _("Service Date"), "reqd": 1},
             {"fieldname": "cost", "fieldtype": "Currency", "label": _("Estimated Cost")},
             {"fieldname": "vendor", "fieldtype": "Link", "options": "Supplier", "label": _("Vendor")},
             {"fieldname": "note", "fieldtype": "Small Text", "label": _("Notes")},
-        ],
-        ("At Garage", "Under Maintenance"): [
-            {"fieldname": "service_type", "fieldtype": "Link", "options": "Service Types", "label": _("Service Type"), "reqd": 1},
-            {"fieldname": "description", "fieldtype": "Data", "label": _("Description"), "reqd": 1},
-            {"fieldname": "date", "fieldtype": "Date", "label": _("Service Date"), "reqd": 1},
-            {"fieldname": "cost", "fieldtype": "Currency", "label": _("Estimated Cost")},
-            {"fieldname": "vendor", "fieldtype": "Link", "options": "Supplier", "label": _("Vendor")},
-        ],
-        
-        # Any state -> Accident/Repair
-        ("Available", "Accident/Repair"): [
-            {"fieldname": "accident_date", "fieldtype": "Date", "label": _("Accident Date"), "reqd": 1},
-            {"fieldname": "accident_description", "fieldtype": "Small Text", "label": _("Accident Description"), "reqd": 1},
-            {"fieldname": "repair_cost", "fieldtype": "Currency", "label": _("Estimated Repair Cost")},
-            {"fieldname": "insurance_claim", "fieldtype": "Check", "label": _("Insurance Claim")},
-        ],
-        ("Rented Out", "Accident/Repair"): [
-            {"fieldname": "accident_date", "fieldtype": "Date", "label": _("Accident Date"), "reqd": 1},
-            {"fieldname": "accident_description", "fieldtype": "Small Text", "label": _("Accident Description"), "reqd": 1},
-            {"fieldname": "driver_involved", "fieldtype": "Link", "options": "Customer", "label": _("Driver Involved")},
-            {"fieldname": "repair_cost", "fieldtype": "Currency", "label": _("Estimated Repair Cost")},
-            {"fieldname": "insurance_claim", "fieldtype": "Check", "label": _("Insurance Claim")},
-        ],
-        
-        # Under Maintenance -> Available
-        ("Under Maintenance", "Available"): [
-            {"fieldname": "service_completed", "fieldtype": "Check", "label": _("Service Completed"), "reqd": 1},
-            {"fieldname": "completion_notes", "fieldtype": "Small Text", "label": _("Completion Notes")},
-        ],
-        
-        # Accident/Repair -> Available
-        ("Accident/Repair", "Available"): [
-            {"fieldname": "repair_completed", "fieldtype": "Check", "label": _("Repair Completed"), "reqd": 1},
-            {"fieldname": "repair_notes", "fieldtype": "Small Text", "label": _("Repair Notes")},
-            {"fieldname": "final_cost", "fieldtype": "Currency", "label": _("Final Repair Cost")},
-        ],
-        
-        # At Garage -> Available
-        ("At Garage", "Available"): [
-            {"fieldname": "garage_clearance", "fieldtype": "Check", "label": _("Cleared for Use"), "reqd": 1},
-            {"fieldname": "clearance_notes", "fieldtype": "Small Text", "label": _("Clearance Notes")},
         ],
     }
     
@@ -460,27 +342,6 @@ def create_service_record(vehicle, data):
         "cost": data.get("cost"),
         "vendor": data.get("vendor"),
         "note": data.get("note"),
-        "workflow_state": "To Do"
-    })
-    service.insert(ignore_permissions=True)
-    return service
-
-
-def create_accident_service_record(vehicle, data):
-    """
-    Create a Service document for accident/repair
-    """
-    description = f"Accident/Repair - {data.get('accident_description', 'No description')}"
-    
-    service = frappe.get_doc({
-        "doctype": "Services",
-        "vehicle": vehicle.name,
-        "service_type": data.get("service_type") or "Repair",
-        "description": description,
-        "date": data.get("accident_date") or frappe.utils.today(),
-        "cost": data.get("repair_cost"),
-        "vendor": data.get("vendor"),
-        "note": f"Accident Date: {data.get('accident_date')}\nDescription: {data.get('accident_description')}\nInsurance Claim: {data.get('insurance_claim', 'No')}",
         "workflow_state": "To Do"
     })
     service.insert(ignore_permissions=True)
