@@ -3,15 +3,16 @@ import frappe
 from frappe import _
 import json
 
+def _vehicle_meta():
+    return frappe.get_meta("Vehicle")  # << singular
+
 @frappe.whitelist()
 def get_kanban_data(filters=None):
-    """
-    Fetch vehicles grouped by workflow state for Kanban view
-    """
+    """Fetch vehicles grouped by workflow state for Kanban view."""
     if filters and isinstance(filters, str):
         filters = json.loads(filters)
-    
-    # Define the workflow states from vehicle_status field
+
+    # --- Column definitions (hardcoded list; keep if you don't use Workflow/Select options) ---
     workflow_states = [
         {"name": "Available", "style": "Success", "idx": 0},
         {"name": "Reserved", "style": "Info", "idx": 1},
@@ -22,128 +23,56 @@ def get_kanban_data(filters=None):
         {"name": "At Garage", "style": "default", "idx": 6},
         {"name": "Under Maintenance", "style": "Warning", "idx": 7},
         {"name": "Accident/Repair", "style": "Danger", "idx": 8},
-        {"name": "Deactivated", "style": "Danger", "idx": 9}
+        {"name": "Deactivated", "style": "Danger", "idx": 9},
     ]
-    
-    # Get the status field name from Vehicles doctype
-    vehicles_meta = frappe.get_meta("Vehicles")
-    status_field_name = "workflow_state"  # default
-    
-    # Find the actual status field
-    for field in vehicles_meta.fields:
-        if field.fieldname in ["vehicle_status", "workflow_state", "status"]:
-            status_field_name = field.fieldname
+
+    # --- Status field detection on Vehicle ---
+    vmeta = _vehicle_meta()
+    status_field_name = "workflow_state"
+    for df in vmeta.fields:
+        if df.fieldname in {"vehicle_status", "workflow_state", "status"}:
+            status_field_name = df.fieldname
             break
-    
-    # Get meta to check available fields
-    available_fields = {field.fieldname for field in vehicles_meta.fields}
-    available_fields.add("name")  # Always available
-    
-    # Build field list dynamically
-    base_fields = ["name", "license_plate", "chassis_number"]
-    
-    # Add the status field we found
-    if status_field_name in available_fields:
-        base_fields.append(status_field_name)
-    optional_fields = {
-        "model": "model",
-        "driver": "driver", 
-        "location": "location",
-        "last_odometer_value": "last_odometer_value",
-        "color": "color",
-        "model_year": "model_year",
-        "fuel_type": "fuel_type",
-        "tags": "tags",
-        "upload_photo": "image",  # Map upload_photo to image
-        "image_5": "image"  # Alternative image field
-    }
-    
-    fields_to_fetch = base_fields.copy()
-    image_field = None
-    
-    for field, alias in optional_fields.items():
-        if field in available_fields:
-            if alias == "image" and not image_field:
-                image_field = field
-                fields_to_fetch.append(field)
-            elif alias != "image":
-                fields_to_fetch.append(field)
-    
-    # Build filters
+
+    # --- Build fields list safely ---
+    available = {df.fieldname for df in vmeta.fields} | {"name"}
+    fields = ["name"]
+    for f in ["license_plate", "chassis_number", "make", "model", "year", "odometer", "current_agreement"]:
+        if f in available: fields.append(f)
+    if status_field_name in available: fields.append(status_field_name)
+
+    # image (first one that exists)
+    image_field = next((f for f in ["image", "upload_photo", "image_5"] if f in available), None)
+    if image_field and image_field not in fields:
+        fields.append(image_field)
+
+    # --- Filters (only allow existing fields) ---
     query_filters = {}
-    if filters:
-        for key, value in filters.items():
-            if value and key in available_fields:
-                query_filters[key] = value
-    
-    # Get vehicles
-    try:
-        vehicles = frappe.get_all(
-            "Vehicles",
-            fields=fields_to_fetch,
-            filters=query_filters,
-            order_by="modified desc"
-        )
-        
-        # Normalize data
-        for vehicle in vehicles:
-            # Handle image field
-            if image_field and image_field in vehicle:
-                vehicle["image"] = vehicle.get(image_field)
-                if image_field != "image":
-                    del vehicle[image_field]
-            else:
-                vehicle["image"] = None
-            
-            # Normalize status field to workflow_state
-            if status_field_name in vehicle and status_field_name != "workflow_state":
-                vehicle["workflow_state"] = vehicle.get(status_field_name)
-                if status_field_name != "workflow_state":
-                    del vehicle[status_field_name]
-            
-            # Ensure all expected fields exist with defaults
-            vehicle.setdefault("model", None)
-            vehicle.setdefault("driver", None)
-            vehicle.setdefault("location", None)
-            vehicle.setdefault("last_odometer_value", 0)
-            vehicle.setdefault("color", None)
-            vehicle.setdefault("model_year", None)
-            vehicle.setdefault("fuel_type", None)
-            vehicle.setdefault("tags", None)
-            vehicle.setdefault("workflow_state", workflow_states[0]["name"] if workflow_states else "Draft")
-        
-    except Exception as e:
-        frappe.log_error(frappe.get_traceback(), "Get Kanban Data Error")
-        vehicles = []
+    if isinstance(filters, dict):
+        for k, v in filters.items():
+            if v and k in available:
+                query_filters[k] = v
 
-    norm_states = []
-    for s in (workflow_states or []):
-        if isinstance(s, dict):
-            norm_states.append({
-                "name": s.get("name") or s.get("state") or s.get("value"),
-                "style": s.get("style") or "default",
-            })
-        else:
-            # If someone passed strings/objects accidentally
-            norm_states.append({"name": str(s), "style": "default"})
+    # --- Fetch vehicles ---
+    vehicles = frappe.get_all("Vehicle", fields=fields, filters=query_filters, order_by="modified desc")
 
-    # 2) Initialize columns in declared order
-    kanban_data = {}
-    for s in norm_states:
-        if not s.get("name"):
-            continue
-        kanban_data[s["name"]] = {
-            "label": s["name"],
-            "style": s.get("style") or "default",
-            "vehicles": [],
-        }
+    # Normalize for UI (ensure keys exist and map status to `workflow_state`)
+    for v in vehicles:
+        if image_field:
+            v["image"] = v.get(image_field)
+            if image_field != "image":
+                v.pop(image_field, None)
+        if status_field_name != "workflow_state" and status_field_name in v:
+            v["workflow_state"] = v.get(status_field_name)
+            v.pop(status_field_name, None)
 
-    # Ensure there's at least one column to avoid index errors
-    if not kanban_data:
-        kanban_data["Draft"] = {"label": "Draft", "style": "default", "vehicles": []}
+        v.setdefault("make", None); v.setdefault("model", None); v.setdefault("year", None)
+        v.setdefault("odometer", 0); v.setdefault("current_agreement", None)
+        if not v.get("workflow_state"):
+            v["workflow_state"] = workflow_states[0]["name"]
 
-    # 3) Default state = first declared, else "Draft"
-    default_state = norm_states[0]["name"] if norm_states and norm_states[0].get("name") else "Draft"
+    # --- Build Kanban buckets & RETURN ---
+    return kanban_data(workflow_states, vehicles)
     
     # Group vehicles by workflow state
 
