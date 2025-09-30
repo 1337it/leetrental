@@ -1,3 +1,4 @@
+# leetrental/leetrental/api/vehicles_kanban.py
 import frappe
 from frappe import _
 import json
@@ -23,13 +24,13 @@ def get_kanban_data(filters=None):
             if option:  # Skip empty lines
                 workflow_states.append({
                     "name": option,
-                    "style": "default",  # You can map specific styles if needed
+                    "style": get_status_style(option),
                     "idx": idx
                 })
     
     # Fallback if no options found
     if not workflow_states:
-        workflow_states = [{"name": "Draft", "style": "default", "idx": 0}]
+        workflow_states = [{"name": "Available", "style": "default", "idx": 0}]
     
     # Get available fields
     available_fields = {field.fieldname for field in vehicles_meta.fields}
@@ -106,9 +107,9 @@ def get_kanban_data(filters=None):
             
             # Normalize status field name
             if "vehicle_status" in vehicle:
-                vehicle["workflow_state"] = vehicle.get("vehicle_status") or "Draft"
+                vehicle["workflow_state"] = vehicle.get("vehicle_status") or "Available"
             else:
-                vehicle.setdefault("workflow_state", "Draft")
+                vehicle.setdefault("workflow_state", "Available")
         
     except Exception as e:
         frappe.log_error(frappe.get_traceback(), "Get Kanban Data Error")
@@ -125,7 +126,7 @@ def get_kanban_data(filters=None):
     
     # Add vehicles to their respective columns
     for vehicle in vehicles:
-        state = vehicle.get("workflow_state") or "Draft"
+        state = vehicle.get("workflow_state") or "Available"
         if state in kanban_data:
             kanban_data[state]["vehicles"].append(vehicle)
         else:
@@ -141,7 +142,25 @@ def get_kanban_data(filters=None):
     return kanban_data
 
 
-# Helper function to get vehicle status options
+def get_status_style(status):
+    """
+    Map vehicle status to visual style
+    """
+    style_map = {
+        "Available": "Success",
+        "Reserved": "Info",
+        "Out for Delivery": "Primary",
+        "Rented Out": "Warning",
+        "Due for Return": "Warning",
+        "Returned (Inspection)": "Info",
+        "At Garage": "default",
+        "Under Maintenance": "Warning",
+        "Accident/Repair": "Danger",
+        "Deactivated": "default"
+    }
+    return style_map.get(status, "default")
+
+
 def get_vehicle_status_options():
     """
     Get the vehicle_status field options from Vehicles doctype
@@ -166,6 +185,20 @@ def move_vehicle(vehicle_name, from_state, to_state):
     try:
         # Get the vehicle document
         vehicle = frappe.get_doc("Vehicles", vehicle_name)
+        
+        # Determine which field contains the status
+        vehicles_meta = frappe.get_meta("Vehicles")
+        status_field = "vehicle_status" if "vehicle_status" in [f.fieldname for f in vehicles_meta.fields] else "workflow_state"
+        
+        # Get current status from the vehicle
+        current_status = getattr(vehicle, status_field, None)
+        
+        # Validate that from_state matches current status
+        if current_status != from_state:
+            return {
+                "success": False,
+                "message": _("Vehicle status mismatch. Current status is {0}, but attempting to move from {1}").format(current_status, from_state)
+            }
         
         # Validate transition is allowed
         allowed = validate_transition(vehicle, from_state, to_state)
@@ -206,42 +239,98 @@ def complete_vehicle_move(vehicle_name, from_state, to_state, form_data=None):
     try:
         vehicle = frappe.get_doc("Vehicles", vehicle_name)
         
+        # Determine which field to update
+        vehicles_meta = frappe.get_meta("Vehicles")
+        status_field = "vehicle_status" if "vehicle_status" in [f.fieldname for f in vehicles_meta.fields] else "workflow_state"
+        
         # Create documents based on transition
         created_docs = []
         
-        # Draft -> Registered: Just update workflow state
-        if from_state == "Draft" and to_state == "Registered":
-            vehicle.workflow_state = to_state
-            vehicle.save(ignore_permissions=True)
-            created_docs.append({"doctype": "Vehicles", "name": vehicle.name})
-        
-        # Registered -> Reserve: Create Car Reservation
-        elif from_state == "Registered" and to_state == "Reserve":
+        # Available -> Reserved: Create reservation
+        if from_state == "Available" and to_state == "Reserved":
             if form_data:
                 reservation = create_car_reservation(vehicle, form_data)
                 created_docs.append({"doctype": "Car Reservations", "name": reservation.name})
-            vehicle.workflow_state = to_state
+            setattr(vehicle, status_field, to_state)
             vehicle.save(ignore_permissions=True)
         
-        # Reserve -> Waiting List: Create movement record
-        elif to_state == "Waiting List":
+        # Reserved -> Out for Delivery: Update vehicle
+        elif from_state == "Reserved" and to_state == "Out for Delivery":
+            setattr(vehicle, status_field, to_state)
+            vehicle.save(ignore_permissions=True)
+            created_docs.append({"doctype": "Vehicles", "name": vehicle.name})
+        
+        # Out for Delivery -> Rented Out OR Reserved -> Rented Out: Create movement record
+        elif to_state == "Rented Out":
             if form_data:
-                movement = create_vehicle_movement(vehicle, form_data, "NRM - Customer")
+                movement = create_vehicle_movement(vehicle, form_data, "Out - Customer")
                 created_docs.append({"doctype": "Vehicle Movements", "name": movement.name})
-            vehicle.workflow_state = to_state
+            setattr(vehicle, status_field, to_state)
             vehicle.save(ignore_permissions=True)
         
-        # Any -> Workshop (Downgraded): Create Service record
-        elif to_state == "Downgraded":
+        # Rented Out -> Due for Return: Update vehicle
+        elif from_state == "Rented Out" and to_state == "Due for Return":
+            setattr(vehicle, status_field, to_state)
+            vehicle.save(ignore_permissions=True)
+            created_docs.append({"doctype": "Vehicles", "name": vehicle.name})
+        
+        # Due for Return -> Returned (Inspection): Create return movement
+        elif from_state == "Due for Return" and to_state == "Returned (Inspection)":
+            if form_data:
+                movement = create_vehicle_movement(vehicle, form_data, "In - Customer")
+                created_docs.append({"doctype": "Vehicle Movements", "name": movement.name})
+            setattr(vehicle, status_field, to_state)
+            vehicle.save(ignore_permissions=True)
+        
+        # Returned (Inspection) -> Available: Complete inspection
+        elif from_state == "Returned (Inspection)" and to_state == "Available":
+            setattr(vehicle, status_field, to_state)
+            vehicle.save(ignore_permissions=True)
+            created_docs.append({"doctype": "Vehicles", "name": vehicle.name})
+        
+        # Returned (Inspection) -> At Garage OR Available -> At Garage: Move to garage
+        elif to_state == "At Garage":
+            setattr(vehicle, status_field, to_state)
+            vehicle.save(ignore_permissions=True)
+            created_docs.append({"doctype": "Vehicles", "name": vehicle.name})
+        
+        # At Garage -> Under Maintenance: Create service record
+        elif from_state == "At Garage" and to_state == "Under Maintenance":
             if form_data:
                 service = create_service_record(vehicle, form_data)
                 created_docs.append({"doctype": "Services", "name": service.name})
-            vehicle.workflow_state = to_state
+            setattr(vehicle, status_field, to_state)
             vehicle.save(ignore_permissions=True)
+        
+        # At Garage -> Accident/Repair OR Rented Out -> Accident/Repair: Create accident record
+        elif to_state == "Accident/Repair":
+            if form_data:
+                accident = create_accident_record(vehicle, form_data)
+                created_docs.append({"doctype": "Vehicle Accidents", "name": accident.name})
+            setattr(vehicle, status_field, to_state)
+            vehicle.save(ignore_permissions=True)
+        
+        # Under Maintenance -> Available OR Accident/Repair -> Available: Complete service
+        elif to_state == "Available" and from_state in ["Under Maintenance", "Accident/Repair"]:
+            setattr(vehicle, status_field, to_state)
+            vehicle.save(ignore_permissions=True)
+            created_docs.append({"doctype": "Vehicles", "name": vehicle.name})
+        
+        # Any -> Deactivated: Deactivate vehicle
+        elif to_state == "Deactivated":
+            setattr(vehicle, status_field, to_state)
+            vehicle.save(ignore_permissions=True)
+            created_docs.append({"doctype": "Vehicles", "name": vehicle.name})
+        
+        # Deactivated -> Available: Reactivate vehicle
+        elif from_state == "Deactivated" and to_state == "Available":
+            setattr(vehicle, status_field, to_state)
+            vehicle.save(ignore_permissions=True)
+            created_docs.append({"doctype": "Vehicles", "name": vehicle.name})
         
         else:
             # Default: just update state
-            vehicle.workflow_state = to_state
+            setattr(vehicle, status_field, to_state)
             vehicle.save(ignore_permissions=True)
             created_docs.append({"doctype": "Vehicles", "name": vehicle.name})
         
@@ -264,36 +353,69 @@ def complete_vehicle_move(vehicle_name, from_state, to_state, form_data=None):
 
 def validate_transition(vehicle, from_state, to_state):
     """
-    Validate if the transition is allowed based on workflow
+    Validate if the transition is allowed based on vehicle_status field options
     """
-    # Get workflow for Vehicles
-    workflow = frappe.get_all(
-        "Workflow",
-        filters={"document_type": "Vehicles", "is_active": 1},
-        fields=["name"],
-        limit=1
-    )
+    # Get available status options from vehicle_status field
+    available_statuses = get_vehicle_status_options()
     
-    if not workflow:
-        return {"valid": True, "message": "No workflow defined"}
+    if not available_statuses:
+        return {"valid": True, "message": "No status options defined"}
     
-    # Get allowed transitions
-    transitions = frappe.get_all(
-        "Workflow Transition",
-        filters={
-            "parent": workflow[0].name,
-            "state": from_state
-        },
-        fields=["next_state", "action"]
-    )
-    
-    allowed_states = [t.next_state for t in transitions]
-    
-    if to_state not in allowed_states:
+    # Check if both states exist in the options
+    if from_state not in available_statuses:
         return {
             "valid": False,
-            "message": _("Transition from {0} to {1} is not allowed").format(from_state, to_state)
+            "message": _("Invalid current state: {0}").format(from_state)
         }
+    
+    if to_state not in available_statuses:
+        return {
+            "valid": False,
+            "message": _("Invalid target state: {0}").format(to_state)
+        }
+    
+    # Optional: Define custom transition rules
+    # You can customize this based on your business logic
+    forbidden_transitions = [
+        # Example: ("Available", "Accident/Repair"),  # Can't go directly to Accident/Repair
+    ]
+    
+    if (from_state, to_state) in forbidden_transitions:
+        return {
+            "valid": False,
+            "message": _("Direct transition from {0} to {1} is not allowed").format(from_state, to_state)
+        }
+    
+    # If using Workflow doctype as well (optional fallback)
+    try:
+        workflow = frappe.get_all(
+            "Workflow",
+            filters={"document_type": "Vehicles", "is_active": 1},
+            fields=["name"],
+            limit=1
+        )
+        
+        if workflow:
+            # Get allowed transitions from workflow
+            transitions = frappe.get_all(
+                "Workflow Transition",
+                filters={
+                    "parent": workflow[0].name,
+                    "state": from_state
+                },
+                fields=["next_state", "action"]
+            )
+            
+            if transitions:
+                allowed_states = [t.next_state for t in transitions]
+                if to_state not in allowed_states:
+                    return {
+                        "valid": False,
+                        "message": _("Transition from {0} to {1} is not allowed by workflow").format(from_state, to_state)
+                    }
+    except Exception as e:
+        # If workflow check fails, continue with basic validation
+        frappe.log_error(frappe.get_traceback(), "Workflow Validation Error")
     
     return {"valid": True, "message": "Transition allowed"}
 
@@ -301,19 +423,6 @@ def validate_transition(vehicle, from_state, to_state):
 def get_required_fields_for_transition(from_state, to_state):
     """
     Return required fields based on the transition
-    Dynamically loads field requirements from vehicle_status options
-    
-    Vehicle Status Options:
-    - Available
-    - Reserved
-    - Out for Delivery
-    - Rented Out
-    - Due for Return
-    - Returned (Inspection)
-    - At Garage
-    - Under Maintenance
-    - Accident/Repair
-    - Deactivated
     """
     # Get all available status options from vehicle_status field
     available_statuses = get_vehicle_status_options()
@@ -452,7 +561,7 @@ def get_required_fields_for_transition(from_state, to_state):
     }
     
     # Validate that both states exist in vehicle_status options
-    if from_state not in available_statuses or to_state not in available_statuses:
+    if available_statuses and (from_state not in available_statuses or to_state not in available_statuses):
         frappe.log_error(
             f"Invalid transition: {from_state} -> {to_state}. "
             f"Available statuses: {', '.join(available_statuses)}",
@@ -490,9 +599,9 @@ def create_vehicle_movement(vehicle, data, movement_type):
         "movement_type": movement_type,
         "agreement_no": data.get("agreement_no"),
         "out_customer": data.get("out_customer"),
-        "out_date_time": data.get("out_date_time"),
-        "out_mileage": data.get("out_mileage"),
-        "out_fuel_level": data.get("out_fuel_level"),
+        "out_date_time": data.get("out_date_time") or data.get("return_date_time"),
+        "out_mileage": data.get("out_mileage") or data.get("return_mileage"),
+        "out_fuel_level": data.get("out_fuel_level") or data.get("return_fuel_level"),
         "out_from": data.get("out_from"),
         "date": frappe.utils.today()
     })
@@ -508,15 +617,35 @@ def create_service_record(vehicle, data):
         "doctype": "Services",
         "vehicle": vehicle.name,
         "service_type": data.get("service_type"),
-        "description": data.get("description"),
-        "date": data.get("date"),
-        "cost": data.get("cost"),
+        "description": data.get("description") or data.get("work_completed"),
+        "date": data.get("date") or data.get("start_date") or frappe.utils.today(),
+        "cost": data.get("cost") or data.get("estimated_cost") or data.get("actual_cost"),
         "vendor": data.get("vendor"),
         "note": data.get("note"),
         "workflow_state": "To Do"
     })
     service.insert(ignore_permissions=True)
     return service
+
+
+def create_accident_record(vehicle, data):
+    """
+    Create a Vehicle Accident/Damage record
+    """
+    accident = frappe.get_doc({
+        "doctype": "Vehicle Accidents",  # Adjust doctype name if different
+        "vehicle": vehicle.name,
+        "incident_date": data.get("incident_date"),
+        "damage_description": data.get("damage_description"),
+        "police_report": data.get("police_report"),
+        "insurance_claim": data.get("insurance_claim"),
+        "estimated_cost": data.get("estimated_repair_cost") or data.get("final_repair_cost"),
+        "repair_vendor": data.get("repair_vendor"),
+        "customer_liable": data.get("customer_liable", 0),
+        "status": "Reported"
+    })
+    accident.insert(ignore_permissions=True)
+    return accident
 
 
 @frappe.whitelist()
@@ -545,7 +674,9 @@ def search_vehicles(query, filters=None):
     if "chassis_number" in available_fields:
         select_fields.append("chassis_number")
         search_fields.append("chassis_number")
-    if "workflow_state" in available_fields:
+    if "vehicle_status" in available_fields:
+        select_fields.append("vehicle_status")
+    elif "workflow_state" in available_fields:
         select_fields.append("workflow_state")
     if "driver" in available_fields:
         select_fields.append("driver")
