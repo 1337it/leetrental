@@ -301,32 +301,163 @@ def validate_transition(vehicle, from_state, to_state):
 def get_required_fields_for_transition(from_state, to_state):
     """
     Return required fields based on the transition
+    Dynamically loads field requirements from vehicle_status options
+    
+    Vehicle Status Options:
+    - Available
+    - Reserved
+    - Out for Delivery
+    - Rented Out
+    - Due for Return
+    - Returned (Inspection)
+    - At Garage
+    - Under Maintenance
+    - Accident/Repair
+    - Deactivated
     """
+    # Get all available status options from vehicle_status field
+    available_statuses = get_vehicle_status_options()
+    
+    # Define fields map based on actual vehicle statuses
     fields_map = {
-        ("Registered", "Reserve"): [
+        # Available -> Reserved: Create reservation
+        ("Available", "Reserved"): [
             {"fieldname": "driver", "fieldtype": "Link", "options": "Customer", "label": _("Customer"), "reqd": 1},
-            {"fieldname": "start_time", "fieldtype": "Datetime", "label": _("Start Time"), "reqd": 1},
-            {"fieldname": "end_time", "fieldtype": "Datetime", "label": _("End Time"), "reqd": 1},
+            {"fieldname": "start_time", "fieldtype": "Datetime", "label": _("Reservation Start"), "reqd": 1},
+            {"fieldname": "end_time", "fieldtype": "Datetime", "label": _("Reservation End"), "reqd": 1},
             {"fieldname": "pickup_location", "fieldtype": "Link", "options": "Reservation Locations", "label": _("Pickup Location")},
             {"fieldname": "drop_location", "fieldtype": "Link", "options": "Reservation Locations", "label": _("Drop Location")},
         ],
-        ("Reserve", "Waiting List"): [
+        
+        # Reserved -> Out for Delivery: Prepare for delivery
+        ("Reserved", "Out for Delivery"): [
+            {"fieldname": "delivery_driver", "fieldtype": "Link", "options": "Employee", "label": _("Delivery Driver")},
+            {"fieldname": "delivery_time", "fieldtype": "Datetime", "label": _("Delivery Time"), "reqd": 1},
+            {"fieldname": "delivery_location", "fieldtype": "Data", "label": _("Delivery Address")},
+        ],
+        
+        # Out for Delivery -> Rented Out: Complete handover
+        ("Out for Delivery", "Rented Out"): [
             {"fieldname": "agreement_no", "fieldtype": "Data", "label": _("Agreement No"), "reqd": 1},
             {"fieldname": "out_customer", "fieldtype": "Link", "options": "Customer", "label": _("Customer"), "reqd": 1},
-            {"fieldname": "out_date_time", "fieldtype": "Datetime", "label": _("Out Date & Time"), "reqd": 1},
-            {"fieldname": "out_mileage", "fieldtype": "Int", "label": _("Out Mileage (KM)"), "reqd": 1},
-            {"fieldname": "out_fuel_level", "fieldtype": "Data", "label": _("Out Fuel Level")},
-            {"fieldname": "out_from", "fieldtype": "Data", "label": _("From Location")},
+            {"fieldname": "out_date_time", "fieldtype": "Datetime", "label": _("Handover Date & Time"), "reqd": 1},
+            {"fieldname": "out_mileage", "fieldtype": "Int", "label": _("Starting Mileage (KM)"), "reqd": 1},
+            {"fieldname": "out_fuel_level", "fieldtype": "Select", "options": "Empty\n1/4\n1/2\n3/4\nFull", "label": _("Fuel Level at Handover")},
+            {"fieldname": "out_from", "fieldtype": "Data", "label": _("Handover Location")},
         ],
-        ("Registered", "Downgraded"): [
+        
+        # Reserved -> Rented Out: Direct rental (skip delivery)
+        ("Reserved", "Rented Out"): [
+            {"fieldname": "agreement_no", "fieldtype": "Data", "label": _("Agreement No"), "reqd": 1},
+            {"fieldname": "out_customer", "fieldtype": "Link", "options": "Customer", "label": _("Customer"), "reqd": 1},
+            {"fieldname": "out_date_time", "fieldtype": "Datetime", "label": _("Handover Date & Time"), "reqd": 1},
+            {"fieldname": "out_mileage", "fieldtype": "Int", "label": _("Starting Mileage (KM)"), "reqd": 1},
+            {"fieldname": "out_fuel_level", "fieldtype": "Select", "options": "Empty\n1/4\n1/2\n3/4\nFull", "label": _("Fuel Level at Handover")},
+            {"fieldname": "out_from", "fieldtype": "Data", "label": _("Handover Location")},
+        ],
+        
+        # Rented Out -> Due for Return: Mark as due
+        ("Rented Out", "Due for Return"): [
+            {"fieldname": "expected_return_date", "fieldtype": "Datetime", "label": _("Expected Return Date"), "reqd": 1},
+            {"fieldname": "return_location", "fieldtype": "Data", "label": _("Return Location")},
+            {"fieldname": "reminder_sent", "fieldtype": "Check", "label": _("Reminder Sent to Customer")},
+        ],
+        
+        # Due for Return -> Returned (Inspection): Vehicle returned
+        ("Due for Return", "Returned (Inspection)"): [
+            {"fieldname": "return_date_time", "fieldtype": "Datetime", "label": _("Actual Return Date & Time"), "reqd": 1},
+            {"fieldname": "return_mileage", "fieldtype": "Int", "label": _("Return Mileage (KM)"), "reqd": 1},
+            {"fieldname": "return_fuel_level", "fieldtype": "Select", "options": "Empty\n1/4\n1/2\n3/4\nFull", "label": _("Fuel Level at Return")},
+            {"fieldname": "inspector", "fieldtype": "Link", "options": "Employee", "label": _("Inspector")},
+        ],
+        
+        # Returned (Inspection) -> Available: Clean, no issues
+        ("Returned (Inspection)", "Available"): [
+            {"fieldname": "inspection_date", "fieldtype": "Datetime", "label": _("Inspection Completed"), "reqd": 1},
+            {"fieldname": "inspection_notes", "fieldtype": "Small Text", "label": _("Inspection Notes")},
+            {"fieldname": "cleanliness_ok", "fieldtype": "Check", "label": _("Vehicle Cleaned"), "reqd": 1},
+        ],
+        
+        # Returned (Inspection) -> At Garage: Issues found
+        ("Returned (Inspection)", "At Garage"): [
+            {"fieldname": "inspection_date", "fieldtype": "Datetime", "label": _("Inspection Date"), "reqd": 1},
+            {"fieldname": "issues_found", "fieldtype": "Small Text", "label": _("Issues Found"), "reqd": 1},
+            {"fieldname": "garage_location", "fieldtype": "Link", "options": "Garage", "label": _("Garage Location")},
+        ],
+        
+        # Available -> At Garage: Regular maintenance or inspection
+        ("Available", "At Garage"): [
+            {"fieldname": "reason", "fieldtype": "Data", "label": _("Reason for Garage"), "reqd": 1},
+            {"fieldname": "garage_location", "fieldtype": "Link", "options": "Garage", "label": _("Garage Location")},
+            {"fieldname": "expected_duration", "fieldtype": "Int", "label": _("Expected Days")},
+        ],
+        
+        # At Garage -> Under Maintenance: Start maintenance
+        ("At Garage", "Under Maintenance"): [
             {"fieldname": "service_type", "fieldtype": "Link", "options": "Service Types", "label": _("Service Type"), "reqd": 1},
-            {"fieldname": "description", "fieldtype": "Data", "label": _("Description"), "reqd": 1},
-            {"fieldname": "date", "fieldtype": "Date", "label": _("Service Date"), "reqd": 1},
-            {"fieldname": "cost", "fieldtype": "Currency", "label": _("Estimated Cost")},
-            {"fieldname": "vendor", "fieldtype": "Link", "options": "Supplier", "label": _("Vendor")},
-            {"fieldname": "note", "fieldtype": "Small Text", "label": _("Notes")},
+            {"fieldname": "description", "fieldtype": "Small Text", "label": _("Work Description"), "reqd": 1},
+            {"fieldname": "start_date", "fieldtype": "Date", "label": _("Maintenance Start Date"), "reqd": 1},
+            {"fieldname": "estimated_cost", "fieldtype": "Currency", "label": _("Estimated Cost")},
+            {"fieldname": "vendor", "fieldtype": "Link", "options": "Supplier", "label": _("Service Vendor")},
+        ],
+        
+        # At Garage -> Accident/Repair: Accident damage found
+        ("At Garage", "Accident/Repair"): [
+            {"fieldname": "incident_date", "fieldtype": "Date", "label": _("Incident Date"), "reqd": 1},
+            {"fieldname": "damage_description", "fieldtype": "Small Text", "label": _("Damage Description"), "reqd": 1},
+            {"fieldname": "insurance_claim", "fieldtype": "Data", "label": _("Insurance Claim No")},
+            {"fieldname": "estimated_repair_cost", "fieldtype": "Currency", "label": _("Estimated Repair Cost")},
+            {"fieldname": "repair_vendor", "fieldtype": "Link", "options": "Supplier", "label": _("Repair Shop")},
+        ],
+        
+        # Rented Out -> Accident/Repair: Accident during rental
+        ("Rented Out", "Accident/Repair"): [
+            {"fieldname": "incident_date", "fieldtype": "Date", "label": _("Incident Date"), "reqd": 1},
+            {"fieldname": "damage_description", "fieldtype": "Small Text", "label": _("Damage Description"), "reqd": 1},
+            {"fieldname": "police_report", "fieldtype": "Data", "label": _("Police Report No")},
+            {"fieldname": "insurance_claim", "fieldtype": "Data", "label": _("Insurance Claim No")},
+            {"fieldname": "customer_liable", "fieldtype": "Check", "label": _("Customer Liable")},
+            {"fieldname": "estimated_repair_cost", "fieldtype": "Currency", "label": _("Estimated Repair Cost")},
+        ],
+        
+        # Under Maintenance -> Available: Maintenance completed
+        ("Under Maintenance", "Available"): [
+            {"fieldname": "completion_date", "fieldtype": "Date", "label": _("Completion Date"), "reqd": 1},
+            {"fieldname": "actual_cost", "fieldtype": "Currency", "label": _("Actual Cost"), "reqd": 1},
+            {"fieldname": "work_completed", "fieldtype": "Small Text", "label": _("Work Completed")},
+            {"fieldname": "invoice_no", "fieldtype": "Data", "label": _("Invoice Number")},
+        ],
+        
+        # Accident/Repair -> Available: Repair completed
+        ("Accident/Repair", "Available"): [
+            {"fieldname": "repair_completion_date", "fieldtype": "Date", "label": _("Repair Completion Date"), "reqd": 1},
+            {"fieldname": "final_repair_cost", "fieldtype": "Currency", "label": _("Final Repair Cost"), "reqd": 1},
+            {"fieldname": "repair_summary", "fieldtype": "Small Text", "label": _("Repair Summary")},
+            {"fieldname": "quality_check", "fieldtype": "Check", "label": _("Quality Check Passed"), "reqd": 1},
+        ],
+        
+        # Any status -> Deactivated: Remove from fleet
+        ("Available", "Deactivated"): [
+            {"fieldname": "deactivation_reason", "fieldtype": "Select", "options": "Sold\nWritten Off\nEnd of Lease\nPermanent Damage\nOther", "label": _("Reason"), "reqd": 1},
+            {"fieldname": "deactivation_date", "fieldtype": "Date", "label": _("Deactivation Date"), "reqd": 1},
+            {"fieldname": "deactivation_notes", "fieldtype": "Small Text", "label": _("Notes")},
+        ],
+        
+        # Deactivated -> Available: Reactivate vehicle
+        ("Deactivated", "Available"): [
+            {"fieldname": "reactivation_date", "fieldtype": "Date", "label": _("Reactivation Date"), "reqd": 1},
+            {"fieldname": "reactivation_reason", "fieldtype": "Small Text", "label": _("Reason for Reactivation"), "reqd": 1},
+            {"fieldname": "inspection_completed", "fieldtype": "Check", "label": _("Inspection Completed"), "reqd": 1},
         ],
     }
+    
+    # Validate that both states exist in vehicle_status options
+    if from_state not in available_statuses or to_state not in available_statuses:
+        frappe.log_error(
+            f"Invalid transition: {from_state} -> {to_state}. "
+            f"Available statuses: {', '.join(available_statuses)}",
+            "Invalid Vehicle Status Transition"
+        )
     
     return fields_map.get((from_state, to_state), [])
 
