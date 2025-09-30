@@ -1,4 +1,3 @@
-# leetrental/leetrental/api/vehicles_kanban.py
 import frappe
 from frappe import _
 import json
@@ -11,20 +10,40 @@ def get_kanban_data(filters=None):
     if filters and isinstance(filters, str):
         filters = json.loads(filters)
     
-    # Get all workflow states for Vehicles
-    workflow_states = frappe.get_all(
-        "Workflow State",
-        fields=["name", "style"],
-        order_by="idx"
-    )
-    
-    # Get meta to check available fields
+    # Get workflow states from vehicle_status field options in Vehicles doctype
     vehicles_meta = frappe.get_meta("Vehicles")
+    vehicle_status_field = vehicles_meta.get_field("vehicle_status")
+    
+    workflow_states = []
+    if vehicle_status_field and vehicle_status_field.options:
+        # Options are stored as newline-separated values
+        options_list = vehicle_status_field.options.split('\n')
+        for idx, option in enumerate(options_list):
+            option = option.strip()
+            if option:  # Skip empty lines
+                workflow_states.append({
+                    "name": option,
+                    "style": "default",  # You can map specific styles if needed
+                    "idx": idx
+                })
+    
+    # Fallback if no options found
+    if not workflow_states:
+        workflow_states = [{"name": "Draft", "style": "default", "idx": 0}]
+    
+    # Get available fields
     available_fields = {field.fieldname for field in vehicles_meta.fields}
     available_fields.add("name")  # Always available
     
     # Build field list dynamically
-    base_fields = ["name", "license_plate", "chassis_number", "workflow_state"]
+    base_fields = ["name", "license_plate", "chassis_number"]
+    
+    # Use vehicle_status instead of workflow_state
+    if "vehicle_status" in available_fields:
+        base_fields.append("vehicle_status")
+    elif "workflow_state" in available_fields:
+        base_fields.append("workflow_state")
+    
     optional_fields = {
         "model": "model",
         "driver": "driver", 
@@ -34,8 +53,8 @@ def get_kanban_data(filters=None):
         "model_year": "model_year",
         "fuel_type": "fuel_type",
         "tags": "tags",
-        "upload_photo": "image",  # Map upload_photo to image
-        "image_5": "image"  # Alternative image field
+        "upload_photo": "image",
+        "image_5": "image"
     }
     
     fields_to_fetch = base_fields.copy()
@@ -84,7 +103,12 @@ def get_kanban_data(filters=None):
             vehicle.setdefault("model_year", None)
             vehicle.setdefault("fuel_type", None)
             vehicle.setdefault("tags", None)
-            vehicle.setdefault("workflow_state", "Draft")
+            
+            # Normalize status field name
+            if "vehicle_status" in vehicle:
+                vehicle["workflow_state"] = vehicle.get("vehicle_status") or "Draft"
+            else:
+                vehicle.setdefault("workflow_state", "Draft")
         
     except Exception as e:
         frappe.log_error(frappe.get_traceback(), "Get Kanban Data Error")
@@ -93,9 +117,9 @@ def get_kanban_data(filters=None):
     # Group vehicles by workflow state
     kanban_data = {}
     for state in workflow_states:
-        kanban_data[state.name] = {
-            "label": state.name,
-            "style": state.style or "default",
+        kanban_data[state["name"]] = {
+            "label": state["name"],
+            "style": state.get("style", "default"),
             "vehicles": []
         }
     
@@ -105,7 +129,7 @@ def get_kanban_data(filters=None):
         if state in kanban_data:
             kanban_data[state]["vehicles"].append(vehicle)
         else:
-            # Handle vehicles with states not in workflow
+            # Handle vehicles with states not in the options
             if "Other" not in kanban_data:
                 kanban_data["Other"] = {
                     "label": "Other",
@@ -115,6 +139,22 @@ def get_kanban_data(filters=None):
             kanban_data["Other"]["vehicles"].append(vehicle)
     
     return kanban_data
+
+
+# Helper function to get vehicle status options
+def get_vehicle_status_options():
+    """
+    Get the vehicle_status field options from Vehicles doctype
+    Returns a list of status options
+    """
+    vehicles_meta = frappe.get_meta("Vehicles")
+    vehicle_status_field = vehicles_meta.get_field("vehicle_status")
+    
+    if vehicle_status_field and vehicle_status_field.options:
+        options_list = [opt.strip() for opt in vehicle_status_field.options.split('\n') if opt.strip()]
+        return options_list
+    
+    return []
 
 
 @frappe.whitelist()
