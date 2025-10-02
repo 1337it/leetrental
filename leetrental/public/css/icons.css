@@ -1,0 +1,52 @@
+.icon {
+    width: 24px;
+    height: 24px;
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.icon-sm {
+    width: 16px;
+    height: 16px;
+}
+
+.icon-md {
+    width: 24px;
+    height: 24px;
+}
+
+.icon-lg {
+    width: 32px;
+    height: 32px;
+}
+
+.icon-xl {
+    width: 48px;
+    height: 48px;
+}
+
+/* Icon color variants */
+.icon-primary {
+    filter: invert(41%) sepia(100%) saturate(1500%) hue-rotate(180deg);
+}
+
+.icon-success {
+    filter: invert(58%) sepia(94%) saturate(450%) hue-rotate(75deg);
+}
+
+.icon-warning {
+    filter: invert(80%) sepia(50%) saturate(1000%) hue-rotate(0deg);
+}
+
+.icon-danger {
+    filter: invert(27%) sepia(98%) saturate(3000%) hue-rotate(350deg);
+}
+
+/* Sidebar and form icons */
+.sidebar-icon,
+.form-icon {
+    width: 20px;
+    height: 20px;
+    margin-right: 8px;
+    vertical-align: middle;
+}
