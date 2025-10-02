@@ -1,9 +1,9 @@
 // Collapsible Sidebar for Frappe
 // Add this file to your_app/public/js/sidebar_toggle.js
 
-frappe.ready(function() {
+
     initCollapsibleSidebar();
-});
+
 
 function initCollapsibleSidebar() {
     // Create hamburger button
