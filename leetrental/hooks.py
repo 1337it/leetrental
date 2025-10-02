@@ -44,7 +44,7 @@ app_include_js = [
 	"/assets/leetrental/js/customer_quick_scan.js",
 	"/assets/leetrental/js/enter-to-next-and-focus-first.js",
 	"/assets/leetrental/js/advanced_link_picker.js",
-	"/assets/leetrental/js/sidebar_toggle.js",
+	"/assets/leetrental/js/sidebar-toggle.js",
 	"/assets/leetrental/js/icons.js"
 ]
 
