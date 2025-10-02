@@ -32,7 +32,8 @@ override_doctype_dashboards = {
 app_include_css = [
 	"/assets/leetrental/css/leetrental.css",
 	"/assets/leetrental/css/portal-settings.css",
-	"/assets/leetrental/css/minimize-to-sidebar.css"
+	"/assets/leetrental/css/minimize-to-sidebar.css",
+	"/assets/leetrental/css/sidebar-toggle.css"
 ]
 
 app_include_js = [
@@ -41,7 +42,8 @@ app_include_js = [
 	"/assets/leetrental/js/minimize-to-sidebar.js",
 	"/assets/leetrental/js/customer_quick_scan.js",
 	"/assets/leetrental/js/enter-to-next-and-focus-first.js",
-	"/assets/leetrental/js/advanced_link_picker.js"
+	"/assets/leetrental/js/advanced_link_picker.js",
+	"/assets/leetrental/js/sidebar_toggle.js"
 ]
 
 app_include_icons = "leetrental/icons/rental-icons.svg"
