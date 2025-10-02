@@ -1,5 +1,38 @@
 @media only screen and (min-width: 992px) {
+.sidebar-item-content {
+font-family: "Segoe UI", "Segoe UI Web (West European)", "Segoe UI", -apple-system, BlinkMacSystemFont, Roboto, "Helvetica Neue", sans-serif;
+-webkit-font-smoothing: antialiased;
+font-size: 14px;
+font-weight: 400;
+outline-color: transparent;
+position: relative;
+min-height: 40px;
+color: rgb(87, 87, 87);
+text-decoration-line: none;
+display: flex;
+flex-direction: row;
+flex-wrap: nowrap;
+align-items: center;
+cursor: pointer;
+width: 100%;
+background-color: transparent;
+border-top-style: none;
+border-right-style: none;
+border-bottom-style: none;
+border-left-style: none;
+padding-top: 0px;
+padding-right: 0px;
+padding-bottom: 0px;
+padding-left: 0px;
+text-align: inherit;
+height: 40px;
+padding: 8px 8px !important;
+}
 
+  .standard-sidebar-label {
+display: none !important;
+}
+  
 .advanced-link-results tbody tr.active {
   background: var(--bg-green-extra-light, #eefcf3);
 }
