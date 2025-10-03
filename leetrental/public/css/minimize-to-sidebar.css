@@ -47,7 +47,7 @@
 .sidebar__minimized{
   padding: 0px;
   display: grid;
-  gap: 6px;
+  gap: 1px;
   border-top: 1px solid rgba(148,163,184,.12);
   margin-top: 8px;
 }
@@ -87,8 +87,8 @@ padding: 0px;
 background: rgb(136, 182, 207);
 width: 32px;
 height: 45px;
-border-top-right-radius: 10px;
-border-bottom-right-radius: 10px;
+border-top-right-radius: 0px;
+border-bottom-right-radius: 0px;
 }
 .minibtn__close:hover{ opacity:1; }
 
@@ -101,13 +101,12 @@ border-bottom-right-radius: 10px;
   align-items: center;
   gap: 8px;
   padding: 0px 12px;
-  border-radius: 10px;
+  border-radius: 0px;
   background: rgba(148,163,184,.10);
   color: inherit;
   cursor: pointer;
   border: 0;
   transition: background .2s ease;
-  box-shadow: rgba(50, 50, 105, 0.15) 0px 2px 5px 0px, rgba(0, 0, 0, 0.05) 0px 1px 1px 0px;
 }
 
 .minibtn__labels{
