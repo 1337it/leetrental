@@ -1,8 +1,19 @@
 @media only screen and (min-width: 992px) {
-.layout-main .layout-side-section {
+[data-page-route=Workspaces] .layout-main .layout-side-section {
 padding: 0px !important;
 box-shadow: rgba(0, 0, 0, 0.4) 0px 2px 4px, rgba(0, 0, 0, 0.3) 0px 7px 13px -3px, rgba(0, 0, 0, 0.2) 0px -3px 0px inset;
 }
+
+  .sidebar-item-icon {
+margin: 8px !important;
+}
+
+  .item-anchor{
+    gap:0px !important;
+
+  }
+
+  
   body {
 margin: 0px;
 padding: 0px !important;
