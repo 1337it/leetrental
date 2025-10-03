@@ -1,10 +1,7 @@
 @media only screen and (min-width: 992px) {
 
 
-  .page-body {
-padding-right: 40px !important;
-padding-left: 40px !important;
-}
+
 
   .sticky-top {
 height: 48px;
@@ -181,6 +178,7 @@ display: none;
 }
 :root {
   overscroll-behavior: none;
+  scrollbar-width: none;
 }
 .search-bar .awesomplete input {
 
