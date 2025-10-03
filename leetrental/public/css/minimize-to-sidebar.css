@@ -47,7 +47,7 @@
 .sidebar__minimized{
   padding: 0px;
   display: grid;
-  gap: 1px;
+  gap: 1px !important;
   border-top: 1px solid rgba(148,163,184,.12);
   margin-top: 8px;
 }
