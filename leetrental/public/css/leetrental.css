@@ -1,4 +1,19 @@
 @media only screen and (min-width: 992px) {
+
+  .sticky-top {
+height: 48px;
+}
+
+.navbar {
+
+position: fixed;
+width: 100vw;
+top: 0;
+}
+  
+  .layout-main-section.frappe-card {
+padding: var(--padding-md);
+}
 [data-page-route=Workspaces] .layout-main .layout-side-section {
 padding: 0px !important;
 box-shadow: rgba(0, 0, 0, 0.4) 0px 2px 4px, rgba(0, 0, 0, 0.3) 0px 7px 13px -3px, rgba(0, 0, 0, 0.2) 0px -3px 0px inset;
@@ -108,6 +123,7 @@ width: calc(100vw - 16.666vw) !important;
 right: 0;
 position: absolute;
   top: var(--navbar-height) !important;
+  left: 16.66667%;
 }
 #page-Workspaces[style="display: none;"] .layout-side-section {
 display: block !important;
