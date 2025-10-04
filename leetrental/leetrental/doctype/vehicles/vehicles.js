@@ -1,6 +1,199 @@
 // Copyright (c) 2022, Solufy and contributors
 // For license information, please see license.txt
 
+// File: your_app/your_app/vehicles/vehicles.js
+// Client Script for Vehicles DocType
+
+frappe.ui.form.on('Vehicles', {
+    // Add button to decode VIN
+    refresh: function(frm) {
+        if (frm.doc.chassis_number && !frm.is_new()) {
+            frm.add_custom_button(__('Decode VIN'), function() {
+                decode_vin(frm);
+            }, __('Actions'));
+        }
+    },
+    
+    // Auto-decode when chassis number is entered
+    chassis_number: function(frm) {
+        if (frm.doc.chassis_number && frm.doc.chassis_number.length >= 11) {
+            decode_vin(frm);
+        }
+    }
+});
+
+function decode_vin(frm) {
+    const vin = frm.doc.chassis_number;
+    
+    if (!vin || vin.length < 11) {
+        frappe.msgprint(__('Please enter a valid VIN/Chassis Number (at least 11 characters)'));
+        return;
+    }
+    
+    // Show loading indicator
+    frappe.show_alert({
+        message: __('Decoding VIN...'),
+        indicator: 'blue'
+    });
+    
+    // Optional: Add model year if available
+    const modelYear = frm.doc.model_year || '';
+    const apiUrl = `https://vpic.nhtsa.dot.gov/api/vehicles/DecodeVinValues/${vin}?format=json&modelyear=${modelYear}`;
+    
+    // Make API call
+    fetch(apiUrl)
+        .then(response => response.json())
+        .then(data => {
+            if (data.Results && data.Results.length > 0) {
+                const result = data.Results[0];
+                
+                // Check if VIN is valid
+                if (result.ErrorCode && result.ErrorCode.includes('0')) {
+                    populate_fields(frm, result);
+                    frappe.show_alert({
+                        message: __('VIN decoded successfully'),
+                        indicator: 'green'
+                    });
+                } else {
+                    frappe.msgprint({
+                        title: __('Error'),
+                        message: result.ErrorText || __('Unable to decode VIN'),
+                        indicator: 'red'
+                    });
+                }
+            }
+        })
+        .catch(error => {
+            console.error('VIN Decode Error:', error);
+            frappe.msgprint({
+                title: __('Error'),
+                message: __('Failed to decode VIN. Please check your internet connection.'),
+                indicator: 'red'
+            });
+        });
+}
+
+function populate_fields(frm, data) {
+    // Map API fields to your DocType fields
+    // Customize these mappings based on your actual field names
+    
+    const fieldMapping = {
+        // Basic Information
+        'make': data.Make,
+        'model': data.Model,
+        'model_year': data.ModelYear,
+        'manufacturer_name': data.Manufacturer,
+        
+        // Vehicle Details
+        'vehicle_type': data.VehicleType,
+        'body_class': data.BodyClass,
+        'trim': data.Trim,
+        'series': data.Series,
+        
+        // Engine Information
+        'engine_number_of_cylinders': data.EngineCylinders,
+        'displacement_cc': data.DisplacementCC,
+        'displacement_l': data.DisplacementL,
+        'engine_model': data.EngineModel,
+        'engine_manufacturer': data.EngineManufacturer,
+        'fuel_type_primary': data.FuelTypePrimary,
+        'fuel_type_secondary': data.FuelTypeSecondary,
+        
+        // Transmission
+        'transmission_style': data.TransmissionStyle,
+        'transmission_speeds': data.TransmissionSpeeds,
+        
+        // Dimensions & Capacity
+        'doors': data.Doors,
+        'windows': data.Windows,
+        'gross_vehicle_weight_rating': data.GVWR,
+        'curb_weight_lbs': data.CurbWeightLBS,
+        
+        // Drive & Brake
+        'drive_type': data.DriveType,
+        'brake_system_type': data.BrakeSystemType,
+        'abs': data.ABS,
+        
+        // Safety Features
+        'airbag_locations': data.AirBagLocations,
+        'electronic_stability_control': data.ESC,
+        'traction_control': data.TractionControl,
+        
+        // Manufacturing
+        'plant_city': data.PlantCity,
+        'plant_country': data.PlantCountry,
+        'plant_state': data.PlantState,
+        'plant_company_name': data.PlantCompanyName,
+        
+        // Additional Info
+        'ncsa_make': data.NCSAMake,
+        'ncsa_model': data.NCSAModel,
+        'ncsa_body_type': data.NCSABodyType,
+        'seat_belts_all': data.SeatBeltsAll,
+        'entertainment_system': data.EntertainmentSystem,
+        'steering_location': data.SteeringLocation,
+        
+        // WMI & VIN Info
+        'wmi': data.WMI,
+        'vehicle_descriptor': data.VehicleDescriptor,
+        'destination_market': data.DestinationMarket,
+        
+        // Commercial Vehicle Info
+        'bus_length': data.BusLength,
+        'bus_floor_configuration': data.BusFloorConfigBType,
+        'bus_type': data.BusType,
+        'trailer_type': data.TrailerType,
+        'trailer_body_type': data.TrailerBodyType,
+        'trailer_length': data.TrailerLength,
+        
+        // Other
+        'other_engine_info': data.OtherEngineInfo,
+        'turbo': data.Turbo,
+        'top_speed_mph': data.TopSpeedMPH,
+        'wheel_base_type': data.WheelBaseType,
+        'track_width': data.TrackWidth,
+        'gross_combination_weight_rating': data.GCWR,
+        'bed_length': data.BedLength,
+        'cab_type': data.CabType,
+        'axles': data.Axles,
+        'axle_configuration': data.AxleConfiguration,
+        'motorcycle_suspension_type': data.MotorcycleSuspensionType,
+        'motorcycle_chassis_type': data.MotorcycleChassisType,
+        'custom_motorcycle_type': data.CustomMotorcycleType,
+        'valve_train_design': data.ValveTrainDesign,
+        'cooling_type': data.CoolingType,
+        'electrification_level': data.ElectrificationLevel,
+        'battery_info': data.BatteryInfo,
+        'battery_type': data.BatteryType,
+        'battery_kwh': data.BatteryKWh,
+        'ev_drive_unit': data.EVDriveUnit,
+        'charger_level': data.ChargerLevel,
+        'charger_power_kw': data.ChargerPowerKW,
+    };
+    
+    // Set field values
+    Object.keys(fieldMapping).forEach(fieldName => {
+        const value = fieldMapping[fieldName];
+        if (value && value !== 'Not Applicable' && value !== '' && frm.fields_dict[fieldName]) {
+            frm.set_value(fieldName, value);
+        }
+    });
+    
+    // Mark form as modified
+    frm.dirty();
+}
+
+// Optional: Add validation to ensure VIN format
+frappe.ui.form.on('Vehicles', {
+    validate: function(frm) {
+        const vin = frm.doc.chassis_number;
+        if (vin && vin.length !== 17 && vin.length < 11) {
+            frappe.msgprint(__('VIN should be either 17 characters (full VIN) or at least 11 characters (partial VIN)'));
+            frappe.validated = false;
+        }
+    }
+});
+
 // Vehicle doctype client script
 frappe.ui.form.on('Vehicles', {
   refresh(frm) {
