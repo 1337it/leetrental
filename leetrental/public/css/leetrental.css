@@ -1,4 +1,10 @@
 @media only screen and (min-width: 992px) {
+
+  #page-Workspaces .layout-side-section[style="display: none;"] {
+width: 48px !important;
+max-width: 48px !important;
+flex: 0 0 48px !important;
+}
   .frappe-control .control-label.reqd:after {
 content: " *";
 color: var(--red-600) !important;
@@ -48,7 +54,7 @@ box-shadow: rgba(0, 0, 0, 0.4) 0px 2px 4px, rgba(0, 0, 0, 0.3) 0px 7px 13px -3px
 }
 
   .sidebar-item-icon {
-margin: 16px !important;
+margin: 14px !important;
 }
 
   .item-anchor{
