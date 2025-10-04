@@ -30,7 +30,7 @@
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Vehicle Type",
-   "options": "Car\nBike"
+   "options": "PASSENGER CAR\nBike"
   },
   {
    "fieldname": "fleet_manager",
