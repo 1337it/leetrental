@@ -113,11 +113,11 @@ function populate_vehicle_fields(frm, data) {
     // Comprehensive field mapping
     const mapping = {
         // Basic Information
-        'make': 'Make',
+        'custom_make': 'Make',
         'model': 'Model',
         'model_year': 'ModelYear',
         'manufacturer_name': 'Manufacturer',
-        
+        'custom_cylinders': 'EngineCylinders',
         // Vehicle Classification
         'vehicle_type': 'VehicleType',
         'body_class': 'BodyClass',
@@ -155,7 +155,8 @@ function populate_vehicle_fields(frm, data) {
         'battery_packs': 'BatteryPacks',
         'charger_level': 'ChargerLevel',
         'charger_power_kw': 'ChargerPowerKW',
-        
+        'horsepower': 'EngineHP_to',
+		
         // Transmission
         'transmission_style': 'TransmissionStyle',
         'transmission_speeds': 'TransmissionSpeeds',
@@ -193,7 +194,7 @@ function populate_vehicle_fields(frm, data) {
         'airbag_locations': 'AirBagLocFront',
         'seat_belts_all': 'SeatBeltsAll',
         'pretensioner': 'Pretensioner',
-        
+        'power' : 'DisplacementCC',
         // Entertainment & Interior
         'entertainment_system': 'EntertainmentSystem',
         'steering_location': 'SteeringLocation',
