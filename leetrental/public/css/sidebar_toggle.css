@@ -3,22 +3,22 @@
 
 /* Hamburger Button */
 .sidebar-toggle-btn {
-    position: fixed !important;
-    top: 48px !important;
-    left: 2px !important;
-    z-index: 9999 !important;
-    width: 45px;
-    height: 45px;
-    background: #ffffff !important;
-    border-radius: 2px;
-    cursor: pointer;
-    display: flex !important;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    gap: 5px;
-    padding: 10px;
-    transition: all 0.3s ease;
+width: 24px;
+height: 24px;
+border-radius: 2px;
+cursor: pointer;
+flex-direction: column;
+justify-content: center;
+align-items: center;
+gap: 5px;
+padding: 0px;
+transition: 0.3s;
+position: fixed !important;
+top: 58px !important;
+left: 12px !important;
+z-index: 9999 !important;
+background: rgb(255, 255, 255) !important;
+display: flex !important;
 }
 
 .sidebar-toggle-btn:hover {
