@@ -1,10 +1,10 @@
-/* Collapsible Sidebar Styles - Enhanced Version */
+/* Collapsible Sidebar Styles for Workspace Sidebar */
 /* Add this file to your_app/public/css/sidebar_toggle.css */
 
-/* Hamburger Button - More Visible */
+/* Hamburger Button */
 .sidebar-toggle-btn {
     position: fixed !important;
-    top: 15px !important;
+    top: 50px !important;
     left: 15px !important;
     z-index: 9999 !important;
     width: 45px;
@@ -57,32 +57,30 @@
     transform: translateY(-8px) rotate(-45deg);
 }
 
-/* Sidebar Collapsed State */
-.layout-side-section {
+/* Target specifically the workspace sidebar */
+#page-Workspaces .layout-side-section {
     transition: all 0.3s ease;
     position: relative;
     z-index: 1040;
 }
 
-.layout-side-section.collapsed {
+/* Collapsed state for workspace sidebar */
+#page-Workspaces .layout-side-section.workspace-collapsed {
     transform: translateX(-100%);
     opacity: 0;
     pointer-events: none;
 }
 
-/* Adjust main content when sidebar is collapsed */
-body.sidebar-collapsed .layout-main-section-wrapper {
+/* Adjust main content area when workspace sidebar is collapsed */
+#page-Workspaces .layout-side-section.workspace-collapsed ~ .layout-main-section-wrapper,
+#page-Workspaces .layout-side-section.workspace-collapsed ~ * .layout-main-section-wrapper {
     margin-left: 0 !important;
     max-width: 100%;
 }
 
-body:not(.sidebar-collapsed) .layout-main-section-wrapper {
+/* Smooth transition for main content */
+#page-Workspaces .layout-main-section-wrapper {
     transition: all 0.3s ease;
-}
-
-/* Add padding to avoid overlap with button */
-.layout-main-section-wrapper {
-    padding-top: 20px;
 }
 
 /* Mobile Responsive */
@@ -98,7 +96,8 @@ body:not(.sidebar-collapsed) .layout-main-section-wrapper {
         width: 20px;
     }
     
-    .layout-side-section {
+    /* Make workspace sidebar overlay on mobile */
+    #page-Workspaces .layout-side-section {
         position: fixed;
         left: 0;
         top: 0;
@@ -109,12 +108,12 @@ body:not(.sidebar-collapsed) .layout-main-section-wrapper {
         overflow-y: auto;
     }
     
-    .layout-side-section.collapsed {
+    #page-Workspaces .layout-side-section.workspace-collapsed {
         transform: translateX(-100%);
     }
     
-    /* Overlay when sidebar is open on mobile */
-    body:not(.sidebar-collapsed)::after {
+    /* Overlay backdrop when sidebar is open on mobile */
+    #page-Workspaces .layout-side-section:not(.workspace-collapsed)::after {
         content: '';
         position: fixed;
         top: 0;
@@ -122,7 +121,7 @@ body:not(.sidebar-collapsed) .layout-main-section-wrapper {
         right: 0;
         bottom: 0;
         background: rgba(0, 0, 0, 0.5);
-        z-index: 1039;
+        z-index: -1;
         animation: fadeIn 0.3s ease;
     }
     
@@ -132,36 +131,36 @@ body:not(.sidebar-collapsed) .layout-main-section-wrapper {
     }
 }
 
-/* Desktop - ensure sidebar is visible by default */
+/* Desktop - ensure workspace sidebar is visible by default */
 @media (min-width: 769px) {
-    .layout-side-section:not(.collapsed) {
+    #page-Workspaces .layout-side-section:not(.workspace-collapsed) {
         transform: translateX(0);
         opacity: 1;
         pointer-events: auto;
     }
 }
 
-/* Smooth scrolling for sidebar */
-.layout-side-section {
+/* Smooth scrolling for workspace sidebar */
+#page-Workspaces .layout-side-section {
     overflow-y: auto;
     overflow-x: hidden;
 }
 
 /* Scrollbar styling */
-.layout-side-section::-webkit-scrollbar {
+#page-Workspaces .layout-side-section::-webkit-scrollbar {
     width: 6px;
 }
 
-.layout-side-section::-webkit-scrollbar-track {
+#page-Workspaces .layout-side-section::-webkit-scrollbar-track {
     background: transparent;
 }
 
-.layout-side-section::-webkit-scrollbar-thumb {
+#page-Workspaces .layout-side-section::-webkit-scrollbar-thumb {
     background: #cccccc;
     border-radius: 3px;
 }
 
-.layout-side-section::-webkit-scrollbar-thumb:hover {
+#page-Workspaces .layout-side-section::-webkit-scrollbar-thumb:hover {
     background: #999999;
 }
 
