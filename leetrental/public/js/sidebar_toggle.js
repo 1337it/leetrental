@@ -1,62 +1,95 @@
-// Collapsible Sidebar for Frappe
+// Collapsible Sidebar for Frappe Workspaces
 // Add this file to your_app/public/js/sidebar_toggle.js
+
 
 
     initCollapsibleSidebar();
 
 
+// Also try on full page load
+$(document).ready(function() {
+    setTimeout(function() {
+        if (!document.querySelector('.sidebar-toggle-btn')) {
+
+            initCollapsibleSidebar();
+        }
+    }, 500);
+});
+
 function initCollapsibleSidebar() {
+    console.log('Initializing collapsible workspace sidebar...');
+    
+    // Check if button already exists
+    if (document.querySelector('.sidebar-toggle-btn')) {
+
+        return;
+    }
+    
+    // Get the workspace sidebar specifically
+    const workspacePage = document.querySelector('#page-Workspaces');
+    if (!workspacePage) {
+
+        // Retry after a delay if workspace isn't loaded yet
+        setTimeout(initCollapsibleSidebar, 1000);
+        return;
+    }
+    
+    const sidebar = workspacePage.querySelector('.layout-side-section');
+    
+    if (!sidebar) {
+
+        return;
+    }
+
+    
     // Create hamburger button
     const hamburgerBtn = createHamburgerButton();
     
-    // Insert hamburger button at the top of the page
-    const navbar = document.querySelector('.navbar');
-    if (navbar) {
-        navbar.insertAdjacentElement('afterbegin', hamburgerBtn);
-    }
+    // Insert button directly into body as first element
+    document.body.insertBefore(hamburgerBtn, document.body.firstChild);
     
-    // Get sidebar element
-    const sidebar = document.querySelector('.layout-side-section');
-    const mainSection = document.querySelector('.layout-main-section-wrapper');
-    
-    if (!sidebar || !mainSection) return;
+
     
     // Load saved state
-    const isCollapsed = localStorage.getItem('sidebar-collapsed') === 'true';
+    const isCollapsed = localStorage.getItem('workspace-sidebar-collapsed') === 'true';
     if (isCollapsed) {
-        sidebar.classList.add('collapsed');
-        document.body.classList.add('sidebar-collapsed');
+        sidebar.classList.add('workspace-collapsed');
+        hamburgerBtn.classList.add('active');
     }
     
     // Toggle sidebar on button click
-    hamburgerBtn.addEventListener('click', function() {
-        const collapsed = sidebar.classList.toggle('collapsed');
-        document.body.classList.toggle('sidebar-collapsed');
+    hamburgerBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+
+        const collapsed = sidebar.classList.toggle('workspace-collapsed');
         hamburgerBtn.classList.toggle('active');
         
         // Save state
-        localStorage.setItem('sidebar-collapsed', collapsed);
+        localStorage.setItem('workspace-sidebar-collapsed', collapsed);
+        console.log('Workspace sidebar collapsed:', collapsed);
     });
     
     // Close sidebar on mobile when clicking outside
     document.addEventListener('click', function(e) {
         if (window.innerWidth <= 768) {
             if (!sidebar.contains(e.target) && !hamburgerBtn.contains(e.target)) {
-                if (!sidebar.classList.contains('collapsed')) {
-                    sidebar.classList.add('collapsed');
-                    document.body.classList.add('sidebar-collapsed');
-                    hamburgerBtn.classList.remove('active');
-                    localStorage.setItem('sidebar-collapsed', 'true');
+                if (!sidebar.classList.contains('workspace-collapsed')) {
+                    sidebar.classList.add('workspace-collapsed');
+                    hamburgerBtn.classList.add('active');
+                    localStorage.setItem('workspace-sidebar-collapsed', 'true');
                 }
             }
         }
     });
+    
+    console.log('Workspace sidebar toggle initialized successfully');
 }
 
 function createHamburgerButton() {
     const button = document.createElement('button');
     button.className = 'sidebar-toggle-btn';
-    button.setAttribute('aria-label', 'Toggle Sidebar');
+    button.setAttribute('aria-label', 'Toggle Workspace Sidebar');
+    button.setAttribute('type', 'button');
     button.innerHTML = `
         <span class="hamburger-line"></span>
         <span class="hamburger-line"></span>
