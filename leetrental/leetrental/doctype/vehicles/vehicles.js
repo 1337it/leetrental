@@ -1,24 +1,16 @@
-// Copyright (c) 2022, Solufy and contributors
-// For license information, please see license.txt
+leetrental.leetrental.doctype
 
 // File: your_app/your_app/vehicles/vehicles.js
-// Client Script for Vehicles DocType
-// File: your_app/your_app/vehicles/vehicles.js
-// Alternative: Server-side VIN decoder implementation
+// Custom VIN Decoder for your Vehicles DocType
 
 frappe.ui.form.on('Vehicles', {
     refresh: function(frm) {
-        // Add custom button in toolbar
-        if (frm.doc.chassis_number && !frm.is_new()) {
+        // Add decode button if chassis number exists
+        if (frm.doc.chassis_number && frm.doc.chassis_number.length >= 11) {
             frm.add_custom_button(__('🔍 Decode VIN'), function() {
-                decode_vin_server(frm);
+                decode_chassis_number(frm);
             });
         }
-        
-        // Add in dropdown menu
-        frm.page.add_menu_item(__('Decode VIN from API'), function() {
-            decode_vin_server(frm);
-        });
     },
     
     chassis_number: function(frm) {
@@ -28,274 +20,246 @@ frappe.ui.form.on('Vehicles', {
             frm.set_value('chassis_number', vin);
             
             // Auto-decode for valid VIN length
-            if (vin.length >= 11 && vin.length <= 17) {
-                decode_vin_server(frm);
+            if (vin.length >= 11) {
+                // Ask user if they want to decode
+                frappe.confirm(
+                    __('Do you want to auto-fill vehicle details from VIN?'),
+                    function() {
+                        decode_chassis_number(frm);
+                    }
+                );
             }
-        }
-    },
-    
-    // Optional: Clear fields when VIN changes
-    chassis_number_on_form_rendered: function(frm) {
-        if (frm.doc.chassis_number && !frm.doc.make) {
-            // VIN exists but no decoded data - show decode button
-            show_decode_indicator(frm);
         }
     }
 });
 
-function decode_vin_server(frm) {
+function decode_chassis_number(frm) {
     const vin = frm.doc.chassis_number;
     
-    if (!vin) {
+    if (!vin || vin.length < 11) {
         frappe.msgprint({
-            title: __('VIN Required'),
-            message: __('Please enter a VIN/Chassis Number first'),
+            title: __('Invalid VIN'),
+            message: __('Please enter a valid VIN/Chassis Number (at least 11 characters)'),
             indicator: 'red'
         });
         return;
     }
     
-    if (vin.length < 11) {
-        frappe.msgprint({
-            title: __('Invalid VIN'),
-            message: __('VIN must be at least 11 characters long'),
-            indicator: 'orange'
-        });
-        return;
-    }
-    
-    // Show progress indicator
+    // Show loading
     frappe.dom.freeze(__('Decoding VIN from NHTSA database...'));
     
-    // Call server-side method
-    frappe.call({
-        method: 'leetrental.leetrental.doctype.vehicles.api.decode_vin',
-        args: {
-            vin: vin,
-            model_year: frm.doc.model_year || null
-        },
-        callback: function(response) {
+    // Build API URL
+    const modelYear = frm.doc.model_year || '';
+    const apiUrl = `https://vpic.nhtsa.dot.gov/api/vehicles/DecodeVinValues/${vin}?format=json&modelyear=${modelYear}`;
+    
+    // Make API call
+    fetch(apiUrl)
+        .then(response => response.json())
+        .then(data => {
             frappe.dom.unfreeze();
             
-            if (response.message && response.message.success) {
-                populate_vehicle_fields(frm, response.message.data);
+            if (data.Results && data.Results.length > 0) {
+                const result = data.Results[0];
                 
-                frappe.show_alert({
-                    message: __('VIN decoded successfully! {0} {1} {2}', [
-                        response.message.data.ModelYear || '',
-                        response.message.data.Make || '',
-                        response.message.data.Model || ''
-                    ]),
-                    indicator: 'green'
-                }, 5);
-                
-            } else {
-                frappe.msgprint({
-                    title: __('Decoding Failed'),
-                    message: response.message.message || __('Unable to decode VIN'),
-                    indicator: 'red'
-                });
+                // Check if decode was successful
+                if (result.ErrorCode && result.ErrorCode.includes('0')) {
+                    populate_vehicle_fields(frm, result);
+                    
+                    frappe.show_alert({
+                        message: __('VIN decoded: {0} {1} {2}', [
+                            result.ModelYear || '',
+                            result.Make || '',
+                            result.Model || ''
+                        ]),
+                        indicator: 'green'
+                    }, 7);
+                } else {
+                    frappe.msgprint({
+                        title: __('Decoding Failed'),
+                        message: result.ErrorText || __('Unable to decode VIN'),
+                        indicator: 'orange'
+                    });
+                }
             }
-        },
-        error: function(error) {
+        })
+        .catch(error => {
             frappe.dom.unfreeze();
             frappe.msgprint({
                 title: __('Error'),
-                message: __('Failed to connect to VIN decoder service. Please check your internet connection.'),
+                message: __('Failed to decode VIN. Please check your internet connection.'),
                 indicator: 'red'
             });
             console.error('VIN Decode Error:', error);
-        }
-    });
+        });
 }
 
 function populate_vehicle_fields(frm, data) {
-    // Comprehensive field mapping
-    const mapping = {
-        // Basic Information
-        'custom_make': 'Make',
-        'model': 'Model',
-        'model_year': 'ModelYear',
-        'manufacturer_name': 'Manufacturer',
-        'custom_cylinders': 'EngineCylinders',
-        // Vehicle Classification
-        'vehicle_type': 'VehicleType',
-        'body_class': 'BodyClass',
-        'trim': 'Trim',
-        'trim_2': 'Trim2',
-        'series': 'Series',
-        'series_2': 'Series2',
+    // Field mapping specific to your DocType
+    const fieldMapping = {
+        // Basic Vehicle Info
+        'model_year': data.ModelYear,
+        'custom_variant': data.Trim || data.Series,
         
-        // Engine Specifications
-        'engine_number_of_cylinders': 'EngineCylinders',
-        'displacement_cc': 'DisplacementCC',
-        'displacement_ci': 'DisplacementCI',
-        'displacement_l': 'DisplacementL',
-        'engine_model': 'EngineModel',
-        'engine_power_kw': 'EngineKW',
-        'engine_configuration': 'EngineConfiguration',
-        'engine_manufacturer': 'EngineManufacturer',
-        'fuel_injection_type': 'FuelInjectionType',
-        'turbo': 'Turbo',
-        'valve_train_design': 'ValveTrainDesign',
-        'cooling_type': 'CoolingType',
+        // Make - Since it's a Link field to "Manufacturers", we'll set it as text
+        // You may need to create the Manufacturer record first or handle it differently
+        // For now, we'll just show it in the variant or description
         
-        // Fuel Information
-        'fuel_type_primary': 'FuelTypePrimary',
-        'fuel_type_secondary': 'FuelTypeSecondary',
+        // Engine & Performance
+        'custom_engine_number': data.EngineModel,
+        'custom_cylinders': data.EngineCylinders,
+        'horsepower': data.EngineHP || data.EngineKW,
+        'power': data.EngineHP || data.EngineKW,
         
-        // Electric Vehicle Info
-        'electrification_level': 'ElectrificationLevel',
-        'battery_type': 'BatteryType',
-        'battery_kwh_from': 'BatteryKWh_From',
-        'battery_kwh_to': 'BatteryKWh_To',
-        'ev_drive_unit': 'EVDriveUnit',
-        'battery_cells': 'BatteryCells',
-        'battery_modules': 'BatteryModules',
-        'battery_packs': 'BatteryPacks',
-        'charger_level': 'ChargerLevel',
-        'charger_power_kw': 'ChargerPowerKW',
-        'horsepower': 'EngineHP_to',
-		
+        // Specifications
+        'seats_number': data.SeatingRows ? (parseInt(data.SeatingRows) * 2).toString() : data.Doors === '2' ? '2' : '5',
+        'doors_number': data.Doors,
+        
+        // Fuel & Emissions
+        'fuel_type': map_fuel_type(data.FuelTypePrimary),
+        'co2_emissions': data.DisplacementCC ? (parseFloat(data.DisplacementCC) * 0.12) : null, // Approximate
+        
         // Transmission
-        'transmission_style': 'TransmissionStyle',
-        'transmission_speeds': 'TransmissionSpeeds',
-        
-        // Dimensions & Capacity
-        'doors': 'Doors',
-        'windows': 'Windows',
-        'wheel_base_type': 'WheelBaseType',
-        'wheel_base_short_inches': 'WheelBaseShort_inches',
-        'wheel_base_long_inches': 'WheelBaseLong_inches',
-        'gross_vehicle_weight_rating': 'GVWR',
-        'gross_vehicle_weight_rating_from': 'GVWR_From',
-        'gross_vehicle_weight_rating_to': 'GVWR_To',
-        'curb_weight_lbs': 'CurbWeightLBS',
-        'bed_length_inches': 'BedLength_inches',
-        'cab_type': 'CabType',
-        'track_width_inches': 'TrackWidth_inches',
-        
-        // Drive & Wheels
-        'drive_type': 'DriveType',
-        'axles': 'Axles',
-        'axle_configuration': 'AxleConfiguration',
-        'wheel_size_front': 'WheelSizeFront_inches',
-        'wheel_size_rear': 'WheelSizeRear_inches',
-        
-        // Brakes & Safety Systems
-        'brake_system_type': 'BrakeSystemType',
-        'brake_system_desc': 'BrakeSystemDesc',
-        'abs': 'ABS',
-        'electronic_stability_control': 'ESC',
-        'traction_control': 'TractionControl',
-        'tire_pressure_monitoring_system': 'TPMS',
-        
-        // Safety Features
-        'airbag_locations': 'AirBagLocFront',
-        'seat_belts_all': 'SeatBeltsAll',
-        'pretensioner': 'Pretensioner',
-        'power' : 'DisplacementCC',
-        // Entertainment & Interior
-        'entertainment_system': 'EntertainmentSystem',
-        'steering_location': 'SteeringLocation',
-        'adaptive_cruise_control': 'AdaptiveCruiseControl',
-        'adaptive_headlights': 'AdaptiveHeadlights',
-        'adaptive_driving_beam': 'AdaptiveDrivingBeam',
-        
-        // Manufacturing Information
-        'plant_city': 'PlantCity',
-        'plant_state': 'PlantState',
-        'plant_country': 'PlantCountry',
-        'plant_company_name': 'PlantCompanyName',
-        
-        // VIN Information
-        'wmi': 'WMI',
-        'vehicle_descriptor': 'VehicleDescriptor',
-        'check_digit': 'VINCheckDigit',
-        'suggested_vin': 'SuggestedVIN',
-        'error_code': 'ErrorCode',
-        'error_text': 'ErrorText',
-        
-        // Market & Classification
-        'destination_market': 'DestinationMarket',
-        'ncsa_make': 'NCSAMake',
-        'ncsa_model': 'NCSAModel',
-        'ncsa_body_type': 'NCSABodyType',
-        'ncsa_note': 'NCSANote',
-        
-        // Commercial Vehicle Specific
-        'bus_length_feet': 'BusLength_feet',
-        'bus_floor_config': 'BusFloorConfigType',
-        'bus_type': 'BusType',
-        'trailer_type': 'TrailerType',
-        'trailer_body_type': 'TrailerBodyType',
-        'trailer_length_feet': 'TrailerLength_feet',
-        
-        // Motorcycle Specific
-        'motorcycle_suspension_type': 'MotorcycleSuspensionType',
-        'motorcycle_chassis_type': 'MotorcycleChassisType',
-        'motorcycle_brake_front': 'MotorcycleBrakeFront',
-        'motorcycle_brake_rear': 'MotorcycleBrakeRear',
-        'custom_motorcycle_type': 'CustomMotorcycleType',
-        
-        // Other Specifications
-        'top_speed_mph': 'TopSpeedMPH',
-        'seating_rows': 'SeatingRows',
-        'displacement_description': 'DisplacementL',
-        'other_engine_info': 'OtherEngineInfo',
-        'note': 'Note',
+        'transmission': map_transmission(data.TransmissionStyle),
     };
     
-    // Track updated fields
-    let updated_fields = [];
-    
-    // Populate fields
-    for (let field_name in mapping) {
-        let api_field = mapping[field_name];
-        let value = data[api_field];
-        
-        // Skip empty or "Not Applicable" values
-        if (!value || value === 'Not Applicable' || value === '' || value === 'null') {
-            continue;
-        }
-        
-        // Check if field exists in form
-        if (frm.fields_dict[field_name]) {
-            // Set the value
-            frm.set_value(field_name, value);
-            updated_fields.push(field_name);
+    // Set fields
+    let updated_count = 0;
+    for (let field in fieldMapping) {
+        const value = fieldMapping[field];
+        if (value && value !== 'Not Applicable' && value !== '' && frm.fields_dict[field]) {
+            frm.set_value(field, value);
+            updated_count++;
         }
     }
     
-    // Mark form as modified
+    // Handle Make separately since it's a Link field
+    if (data.Make) {
+        // Store make info in description or custom field
+        let make_info = `${data.Manufacturer || data.Make}`;
+        
+        // Update description with vehicle details
+        let vehicle_details = `Vehicle Information (Auto-decoded from VIN):\n`;
+        vehicle_details += `Make: ${data.Make}\n`;
+        vehicle_details += `Manufacturer: ${data.Manufacturer}\n`;
+        vehicle_details += `Model: ${data.Model}\n`;
+        vehicle_details += `Year: ${data.ModelYear}\n`;
+        vehicle_details += `Body Class: ${data.BodyClass || 'N/A'}\n`;
+        vehicle_details += `Vehicle Type: ${data.VehicleType || 'N/A'}\n`;
+        
+        if (data.EngineModel) vehicle_details += `Engine Model: ${data.EngineModel}\n`;
+        if (data.DisplacementL) vehicle_details += `Displacement: ${data.DisplacementL}L\n`;
+        if (data.DriveType) vehicle_details += `Drive Type: ${data.DriveType}\n`;
+        if (data.PlantCountry) vehicle_details += `Made in: ${data.PlantCountry}\n`;
+        
+        vehicle_details += `\n${frm.doc.description || ''}`;
+        
+        frm.set_value('description', vehicle_details);
+    }
+    
+    // Handle Model - since it's also a Link field, we'll need special handling
+    if (data.Model) {
+        // Try to set the model if it exists
+        frappe.db.get_value('Vehicles Model', {'name': data.Model}, 'name', (r) => {
+            if (r && r.name) {
+                frm.set_value('model', r.name);
+            } else {
+                // Model doesn't exist, add to description
+                frappe.msgprint({
+                    title: __('Model Not Found'),
+                    message: __('The model "{0}" was not found in your database. Please create it first or add it to the description.', [data.Model]),
+                    indicator: 'orange'
+                });
+            }
+        });
+    }
+    
+    // Additional decoded information
+    const additional_info = {
+        'Body Class': data.BodyClass,
+        'Vehicle Type': data.VehicleType,
+        'Drive Type': data.DriveType,
+        'ABS': data.ABS,
+        'Airbags': data.AirBagLocFront,
+        'Manufacturing Country': data.PlantCountry,
+        'Manufacturing City': data.PlantCity,
+        'Engine Configuration': data.EngineConfiguration,
+        'Fuel Injection': data.FuelInjectionType,
+        'Turbo': data.Turbo,
+        'Top Speed (MPH)': data.TopSpeedMPH,
+        'GVWR': data.GVWR,
+        'Brake System': data.BrakeSystemType,
+        'ESC': data.ESC,
+        'Traction Control': data.TractionControl,
+    };
+    
+    // Show summary dialog
+    let summary = '<table class="table table-bordered"><tbody>';
+    for (let key in additional_info) {
+        if (additional_info[key] && additional_info[key] !== 'Not Applicable') {
+            summary += `<tr><td><b>${key}</b></td><td>${additional_info[key]}</td></tr>`;
+        }
+    }
+    summary += '</tbody></table>';
+    
+    frappe.msgprint({
+        title: __('VIN Decoded Successfully'),
+        message: __('Updated {0} fields. Additional Information:', [updated_count]) + '<br><br>' + summary,
+        indicator: 'green',
+        wide: true
+    });
+    
+    // Mark form as dirty
     frm.dirty();
+}
+
+// Helper function to map fuel types
+function map_fuel_type(api_fuel) {
+    if (!api_fuel) return null;
     
-    // Log updated fields for debugging
-    console.log('VIN Decoder: Updated ' + updated_fields.length + ' fields:', updated_fields);
+    const fuel_map = {
+        'Gasoline': 'Gasoline',
+        'Diesel': 'Diesel',
+        'Liquefied Petroleum Gas (LPG)': 'LPG',
+        'LPG': 'LPG',
+        'Electric': 'Electric',
+        'Plug-in Hybrid': 'Hybrid',
+        'Hybrid': 'Hybrid',
+        'E85': 'Gasoline',
+        'Flex Fuel': 'Gasoline',
+    };
     
-    // Show summary
-    if (updated_fields.length > 0) {
-        frappe.show_alert({
-            message: __('Updated {0} vehicle fields', [updated_fields.length]),
-            indicator: 'blue'
-        }, 3);
+    for (let key in fuel_map) {
+        if (api_fuel.includes(key)) {
+            return fuel_map[key];
+        }
     }
+    
+    return null;
 }
 
-function show_decode_indicator(frm) {
-    // Add a visual indicator that VIN can be decoded
-    frm.dashboard.add_indicator(__('VIN Ready to Decode'), 'blue');
+// Helper function to map transmission types
+function map_transmission(api_transmission) {
+    if (!api_transmission) return null;
+    
+    if (api_transmission.toLowerCase().includes('manual')) {
+        return 'Manual';
+    } else if (api_transmission.toLowerCase().includes('auto') || 
+               api_transmission.toLowerCase().includes('cvt') ||
+               api_transmission.toLowerCase().includes('dct')) {
+        return 'Automatic';
+    }
+    
+    return null;
 }
 
-// Optional: Add VIN format validation
+// Add VIN validation
 frappe.ui.form.on('Vehicles', {
     validate: function(frm) {
         if (frm.doc.chassis_number) {
             const vin = frm.doc.chassis_number;
             
-            // Basic VIN validation
+            // Check for invalid characters in full VIN
             if (vin.length === 17) {
-                // Full VIN - check for invalid characters
                 const invalidChars = /[IOQioq]/;
                 if (invalidChars.test(vin)) {
                     frappe.msgprint({
@@ -305,39 +269,21 @@ frappe.ui.form.on('Vehicles', {
                     });
                     frappe.validated = false;
                 }
-            } else if (vin.length < 11) {
-                frappe.msgprint({
-                    title: __('Invalid VIN Length'),
-                    message: __('VIN must be at least 11 characters'),
-                    indicator: 'orange'
-                });
-                frappe.validated = false;
             }
         }
     }
 });
 
-// Add helper function to get specific make models
-function get_models_for_make(frm) {
-    if (!frm.doc.make) {
-        frappe.msgprint(__('Please select a Make first'));
-        return;
-    }
-    
-    frappe.call({
-        method: 'leetrental.leetrental.doctype.vehicles.api.get_models_for_make',
-        args: {
-            make: frm.doc.make,
-            year: frm.doc.model_year
-        },
-        callback: function(r) {
-            if (r.message && r.message.success) {
-                // Could populate a select field or show in dialog
-                console.log('Available models:', r.message.models);
-            }
+// Optional: Add button to update make/model from decoded data
+frappe.ui.form.on('Vehicles', {
+    refresh: function(frm) {
+        // Add helper text
+        if (frm.is_new() && !frm.doc.chassis_number) {
+            frm.set_df_property('chassis_number', 'description', 
+                'Enter VIN (17 chars) or partial VIN (11+ chars) to auto-fill vehicle details');
         }
-    });
-}
+    }
+});
 
 // Vehicle doctype client script
 frappe.ui.form.on('Vehicles', {
