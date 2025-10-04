@@ -1,13 +1,11 @@
-
-
-// File: your_app/your_app/vehicles/vehicles.js
-// Custom VIN Decoder for your Vehicles DocType
-
 // File: your_app/your_app/vehicles/vehicles.js
 // Client script with auto-create for Vehicles Model (Server API)
 
 frappe.ui.form.on('Vehicles', {
     refresh: function(frm) {
+        // Remove any existing decode button first
+        frm.remove_custom_button('🔍 Decode VIN');
+        
         // Add decode button if chassis number exists
         if (frm.doc.chassis_number && frm.doc.chassis_number.length >= 11) {
             frm.add_custom_button(__('🔍 Decode VIN'), function() {
@@ -37,10 +35,16 @@ frappe.ui.form.on('Vehicles', {
     
     // Optional: Add quick decode button next to chassis field
     onload: function(frm) {
-        // Add custom button next to chassis_number field
+        // Add custom button next to chassis_number field (only once)
         if (frm.fields_dict.chassis_number) {
-            frm.fields_dict.chassis_number.$wrapper.find('.control-input-wrapper').append(
-                `<button class="btn btn-xs btn-default" style="margin-left: 5px;" 
+            let wrapper = frm.fields_dict.chassis_number.$wrapper.find('.control-input-wrapper');
+            
+            // Remove any existing decode button
+            wrapper.find('.btn-decode-vin').remove();
+            
+            // Add the button
+            wrapper.append(
+                `<button class="btn btn-xs btn-default btn-decode-vin" style="margin-left: 5px;" 
                     onclick="decode_from_inline()">Decode</button>`
             );
         }
