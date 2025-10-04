@@ -1,12 +1,12 @@
 # File: your_app/your_app/vehicles/api.py
-# Server-side API for VIN decoding
+# Server-side VIN decoder with auto-create for Vehicles Model
 
 import frappe
 import requests
 from frappe import _
 
 @frappe.whitelist()
-def decode_vin(vin, model_year=None):
+def decode_vehicle_vin(vin, model_year=None):
     """
     Decode VIN using NHTSA vPIC API
     
@@ -20,9 +20,18 @@ def decode_vin(vin, model_year=None):
     if not vin:
         frappe.throw(_("VIN is required"))
     
+    # Clean VIN
+    vin = vin.strip().upper()
+    
     # Validate VIN length
     if len(vin) < 11:
         frappe.throw(_("VIN must be at least 11 characters long"))
+    
+    # Check for invalid characters in full VIN
+    if len(vin) == 17:
+        invalid_chars = set('IOQ')
+        if any(char in invalid_chars for char in vin):
+            frappe.throw(_("VIN cannot contain letters I, O, or Q"))
     
     try:
         # Build API URL
@@ -33,7 +42,7 @@ def decode_vin(vin, model_year=None):
             params["modelyear"] = model_year
         
         # Make API request
-        response = requests.get(api_url, params=params, timeout=10)
+        response = requests.get(api_url, params=params, timeout=15)
         response.raise_for_status()
         
         data = response.json()
@@ -42,10 +51,25 @@ def decode_vin(vin, model_year=None):
             result = data["Results"][0]
             
             # Check for errors
-            if result.get("ErrorCode") and "0" in result.get("ErrorCode", ""):
+            error_code = result.get("ErrorCode", "")
+            if "0" in error_code:
+                # Map to your DocType fields
+                mapped_data = map_to_vehicle_fields(result)
+                
+                # Create manufacturer and model if they don't exist
+                make_name = create_manufacturer_if_not_exists(result)
+                model_name = create_vehicle_model_if_not_exists(result, make_name)
+                
+                # Add the linked fields to mapped data
+                if make_name:
+                    mapped_data['custom_make'] = make_name
+                if model_name:
+                    mapped_data['model'] = model_name
+                
                 return {
                     "success": True,
-                    "data": result,
+                    "data": mapped_data,
+                    "raw_data": result,
                     "message": _("VIN decoded successfully")
                 }
             else:
@@ -61,6 +85,12 @@ def decode_vin(vin, model_year=None):
                 "data": None
             }
             
+    except requests.exceptions.Timeout:
+        frappe.log_error("VIN Decode Timeout", "VIN Decoder")
+        return {
+            "success": False,
+            "message": _("Request timed out. Please try again."),
+        }
     except requests.exceptions.RequestException as e:
         frappe.log_error(f"VIN Decode Error: {str(e)}", "VIN Decoder")
         return {
@@ -77,133 +107,299 @@ def decode_vin(vin, model_year=None):
         }
 
 
-@frappe.whitelist()
-def get_vehicle_makes():
+def create_manufacturer_if_not_exists(api_data):
     """
-    Get all vehicle makes from NHTSA API
-    
-    Returns:
-        list: List of vehicle makes
-    """
-    try:
-        api_url = "https://vpic.nhtsa.dot.gov/api/vehicles/GetAllMakes"
-        params = {"format": "json"}
-        
-        response = requests.get(api_url, params=params, timeout=10)
-        response.raise_for_status()
-        
-        data = response.json()
-        
-        if data.get("Results"):
-            makes = [item["Make_Name"] for item in data["Results"]]
-            return {"success": True, "makes": makes}
-        else:
-            return {"success": False, "message": _("No makes found")}
-            
-    except Exception as e:
-        frappe.log_error(f"Get Makes Error: {str(e)}", "VIN Decoder")
-        return {
-            "success": False,
-            "message": _("Failed to fetch vehicle makes"),
-            "error": str(e)
-        }
-
-
-@frappe.whitelist()
-def get_models_for_make(make, year=None):
-    """
-    Get models for a specific make and year
+    Create Manufacturers record if it doesn't exist
     
     Args:
-        make (str): Vehicle make
-        year (str, optional): Model year
+        api_data (dict): API response data
     
     Returns:
-        list: List of models
+        str: Manufacturer name
     """
+    make = api_data.get("Make")
+    if not make or make == "Not Applicable":
+        return None
+    
+    # Clean the make name
+    make = make.strip()
+    
+    # Check if manufacturer exists
+    if frappe.db.exists("Manufacturers", make):
+        return make
+    
     try:
-        api_url = f"https://vpic.nhtsa.dot.gov/api/vehicles/GetModelsForMake/{make}"
-        params = {"format": "json"}
+        # Create new manufacturer
+        manufacturer_doc = frappe.get_doc({
+            "doctype": "Manufacturers",
+            "name": make,
+            "manufacturer_name": make,
+            # Add any other required fields for your Manufacturers doctype
+        })
         
-        response = requests.get(api_url, params=params, timeout=10)
-        response.raise_for_status()
+        manufacturer_doc.insert(ignore_permissions=True)
+        frappe.db.commit()
         
-        data = response.json()
+        frappe.msgprint(_("Created new manufacturer: {0}").format(make), alert=True)
+        return make
         
-        if data.get("Results"):
-            models = [item["Model_Name"] for item in data["Results"]]
-            return {"success": True, "models": models}
-        else:
-            return {"success": False, "message": _("No models found")}
-            
     except Exception as e:
-        frappe.log_error(f"Get Models Error: {str(e)}", "VIN Decoder")
-        return {
-            "success": False,
-            "message": _("Failed to fetch models"),
-            "error": str(e)
+        frappe.log_error(f"Error creating manufacturer {make}: {str(e)}", "VIN Decoder")
+        # Don't throw error, just log it
+        return None
+
+
+def create_vehicle_model_if_not_exists(api_data, manufacturer_name):
+    """
+    Create Vehicles Model record if it doesn't exist
+    
+    Args:
+        api_data (dict): API response data
+        manufacturer_name (str): Manufacturer name from Manufacturers doctype
+    
+    Returns:
+        str: Model name
+    """
+    model = api_data.get("Model")
+    if not model or model == "Not Applicable":
+        return None
+    
+    # Clean the model name
+    model = model.strip()
+    
+    # Check if model exists
+    if frappe.db.exists("Vehicles Model", model):
+        return model
+    
+    try:
+        # Get vehicle type from API
+        vehicle_type = api_data.get("VehicleType")
+        if vehicle_type and vehicle_type != "Not Applicable":
+            vehicle_type = vehicle_type.strip()
+        else:
+            vehicle_type = None
+        
+        # Create new vehicle model
+        model_doc = frappe.get_doc({
+            "doctype": "Vehicles Model",
+            "model_name": model,
+            "manufacturer": manufacturer_name,
+            "vehicle_type": vehicle_type,
+        })
+        
+        model_doc.insert(ignore_permissions=True)
+        frappe.db.commit()
+        
+        frappe.msgprint(_("Created new vehicle model: {0}").format(model), alert=True)
+        return model
+        
+    except Exception as e:
+        frappe.log_error(f"Error creating vehicle model {model}: {str(e)}", "VIN Decoder")
+        # Don't throw error, just log it
+        return None
+
+
+def map_to_vehicle_fields(api_data):
+    """Map API response to Vehicles DocType fields"""
+    
+    # Helper function to get value safely
+    def get_value(key):
+        val = api_data.get(key)
+        if val and val not in ["Not Applicable", "null", ""]:
+            return val
+        return None
+    
+    # Map fuel type
+    def map_fuel_type(api_fuel):
+        if not api_fuel:
+            return None
+        
+        fuel_map = {
+            'Gasoline': 'Gasoline',
+            'Diesel': 'Diesel',
+            'LPG': 'LPG',
+            'Liquefied Petroleum Gas': 'LPG',
+            'Electric': 'Electric',
+            'Plug-in Hybrid': 'Hybrid',
+            'Hybrid': 'Hybrid',
+            'E85': 'Gasoline',
+            'Flex': 'Gasoline',
         }
+        
+        for key, value in fuel_map.items():
+            if key.lower() in api_fuel.lower():
+                return value
+        return None
+    
+    # Map transmission
+    def map_transmission(api_trans):
+        if not api_trans:
+            return None
+        
+        api_trans_lower = api_trans.lower()
+        if 'manual' in api_trans_lower:
+            return 'Manual'
+        elif any(x in api_trans_lower for x in ['auto', 'cvt', 'dct']):
+            return 'Automatic'
+        return None
+    
+    # Calculate seats (approximate)
+    def calculate_seats(doors, rows):
+        if rows:
+            try:
+                return str(int(rows) * 2)
+            except:
+                pass
+        
+        if doors:
+            return '2' if doors == '2' else '5'
+        
+        return None
+    
+    # Build mapped data
+    mapped = {
+        'model_year': get_value('ModelYear'),
+        'custom_variant': get_value('Trim') or get_value('Series'),
+        'custom_engine_number': get_value('EngineModel'),
+        'custom_cylinders': get_value('EngineCylinders'),
+        'horsepower': get_value('EngineHP') or get_value('EngineKW'),
+        'power': get_value('EngineHP') or get_value('EngineKW'),
+        'doors_number': get_value('Doors'),
+        'seats_number': calculate_seats(get_value('Doors'), get_value('SeatingRows')),
+        'fuel_type': map_fuel_type(get_value('FuelTypePrimary')),
+        'transmission': map_transmission(get_value('TransmissionStyle')),
+    }
+    
+    # Build description with all details
+    description_parts = ["Vehicle Information (Auto-decoded from VIN):\n"]
+    
+    info_fields = {
+        'Make': get_value('Make'),
+        'Manufacturer': get_value('Manufacturer'),
+        'Model': get_value('Model'),
+        'Year': get_value('ModelYear'),
+        'Body Class': get_value('BodyClass'),
+        'Vehicle Type': get_value('VehicleType'),
+        'Trim': get_value('Trim'),
+        'Series': get_value('Series'),
+        'Engine Model': get_value('EngineModel'),
+        'Displacement': f"{get_value('DisplacementL')}L" if get_value('DisplacementL') else None,
+        'Drive Type': get_value('DriveType'),
+        'Brake System': get_value('BrakeSystemType'),
+        'ABS': get_value('ABS'),
+        'ESC': get_value('ESC'),
+        'Traction Control': get_value('TractionControl'),
+        'Airbags': get_value('AirBagLocFront'),
+        'Plant Country': get_value('PlantCountry'),
+        'Plant City': get_value('PlantCity'),
+    }
+    
+    for label, value in info_fields.items():
+        if value:
+            description_parts.append(f"{label}: {value}")
+    
+    mapped['description'] = '\n'.join(description_parts)
+    
+    # Additional info for reference
+    mapped['_additional_info'] = {
+        'make': get_value('Make'),
+        'manufacturer': get_value('Manufacturer'),
+        'model': get_value('Model'),
+        'body_class': get_value('BodyClass'),
+        'vehicle_type': get_value('VehicleType'),
+        'drive_type': get_value('DriveType'),
+        'displacement_l': get_value('DisplacementL'),
+        'displacement_cc': get_value('DisplacementCC'),
+        'engine_config': get_value('EngineConfiguration'),
+        'fuel_injection': get_value('FuelInjectionType'),
+        'turbo': get_value('Turbo'),
+        'top_speed_mph': get_value('TopSpeedMPH'),
+        'gvwr': get_value('GVWR'),
+        'plant_country': get_value('PlantCountry'),
+    }
+    
+    # Remove None values
+    mapped = {k: v for k, v in mapped.items() if v is not None}
+    
+    return mapped
 
 
 @frappe.whitelist()
-def auto_fill_vehicle_from_vin(doc_name, vin, model_year=None):
+def auto_fill_vehicle(doc_name, vin, model_year=None):
     """
-    Auto-fill vehicle document fields from VIN
+    Auto-fill Vehicle document from VIN
     
     Args:
-        doc_name (str): Name of the Vehicles document
-        vin (str): Vehicle Identification Number
+        doc_name (str): Name of Vehicles document
+        vin (str): VIN
         model_year (str, optional): Model year
     
     Returns:
-        dict: Updated document
+        dict: Result
     """
     # Decode VIN
-    result = decode_vin(vin, model_year)
+    result = decode_vehicle_vin(vin, model_year)
     
     if not result.get("success"):
-        frappe.throw(result.get("message", _("Failed to decode VIN")))
+        return result
     
-    # Get the document
-    doc = frappe.get_doc("Vehicles", doc_name)
-    
-    # Map API data to document fields
-    api_data = result.get("data", {})
-    
-    # Field mapping - customize based on your doctype
-    field_map = {
-        "make": "Make",
-        "model": "Model",
-        "model_year": "ModelYear",
-        "manufacturer_name": "Manufacturer",
-        "vehicle_type": "VehicleType",
-        "body_class": "BodyClass",
-        "trim": "Trim",
-        "series": "Series",
-        "engine_number_of_cylinders": "EngineCylinders",
-        "displacement_cc": "DisplacementCC",
-        "displacement_l": "DisplacementL",
-        "engine_model": "EngineModel",
-        "fuel_type_primary": "FuelTypePrimary",
-        "transmission_style": "TransmissionStyle",
-        "doors": "Doors",
-        "drive_type": "DriveType",
-        "abs": "ABS",
-        "plant_country": "PlantCountry",
-    }
+    # Get document
+    try:
+        doc = frappe.get_doc("Vehicles", doc_name)
+    except frappe.DoesNotExistError:
+        return {
+            "success": False,
+            "message": _("Vehicle document not found")
+        }
     
     # Update fields
-    for doc_field, api_field in field_map.items():
-        value = api_data.get(api_field)
-        if value and value not in ["Not Applicable", "", None]:
-            if hasattr(doc, doc_field):
-                setattr(doc, doc_field, value)
+    mapped_data = result.get("data", {})
     
-    # Save the document
+    for field, value in mapped_data.items():
+        if field.startswith('_'):  # Skip internal fields
+            continue
+        
+        if hasattr(doc, field):
+            setattr(doc, field, value)
+    
+    # Save
     doc.save()
     
     return {
         "success": True,
-        "message": _("Vehicle information updated successfully"),
-        "doc": doc
+        "message": _("Vehicle updated successfully"),
+        "data": mapped_data
     }
+
+
+@frappe.whitelist()
+def validate_vin(vin):
+    """
+    Validate VIN format
+    
+    Args:
+        vin (str): VIN to validate
+    
+    Returns:
+        dict: Validation result
+    """
+    if not vin:
+        return {"valid": False, "message": "VIN is empty"}
+    
+    vin = vin.strip().upper()
+    
+    # Check length
+    if len(vin) < 11:
+        return {"valid": False, "message": "VIN must be at least 11 characters"}
+    
+    # Check for invalid characters in full VIN
+    if len(vin) == 17:
+        invalid_chars = set('IOQ')
+        found_invalid = [c for c in vin if c in invalid_chars]
+        if found_invalid:
+            return {
+                "valid": False,
+                "message": f"VIN cannot contain letters: {', '.join(found_invalid)}"
+            }
+    
+    return {"valid": True, "message": "VIN is valid"}
