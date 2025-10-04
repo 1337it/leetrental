@@ -4,14 +4,13 @@
 /* Hamburger Button */
 .sidebar-toggle-btn {
     position: fixed !important;
-    top: 50px !important;
-    left: 15px !important;
+    top: 48px !important;
+    left: 2px !important;
     z-index: 9999 !important;
     width: 45px;
     height: 45px;
     background: #ffffff !important;
-    border: 2px solid #d1d8dd !important;
-    border-radius: 8px;
+    border-radius: 2px;
     cursor: pointer;
     display: flex !important;
     flex-direction: column;
@@ -20,7 +19,6 @@
     gap: 5px;
     padding: 10px;
     transition: all 0.3s ease;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
 }
 
 .sidebar-toggle-btn:hover {
