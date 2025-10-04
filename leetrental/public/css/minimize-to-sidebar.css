@@ -60,9 +60,9 @@
 .minibtn__icon {
 width: 24px;
 text-align: center;
-opacity: 0.9;
+opacity: 1;
 font-size: 22px;
-  margin-left: 6px;
+  margin-left: -1px;
 /* margin-right: 5px; */
 }
 .minibtn__labels {
