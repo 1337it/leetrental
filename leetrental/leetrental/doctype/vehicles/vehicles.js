@@ -1,4 +1,4 @@
-leetrental.leetrental.doctype
+
 
 // File: your_app/your_app/vehicles/vehicles.js
 // Custom VIN Decoder for your Vehicles DocType
