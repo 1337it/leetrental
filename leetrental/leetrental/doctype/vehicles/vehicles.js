@@ -69,7 +69,7 @@ function decode_vin_server(frm) {
     
     // Call server-side method
     frappe.call({
-        method: 'your_app.vehicles.api.decode_vin',
+        method: 'leetrental.leetrental.doctype.vehicles.api.decode_vin',
         args: {
             vin: vin,
             model_year: frm.doc.model_year || null
@@ -324,7 +324,7 @@ function get_models_for_make(frm) {
     }
     
     frappe.call({
-        method: 'your_app.vehicles.api.get_models_for_make',
+        method: 'leetrental.leetrental.doctype.vehicles.api.get_models_for_make',
         args: {
             make: frm.doc.make,
             year: frm.doc.model_year
