@@ -151,43 +151,9 @@ display: none;
 min-width: 0;
 display: none;
 }
-.page-container:not(#page-Workspaces) {
-width: calc(100vw - 16.666vw) !important;
-right: 0;
-position: absolute;
-  top: var(--navbar-height) !important;
-  left: 16.66667%;
-}
-#page-Workspaces[style="display: none;"] .layout-side-section {
-display: block !important;
 
-  position: fixed;
-}
-[data-page-route="Workspaces"] .page-head {
-z-index: 6;
-top: var(--navbar-height);
-background: var(--bg-color);
-margin-bottom: 5px;
-transition: top 0.5s;
-width: calc(100vw - 16.66667vw);
-right: 0px;
-position: absolute;
-left: 16.66667%;
-  padding-left: 20px;
-padding-right: 20px;
-}
-  [data-page-route="Workspaces"] .page-head {
-z-index: 6;
-top: var(--navbar-height);
-background: var(--bg-color);
-margin-bottom: 5px;
-transition: top 0.5s;
-width: calc(100vw - 16.66667vw);
-right: 0px;
-left: 16.66667%;
-  padding-left: 20px;
-padding-right: 20px;
-}
+
+
 [data-page-route="Workspaces"] .layout-main .layout-main-section-wrapper {
 padding-top: var(--page-head-height);
 }
