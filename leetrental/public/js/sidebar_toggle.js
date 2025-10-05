@@ -34,7 +34,7 @@ function initCollapsibleSidebar() {
         return;
     }
     
-    const sidebar = workspacePage.querySelector('.layout-side-section');
+    const sidebar = workspacePage.querySelector('#page-Workspaces .layout-side-section');
     
     if (!sidebar) {
 
