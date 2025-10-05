@@ -129,7 +129,7 @@ def create_manufacturer_if_not_exists(api_data):
     
     # Check if manufacturer exists - use a more robust check
     existing_make = frappe.db.get_value("Manufacturers", 
-        filters={"manufacturer_name": make}, 
+        filters={"name1": make}, 
         fieldname="name"
     )
     
@@ -139,7 +139,7 @@ def create_manufacturer_if_not_exists(api_data):
     try:
         # Double-check before creating (prevent race condition)
         existing_make = frappe.db.get_value("Manufacturers", 
-            filters={"manufacturer_name": make}, 
+            filters={"name1": make}, 
             fieldname="name"
         )
         
@@ -149,7 +149,7 @@ def create_manufacturer_if_not_exists(api_data):
         # Create new manufacturer
         manufacturer_doc = frappe.get_doc({
             "doctype": "Manufacturers",
-            "manufacturer_name": make,
+            "name1": make,
             # Add any other required fields for your Manufacturers doctype
         })
         
@@ -165,7 +165,7 @@ def create_manufacturer_if_not_exists(api_data):
         # Manufacturer was created by another process, fetch and return it
         frappe.db.rollback()
         existing_make = frappe.db.get_value("Manufacturers", 
-            filters={"manufacturer_name": make}, 
+            filters={"name1": make}, 
             fieldname="name"
         )
         return existing_make
@@ -175,7 +175,7 @@ def create_manufacturer_if_not_exists(api_data):
         frappe.db.rollback()
         # Try to return existing manufacturer if any
         existing_make = frappe.db.get_value("Manufacturers", 
-            filters={"manufacturer_name": make}, 
+            filters={"name1": make}, 
             fieldname="name"
         )
         return existing_make if existing_make else None
@@ -187,7 +187,7 @@ def create_vehicle_model_if_not_exists(api_data, manufacturer_name):
     
     Args:
         api_data (dict): API response data
-        manufacturer_name (str): Manufacturer name from Manufacturers doctype
+        name1 (str): Manufacturer name from Manufacturers doctype
     
     Returns:
         str: Model name
@@ -229,7 +229,7 @@ def create_vehicle_model_if_not_exists(api_data, manufacturer_name):
         model_doc = frappe.get_doc({
             "doctype": "Vehicles Model",
             "model_name": model,
-            "manufacturer": manufacturer_name,
+            "manufacturer": name1,
             "vehicle_type": vehicle_type,
         })
         
