@@ -176,10 +176,18 @@ function populate_fields_from_api(frm, mapped_data, raw_data) {
     // Mark form as modified
     frm.dirty();
     
-    console.log(`VIN Decoder: Updated ${updated_count} fields`);
-    
-    // Refresh the form to show the linked records
+    // Refresh all fields to ensure link fields show properly
     frm.refresh_fields();
+    
+    // Specifically refresh link fields to show the linked records
+    if (mapped_data.custom_make) {
+        frm.refresh_field('custom_make');
+    }
+    if (mapped_data.model) {
+        frm.refresh_field('model');
+    }
+    
+    console.log(`VIN Decoder: Updated ${updated_count} fields`);
 }
 
 function show_additional_info_dialog(frm, additional_info, raw_data) {
