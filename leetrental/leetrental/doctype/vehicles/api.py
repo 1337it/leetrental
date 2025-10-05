@@ -63,8 +63,11 @@ def decode_vehicle_vin(vin, model_year=None):
                 # Add the linked fields to mapped data
                 if make_name:
                     mapped_data['custom_make'] = make_name
+                    frappe.msgprint(_("Manufacturer set: {0}").format(make_name), indicator='blue', alert=True)
+                    
                 if model_name:
                     mapped_data['model'] = model_name
+                    frappe.msgprint(_("Model set: {0}").format(model_name), indicator='blue', alert=True)
                 
                 return {
                     "success": True,
@@ -124,29 +127,58 @@ def create_manufacturer_if_not_exists(api_data):
     # Clean the make name
     make = make.strip()
     
-    # Check if manufacturer exists
-    if frappe.db.exists("Manufacturers", make):
-        return make
+    # Check if manufacturer exists - use a more robust check
+    existing_make = frappe.db.get_value("Manufacturers", 
+        filters={"manufacturer_name": make}, 
+        fieldname="name"
+    )
+    
+    if existing_make:
+        return existing_make
     
     try:
+        # Double-check before creating (prevent race condition)
+        existing_make = frappe.db.get_value("Manufacturers", 
+            filters={"manufacturer_name": make}, 
+            fieldname="name"
+        )
+        
+        if existing_make:
+            return existing_make
+        
         # Create new manufacturer
         manufacturer_doc = frappe.get_doc({
             "doctype": "Manufacturers",
-            "name": make,
             "manufacturer_name": make,
             # Add any other required fields for your Manufacturers doctype
         })
         
-        manufacturer_doc.insert(ignore_permissions=True)
+        manufacturer_doc.insert(ignore_permissions=True, ignore_if_duplicate=True)
         frappe.db.commit()
         
         frappe.msgprint(_("Created new manufacturer: {0}").format(make), alert=True)
-        return make
+        
+        # Return the name of the created document
+        return manufacturer_doc.name
+        
+    except frappe.DuplicateEntryError:
+        # Manufacturer was created by another process, fetch and return it
+        frappe.db.rollback()
+        existing_make = frappe.db.get_value("Manufacturers", 
+            filters={"manufacturer_name": make}, 
+            fieldname="name"
+        )
+        return existing_make
         
     except Exception as e:
         frappe.log_error(f"Error creating manufacturer {make}: {str(e)}", "VIN Decoder")
-        # Don't throw error, just log it
-        return None
+        frappe.db.rollback()
+        # Try to return existing manufacturer if any
+        existing_make = frappe.db.get_value("Manufacturers", 
+            filters={"manufacturer_name": make}, 
+            fieldname="name"
+        )
+        return existing_make if existing_make else None
 
 
 def create_vehicle_model_if_not_exists(api_data, manufacturer_name):
@@ -167,9 +199,14 @@ def create_vehicle_model_if_not_exists(api_data, manufacturer_name):
     # Clean the model name
     model = model.strip()
     
-    # Check if model exists
-    if frappe.db.exists("Vehicles Model", model):
-        return model
+    # Check if model exists - use a more robust check
+    existing_model = frappe.db.get_value("Vehicles Model", 
+        filters={"model_name": model}, 
+        fieldname="name"
+    )
+    
+    if existing_model:
+        return existing_model
     
     try:
         # Get vehicle type from API
@@ -179,6 +216,15 @@ def create_vehicle_model_if_not_exists(api_data, manufacturer_name):
         else:
             vehicle_type = None
         
+        # Double-check before creating (prevent race condition)
+        existing_model = frappe.db.get_value("Vehicles Model", 
+            filters={"model_name": model}, 
+            fieldname="name"
+        )
+        
+        if existing_model:
+            return existing_model
+        
         # Create new vehicle model
         model_doc = frappe.get_doc({
             "doctype": "Vehicles Model",
@@ -187,16 +233,32 @@ def create_vehicle_model_if_not_exists(api_data, manufacturer_name):
             "vehicle_type": vehicle_type,
         })
         
-        model_doc.insert(ignore_permissions=True)
+        model_doc.insert(ignore_permissions=True, ignore_if_duplicate=True)
         frappe.db.commit()
         
         frappe.msgprint(_("Created new vehicle model: {0}").format(model), alert=True)
-        return model
+        
+        # Return the name of the created document
+        return model_doc.name
+        
+    except frappe.DuplicateEntryError:
+        # Model was created by another process, fetch and return it
+        frappe.db.rollback()
+        existing_model = frappe.db.get_value("Vehicles Model", 
+            filters={"model_name": model}, 
+            fieldname="name"
+        )
+        return existing_model
         
     except Exception as e:
         frappe.log_error(f"Error creating vehicle model {model}: {str(e)}", "VIN Decoder")
-        # Don't throw error, just log it
-        return None
+        frappe.db.rollback()
+        # Try to return existing model if any
+        existing_model = frappe.db.get_value("Vehicles Model", 
+            filters={"model_name": model}, 
+            fieldname="name"
+        )
+        return existing_model if existing_model else None
 
 
 def map_to_vehicle_fields(api_data):
@@ -263,7 +325,7 @@ def map_to_vehicle_fields(api_data):
         'custom_engine_number': get_value('EngineModel'),
         'custom_cylinders': get_value('EngineCylinders'),
         'horsepower': get_value('EngineHP') or get_value('EngineKW'),
-        'power': get_value('EngineHP') or get_value('EngineKW'),
+        'power': get_value('DisplacementCC') or get_value('EngineKW'),
         'doors_number': get_value('Doors'),
         'seats_number': calculate_seats(get_value('Doors'), get_value('SeatingRows')),
         'fuel_type': map_fuel_type(get_value('FuelTypePrimary')),
