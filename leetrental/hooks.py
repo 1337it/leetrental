@@ -45,11 +45,18 @@ app_include_js = [
 	"/assets/leetrental/js/enter-to-next-and-focus-first.js",
 	"/assets/leetrental/js/advanced_link_picker.js",
 	"/assets/leetrental/js/sidebar_toggle.js",
-	"/assets/leetrental/js/icons.js"
+	"/assets/leetrental/js/icons.js",
+	"/assets/leetrental/js/vehicle_listview.js"
 ]
 
 app_include_icons = "leetrental/icons/rental-icons.svg"
 
+
+fixtures = [
+    "Workflow",
+    "Custom Field",
+    "Server Script"
+]
 # hooks.py
 
 # If you also want this in Desk (optional):
