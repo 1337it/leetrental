@@ -1,0 +1,11 @@
+[
+  {
+    "doctype": "Server Script",
+    "name": "Vehicle Status Sync",
+    "script_type": "DocType Event",
+    "reference_doctype": "Vehicles",
+    "event": "Before Save",
+    "enabled": 1,
+    "script": "import frappe\n\ndef before_save(doc, method=None):\n    # Keep custom status in sync with workflow_state\n    if getattr(doc, 'workflow_state', None):\n        if doc.status != doc.workflow_state:\n            doc.status = doc.workflow_state\n"
+  }
+]
