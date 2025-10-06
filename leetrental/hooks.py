@@ -10,16 +10,6 @@ app_license = "MIT"
 # Includes in <head>
 # ------------------
 
-fixtures = [{
-    "doctype": "Workflow",
-        "filters": {
-            "name": [ "in", ["Vehicles Workflow","Vehicle Movements Workflow","Service Workflow","Contract Information"]]
-            }
-        },
-        {
-    "doctype": "Workflow State"
-    }
-    ]
 # my_app/hooks.py
 
 # Include the custom JavaScript and CSS
