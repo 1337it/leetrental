@@ -149,7 +149,7 @@ def create_manufacturer_if_not_exists(api_data):
         # Create new manufacturer
         manufacturer_doc = frappe.get_doc({
             "doctype": "Manufacturers",
-            "name1": make,
+            "manufacturers_name": make,
             # Add any other required fields for your Manufacturers doctype
         })
         
@@ -165,7 +165,7 @@ def create_manufacturer_if_not_exists(api_data):
         # Manufacturer was created by another process, fetch and return it
         frappe.db.rollback()
         existing_make = frappe.db.get_value("Manufacturers", 
-            filters={"name1": make}, 
+            filters={"manufacturers_name": make}, 
             fieldname="name"
         )
         return existing_make
@@ -175,7 +175,7 @@ def create_manufacturer_if_not_exists(api_data):
         frappe.db.rollback()
         # Try to return existing manufacturer if any
         existing_make = frappe.db.get_value("Manufacturers", 
-            filters={"name1": make}, 
+            filters={"manufacturers_name": make}, 
             fieldname="name"
         )
         return existing_make if existing_make else None
