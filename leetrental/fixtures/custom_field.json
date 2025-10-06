@@ -3,7 +3,7 @@
     "doctype": "Custom Field",
     "name": "Vehicle-status",
     "dt": "Vehicles",
-    "fieldname": "status",
+    "fieldname": "vehicle_status",
     "label": "Status",
     "fieldtype": "Select",
     "options": "Available\nReserved\nOut for Delivery\nRented Out\nDue for Return\nCustody\nAt Garage\nUnder Maintenance\nAccident/Repair\nDeactivated",
