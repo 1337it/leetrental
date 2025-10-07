@@ -42,13 +42,13 @@ app_include_js = [
 app_include_icons = "leetrental/icons/rental-icons.svg"
 
 
-fixtures = [{
-    "doctype": "Workflow",
-        "filters": {
-            "name": [ "in", ["Vehicles Workflow"]]
-            }
-        }
-    ]
+fixtures = [
+    "Role",
+    "Workflow State",
+    "Workflow Action Master",
+    "Custom Field",
+    "Workflow"
+]
 # hooks.py
 
 # If you also want this in Desk (optional):
