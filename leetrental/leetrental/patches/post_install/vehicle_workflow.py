@@ -1,3 +1,5 @@
+# leetrental/leetrental/patches/post_install/vehicle_workflow.py
+
 import frappe
 
 def execute():
@@ -9,6 +11,7 @@ def execute():
     ])
     ensure_vehicle_status_field()
     ensure_vehicle_status_sync_script()
+    ensure_workflow_states()          # <-- NEW: create Workflow State docs first
     ensure_vehicle_workflow()
 
 def ensure_roles(role_names):
@@ -78,9 +81,34 @@ def ensure_vehicle_status_sync_script():
             "script": script_body,
         }).insert(ignore_permissions=True)
 
+# NEW: create Workflow State docs (names must exist before linking from Workflow rows)
+def ensure_workflow_states():
+    style_map = {
+        "Available": "Success",
+        "Reserved": "Warning",
+        "Out for Delivery": "Primary",
+        "Rented Out": "Primary",
+        "Due for Return": "Warning",
+        "Custody": "Default",
+        "At Garage": "Warning",
+        "Under Maintenance": "Danger",
+        "Accident/Repair": "Danger",
+        "Deactivated": "Muted",
+    }
+    for state, style in style_map.items():
+        if not frappe.db.exists("Workflow State", state):
+            frappe.get_doc({
+                "doctype": "Workflow State",
+                "workflow_state_name": state,   # some versions accept this
+                "name": state,                  # ensure name is exactly the state text
+                "style": style,
+                "is_default": 0,
+            }).insert(ignore_permissions=True)
+
 def ensure_vehicle_workflow():
     wf_name = "Vehicle Status Workflow"
 
+    # create or reset
     if frappe.db.exists("Workflow", wf_name):
         wf = frappe.get_doc("Workflow", wf_name)
         wf.states = []
@@ -98,26 +126,26 @@ def ensure_vehicle_workflow():
 
     def add_state(state, roles, update_field="status", update_value=None, doc_status=0):
         row = wf.append("states", {})
-        row.state = state
+        row.state = state                  # Link to existing Workflow State
         row.doc_status = doc_status
         row.update_field = update_field
         row.update_value = update_value or state
         for r in roles:
             ar = row.append("allow_edit", {})
-            ar.role = r
+            ar.role = r                    # Link to Role
 
     def add_transition(from_state, action, to_state, allowed_roles, allow_self_approval=1, condition=None):
         for role in allowed_roles:
             tr = wf.append("transitions", {})
-            tr.state = from_state
+            tr.state = from_state          # Link to Workflow State
             tr.action = action
-            tr.next_state = to_state
-            tr.allowed = role
+            tr.next_state = to_state       # Link to Workflow State
+            tr.allowed = role              # Link to Role
             tr.allow_self_approval = allow_self_approval
             if condition:
                 tr.condition = condition
 
-    # States
+    # States (names MUST match the Workflow State docs just created)
     add_state("Available",         ["Rental Agent", "Fleet Manager"])
     add_state("Reserved",          ["Rental Agent", "Fleet Manager"])
     add_state("Out for Delivery",  ["Delivery Agent", "Fleet Manager"])
