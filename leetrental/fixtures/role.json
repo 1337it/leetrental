@@ -1,0 +1,22 @@
+[
+  {
+    "doctype": "Role",
+    "role_name": "Fleet Manager",
+    "desk_access": 1
+  },
+  {
+    "doctype": "Role",
+    "role_name": "Rental Agent",
+    "desk_access": 1
+  },
+  {
+    "doctype": "Role",
+    "role_name": "Delivery Agent",
+    "desk_access": 1
+  },
+  {
+    "doctype": "Role",
+    "role_name": "Service Advisor",
+    "desk_access": 1
+  }
+]
