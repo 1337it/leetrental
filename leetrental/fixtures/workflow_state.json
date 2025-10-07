@@ -1,0 +1,62 @@
+[
+  {
+    "doctype": "Workflow State",
+    "name": "Available",
+    "workflow_state_name": "Available",
+    "style": "Success"
+  },
+  {
+    "doctype": "Workflow State",
+    "name": "Reserved",
+    "workflow_state_name": "Reserved",
+    "style": "Warning"
+  },
+  {
+    "doctype": "Workflow State",
+    "name": "Out for Delivery",
+    "workflow_state_name": "Out for Delivery",
+    "style": "Primary"
+  },
+  {
+    "doctype": "Workflow State",
+    "name": "Rented Out",
+    "workflow_state_name": "Rented Out",
+    "style": "Primary"
+  },
+  {
+    "doctype": "Workflow State",
+    "name": "Due for Return",
+    "workflow_state_name": "Due for Return",
+    "style": "Warning"
+  },
+  {
+    "doctype": "Workflow State",
+    "name": "Custody",
+    "workflow_state_name": "Custody",
+    "style": "Default"
+  },
+  {
+    "doctype": "Workflow State",
+    "name": "At Garage",
+    "workflow_state_name": "At Garage",
+    "style": "Warning"
+  },
+  {
+    "doctype": "Workflow State",
+    "name": "Under Maintenance",
+    "workflow_state_name": "Under Maintenance",
+    "style": "Danger"
+  },
+  {
+    "doctype": "Workflow State",
+    "name": "Accident/Repair",
+    "workflow_state_name": "Accident/Repair",
+    "style": "Danger"
+  },
+  {
+    "doctype": "Workflow State",
+    "name": "Deactivated",
+    "workflow_state_name": "Deactivated",
+    "style": "Muted"
+  }
+]
