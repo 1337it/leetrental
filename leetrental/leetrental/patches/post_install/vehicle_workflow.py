@@ -104,6 +104,47 @@ def ensure_workflow_states():
                 "style": style,
                 "is_default": 0,
             }).insert(ignore_permissions=True)
+def ensure_workflow_actions():
+    actions = [
+        "Reserve",
+        "Cancel Reservation",
+        "Dispatch",
+        "Hand Over",
+        "Mark Due for Return",
+        "Return Completed",
+        "Send to Garage",
+        "Start Maintenance",
+        "Job Done",
+        "Accident/Repair",
+        "Repair Completed",
+        "Move to Custody",
+        "Release to Fleet",
+        "Deactivate",
+        "Reactivate",
+    ]
+    for a in actions:
+        # Frappe v14+/v15: Doctype is "Workflow Action Master"
+        # Field is commonly "workflow_action_name"; we also set name explicitly for safety.
+        if not frappe.db.exists("Workflow Action Master", a):
+            frappe.get_doc({
+                "doctype": "Workflow Action Master",
+                "workflow_action_name": a,
+                "name": a,
+                "is_custom": 1,  # optional; harmless if field not present
+            }).insert(ignore_permissions=True)
+
+def execute():
+    ensure_roles([
+        "Rental Agent",
+        "Delivery Agent",
+        "Service Advisor",
+        "Fleet Manager",
+    ])
+    ensure_vehicle_status_field()
+    ensure_vehicle_status_sync_script()
+    ensure_workflow_states()     # we added earlier
+    ensure_workflow_actions()    # <-- add this line
+    ensure_vehicle_workflow()
 
 def ensure_vehicle_workflow():
     wf_name = "Vehicle Status Workflow"
