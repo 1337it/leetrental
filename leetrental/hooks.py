@@ -44,7 +44,6 @@ app_include_icons = "leetrental/icons/rental-icons.svg"
 
 fixtures = [
     "Workflow",
-    "Custom Field",
     "Server Script"
 ]
 # hooks.py
