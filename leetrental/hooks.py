@@ -45,12 +45,9 @@ app_include_icons = "leetrental/icons/rental-icons.svg"
 fixtures = [{
     "doctype": "Workflow",
         "filters": {
-            "name": [ "in", ["Vehicles Workflow","Agreements Workflow","Service Workflow","Contract Information"]]
+            "name": [ "in", ["Vehicles Workflow"]]
             }
-        },
-        {
-    "doctype": "Workflow State"
-    }
+        }
     ]
 # hooks.py
 
