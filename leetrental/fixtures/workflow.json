@@ -1,13 +1,14 @@
 [
-  {
-    "doctype": "Workflow",
-    "workflow_name": "Vehicle Status Workflow",
-    "document_type": "Vehicles",
-    "is_active": 1,
-    "override_status": 0,
-    "send_email_alert": 0,
-    "workflow_state_field": "workflow_state",
-    "states": [
+ {
+  "docstatus": 0,
+  "doctype": "Workflow",
+  "document_type": "Vehicles",
+  "is_active": 1,
+  "modified": "2022-11-17 10:09:50.568525",
+  "name": "Vehicles Workflow",
+  "override_status": 0,
+  "send_email_alert": 1,
+  "states": [
       {"state": "Available",          "doc_status": 0, "allow_edit": "Rental Agent, Fleet Manager", "update_field": "status", "update_value": "Available"},
       {"state": "Reserved",           "doc_status": 0, "allow_edit": "Rental Agent, Fleet Manager", "update_field": "status", "update_value": "Reserved"},
       {"state": "Out for Delivery",   "doc_status": 0, "allow_edit": "Delivery Agent, Fleet Manager", "update_field": "status", "update_value": "Out for Delivery"},
