@@ -42,10 +42,16 @@ app_include_js = [
 app_include_icons = "leetrental/icons/rental-icons.svg"
 
 
-fixtures = [
-    "Workflow",
-    "Server Script"
-]
+fixtures = [{
+    "doctype": "Workflow",
+        "filters": {
+            "name": [ "in", ["Vehicles Workflow","Agreements Workflow","Service Workflow","Contract Information"]]
+            }
+        },
+        {
+    "doctype": "Workflow State"
+    }
+    ]
 # hooks.py
 
 # If you also want this in Desk (optional):
