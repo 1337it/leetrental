@@ -1,0 +1,168 @@
+import frappe
+from frappe.model.doc import Document
+
+def execute():
+    ensure_roles([
+        "Rental Agent",
+        "Delivery Agent",
+        "Service Advisor",
+        "Fleet Manager",
+    ])
+    ensure_vehicle_status_field()
+    ensure_vehicle_status_sync_script()
+    ensure_vehicle_workflow()
+
+def ensure_roles(role_names):
+    for rn in role_names:
+        if not frappe.db.exists("Role", rn):
+            doc = frappe.get_doc({"doctype": "Role", "role_name": rn})
+            doc.insert(ignore_permissions=True)
+
+def ensure_vehicle_status_field():
+    # Create Vehicle.status (Select) if not present
+    if frappe.db.exists("Custom Field", "Vehicle-status"):
+        return
+    options = "\n".join([
+        "Available",
+        "Reserved",
+        "Out for Delivery",
+        "Rented Out",
+        "Due for Return",
+        "Custody",
+        "At Garage",
+        "Under Maintenance",
+        "Accident/Repair",
+        "Deactivated",
+    ])
+    cf = frappe.get_doc({
+        "doctype": "Custom Field",
+        "name": "Vehicle-status",
+        "dt": "Vehicle",
+        "fieldname": "status",
+        "label": "Status",
+        "fieldtype": "Select",
+        "options": options,
+        "default": "Available",
+        "insert_after": "model",
+        "read_only": 1,
+        "reqd": 1,
+        "no_copy": 1,
+        "in_list_view": 1,
+        "in_standard_filter": 1,
+    })
+    cf.insert(ignore_permissions=True)
+    frappe.clear_cache(doctype="Vehicle")
+
+def ensure_vehicle_status_sync_script():
+    # Server Script: keep status in sync with workflow_state
+    name = "Vehicle Status Sync"
+    ss = frappe.db.exists("Server Script", name)
+    script_body = (
+        "import frappe\n"
+        "def before_save(doc, method=None):\n"
+        "    if getattr(doc, 'workflow_state', None):\n"
+        "        if doc.status != doc.workflow_state:\n"
+        "            doc.status = doc.workflow_state\n"
+    )
+    if ss:
+        doc = frappe.get_doc("Server Script", name)
+        doc.script_type = "DocType Event"
+        doc.reference_doctype = "Vehicle"
+        doc.event = "Before Save"
+        doc.enabled = 1
+        doc.script = script_body
+        doc.save(ignore_permissions=True)
+    else:
+        frappe.get_doc({
+            "doctype": "Server Script",
+            "name": name,
+            "script_type": "DocType Event",
+            "reference_doctype": "Vehicle",
+            "event": "Before Save",
+            "enabled": 1,
+            "script": script_body,
+        }).insert(ignore_permissions=True)
+
+def ensure_vehicle_workflow():
+    wf_name = "Vehicle Status Workflow"
+    if frappe.db.exists("Workflow", wf_name):
+        wf = frappe.get_doc("Workflow", wf_name)
+        # reset children
+        wf.states = []
+        wf.transitions = []
+    else:
+        wf = frappe.get_doc({
+            "doctype": "Workflow",
+            "workflow_name": wf_name,
+            "document_type": "Vehicle",
+            "is_active": 1,
+            "override_status": 0,
+            "send_email_alert": 0,
+            "workflow_state_field": "workflow_state",
+        })
+
+    # Helper to add a state (with allow_edit roles + update field/value)
+    def add_state(state, roles, update_field="status", update_value=None, doc_status=0):
+        row = wf.append("states", {})
+        row.state = state
+        row.doc_status = doc_status
+        row.update_field = update_field
+        row.update_value = update_value or state
+        # "Allow Edit For" is a child table on Workflow State: add roles
+        for r in roles:
+            ar = row.append("allow_edit", {})
+            ar.role = r
+
+    # Helper to add transitions; In Frappe, each transition has a SINGLE "Allowed" role.
+    def add_transition(from_state, action, to_state, allowed_roles, allow_self_approval=1, condition=None):
+        for role in allowed_roles:
+            tr = wf.append("transitions", {})
+            tr.state = from_state
+            tr.action = action
+            tr.next_state = to_state
+            tr.allowed = role
+            tr.allow_self_approval = allow_self_approval
+            if condition:
+                tr.condition = condition
+
+    # --- States ---
+    add_state("Available",         ["Rental Agent", "Fleet Manager"])
+    add_state("Reserved",          ["Rental Agent", "Fleet Manager"])
+    add_state("Out for Delivery",  ["Delivery Agent", "Fleet Manager"])
+    add_state("Rented Out",        ["Rental Agent", "Fleet Manager"])
+    add_state("Due for Return",    ["Rental Agent", "Fleet Manager"])
+    add_state("Custody",           ["Fleet Manager"])
+    add_state("At Garage",         ["Service Advisor", "Fleet Manager"])
+    add_state("Under Maintenance", ["Service Advisor", "Fleet Manager"])
+    add_state("Accident/Repair",   ["Service Advisor", "Fleet Manager"])
+    add_state("Deactivated",       ["Fleet Manager"])
+
+    # --- Transitions ---
+    add_transition("Available",        "Reserve",              "Reserved",          ["Rental Agent", "Fleet Manager"])
+    add_transition("Reserved",         "Cancel Reservation",   "Available",         ["Rental Agent", "Fleet Manager"])
+    add_transition("Reserved",         "Dispatch",             "Out for Delivery",  ["Rental Agent", "Fleet Manager"])
+    add_transition("Available",        "Dispatch",             "Out for Delivery",  ["Rental Agent", "Fleet Manager"])
+    add_transition("Out for Delivery", "Hand Over",            "Rented Out",        ["Delivery Agent", "Fleet Manager"])
+    add_transition("Rented Out",       "Mark Due for Return",  "Due for Return",    ["Rental Agent", "Fleet Manager"])
+    add_transition("Due for Return",   "Return Completed",     "Available",         ["Rental Agent", "Fleet Manager"])
+    add_transition("Rented Out",       "Send to Garage",       "At Garage",         ["Fleet Manager", "Service Advisor"])
+    add_transition("At Garage",        "Start Maintenance",    "Under Maintenance", ["Service Advisor", "Fleet Manager"])
+    add_transition("Under Maintenance","Job Done",             "Available",         ["Service Advisor", "Fleet Manager"])
+    add_transition("At Garage",        "Accident/Repair",      "Accident/Repair",   ["Service Advisor", "Fleet Manager"])
+    add_transition("Accident/Repair",  "Repair Completed",     "Available",         ["Service Advisor", "Fleet Manager"])
+    add_transition("Available",        "Move to Custody",      "Custody",           ["Fleet Manager"])
+    add_transition("Custody",          "Release to Fleet",     "Available",         ["Fleet Manager"])
+    add_transition("Available",        "Deactivate",           "Deactivated",       ["Fleet Manager"])
+    add_transition("Deactivated",      "Reactivate",           "Available",         ["Fleet Manager"])
+
+    # Ensure top-level mandatory fields are present (explicitly set)
+    wf.workflow_name = wf_name
+    wf.document_type = "Vehicle"
+    wf.is_active = 1
+    wf.workflow_state_field = "workflow_state"
+
+    # Save or insert
+    if wf.get("name"):
+        wf.save(ignore_permissions=True)
+    else:
+        wf.insert(ignore_permissions=True)
