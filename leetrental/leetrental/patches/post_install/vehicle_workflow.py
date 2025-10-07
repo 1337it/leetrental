@@ -1,5 +1,4 @@
 import frappe
-from frappe.model.doc import Document
 
 def execute():
     ensure_roles([
@@ -15,11 +14,9 @@ def execute():
 def ensure_roles(role_names):
     for rn in role_names:
         if not frappe.db.exists("Role", rn):
-            doc = frappe.get_doc({"doctype": "Role", "role_name": rn})
-            doc.insert(ignore_permissions=True)
+            frappe.get_doc({"doctype": "Role", "role_name": rn}).insert(ignore_permissions=True)
 
 def ensure_vehicle_status_field():
-    # Create Vehicle.status (Select) if not present
     if frappe.db.exists("Custom Field", "Vehicle-status"):
         return
     options = "\n".join([
@@ -54,9 +51,7 @@ def ensure_vehicle_status_field():
     frappe.clear_cache(doctype="Vehicle")
 
 def ensure_vehicle_status_sync_script():
-    # Server Script: keep status in sync with workflow_state
     name = "Vehicle Status Sync"
-    ss = frappe.db.exists("Server Script", name)
     script_body = (
         "import frappe\n"
         "def before_save(doc, method=None):\n"
@@ -64,7 +59,7 @@ def ensure_vehicle_status_sync_script():
         "        if doc.status != doc.workflow_state:\n"
         "            doc.status = doc.workflow_state\n"
     )
-    if ss:
+    if frappe.db.exists("Server Script", name):
         doc = frappe.get_doc("Server Script", name)
         doc.script_type = "DocType Event"
         doc.reference_doctype = "Vehicle"
@@ -85,9 +80,9 @@ def ensure_vehicle_status_sync_script():
 
 def ensure_vehicle_workflow():
     wf_name = "Vehicle Status Workflow"
+
     if frappe.db.exists("Workflow", wf_name):
         wf = frappe.get_doc("Workflow", wf_name)
-        # reset children
         wf.states = []
         wf.transitions = []
     else:
@@ -101,19 +96,16 @@ def ensure_vehicle_workflow():
             "workflow_state_field": "workflow_state",
         })
 
-    # Helper to add a state (with allow_edit roles + update field/value)
     def add_state(state, roles, update_field="status", update_value=None, doc_status=0):
         row = wf.append("states", {})
         row.state = state
         row.doc_status = doc_status
         row.update_field = update_field
         row.update_value = update_value or state
-        # "Allow Edit For" is a child table on Workflow State: add roles
         for r in roles:
             ar = row.append("allow_edit", {})
             ar.role = r
 
-    # Helper to add transitions; In Frappe, each transition has a SINGLE "Allowed" role.
     def add_transition(from_state, action, to_state, allowed_roles, allow_self_approval=1, condition=None):
         for role in allowed_roles:
             tr = wf.append("transitions", {})
@@ -125,7 +117,7 @@ def ensure_vehicle_workflow():
             if condition:
                 tr.condition = condition
 
-    # --- States ---
+    # States
     add_state("Available",         ["Rental Agent", "Fleet Manager"])
     add_state("Reserved",          ["Rental Agent", "Fleet Manager"])
     add_state("Out for Delivery",  ["Delivery Agent", "Fleet Manager"])
@@ -137,7 +129,7 @@ def ensure_vehicle_workflow():
     add_state("Accident/Repair",   ["Service Advisor", "Fleet Manager"])
     add_state("Deactivated",       ["Fleet Manager"])
 
-    # --- Transitions ---
+    # Transitions
     add_transition("Available",        "Reserve",              "Reserved",          ["Rental Agent", "Fleet Manager"])
     add_transition("Reserved",         "Cancel Reservation",   "Available",         ["Rental Agent", "Fleet Manager"])
     add_transition("Reserved",         "Dispatch",             "Out for Delivery",  ["Rental Agent", "Fleet Manager"])
@@ -155,13 +147,11 @@ def ensure_vehicle_workflow():
     add_transition("Available",        "Deactivate",           "Deactivated",       ["Fleet Manager"])
     add_transition("Deactivated",      "Reactivate",           "Available",         ["Fleet Manager"])
 
-    # Ensure top-level mandatory fields are present (explicitly set)
     wf.workflow_name = wf_name
     wf.document_type = "Vehicle"
     wf.is_active = 1
     wf.workflow_state_field = "workflow_state"
 
-    # Save or insert
     if wf.get("name"):
         wf.save(ignore_permissions=True)
     else:
