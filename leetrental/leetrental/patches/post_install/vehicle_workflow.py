@@ -88,12 +88,12 @@ def ensure_workflow_states():
         "Reserved": "Warning",
         "Out for Delivery": "Primary",
         "Rented Out": "Primary",
-        "Due for Return": "Warning",
-        "Custody": "Default",
+        "Due for Return": "Info",
+        "Custody": "Info",
         "At Garage": "Warning",
         "Under Maintenance": "Danger",
         "Accident/Repair": "Danger",
-        "Deactivated": "Muted",
+        "Deactivated": "Inverse",
     }
     for state, style in style_map.items():
         if not frappe.db.exists("Workflow State", state):
