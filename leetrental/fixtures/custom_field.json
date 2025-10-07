@@ -1,0 +1,19 @@
+[
+  {
+    "doctype": "Custom Field",
+    "name": "Vehicle-status",
+    "dt": "Vehicle",
+    "fieldname": "status",
+    "label": "Status",
+    "fieldtype": "Select",
+    "options": "Available\nReserved\nOut for Delivery\nRented Out\nDue for Return\nCustody\nAt Garage\nUnder Maintenance\nAccident/Repair\nDeactivated",
+    "default": "Available",
+    "insert_after": "model",
+    "read_only": 1,
+    "reqd": 1,
+    "no_copy": 1,
+    "allow_in_quick_entry": 0,
+    "in_list_view": 1,
+    "in_standard_filter": 1
+  }
+]
