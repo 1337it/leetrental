@@ -2,7 +2,7 @@
   {
     "doctype": "Custom Field",
     "name": "Vehicle-status",
-    "dt": "Vehicle",
+    "dt": "Vehicles",
     "fieldname": "vehicle_status",
     "label": "Vehicle Status",
     "fieldtype": "Select",
