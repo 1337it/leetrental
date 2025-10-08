@@ -9,16 +9,16 @@
   "override_status": 0,
   "send_email_alert": 1,
   "states": [
-      {"state": "Available",          "doc_status": 0, "allow_edit": "Rental Agent, Fleet Manager", "update_field": "status", "update_value": "Available"},
-      {"state": "Reserved",           "doc_status": 0, "allow_edit": "Rental Agent, Fleet Manager", "update_field": "status", "update_value": "Reserved"},
-      {"state": "Out for Delivery",   "doc_status": 0, "allow_edit": "Delivery Agent, Fleet Manager", "update_field": "status", "update_value": "Out for Delivery"},
-      {"state": "Rented Out",         "doc_status": 0, "allow_edit": "Rental Agent, Fleet Manager", "update_field": "status", "update_value": "Rented Out"},
-      {"state": "Due for Return",     "doc_status": 0, "allow_edit": "Rental Agent, Fleet Manager", "update_field": "status", "update_value": "Due for Return"},
-      {"state": "Custody",            "doc_status": 0, "allow_edit": "Fleet Manager", "update_field": "status", "update_value": "Custody"},
-      {"state": "At Garage",          "doc_status": 0, "allow_edit": "Service Advisor, Fleet Manager", "update_field": "status", "update_value": "At Garage"},
-      {"state": "Under Maintenance",  "doc_status": 0, "allow_edit": "Service Advisor, Fleet Manager", "update_field": "status", "update_value": "Under Maintenance"},
-      {"state": "Accident/Repair",    "doc_status": 0, "allow_edit": "Service Advisor, Fleet Manager", "update_field": "status", "update_value": "Accident/Repair"},
-      {"state": "Deactivated",        "doc_status": 0, "allow_edit": "Fleet Manager", "update_field": "status", "update_value": "Deactivated"}
+      {"state": "Available",          "doc_status": 0, "allow_edit": "Rental Agent, Fleet Manager", "update_field": "vehicle_status", "update_value": "Available"},
+      {"state": "Reserved",           "doc_status": 0, "allow_edit": "Rental Agent, Fleet Manager", "update_field": "vehicle_status", "update_value": "Reserved"},
+      {"state": "Out for Delivery",   "doc_status": 0, "allow_edit": "Delivery Agent, Fleet Manager", "update_field": "vehicle_status", "update_value": "Out for Delivery"},
+      {"state": "Rented Out",         "doc_status": 0, "allow_edit": "Rental Agent, Fleet Manager", "update_field": "vehicle_status", "update_value": "Rented Out"},
+      {"state": "Due for Return",     "doc_status": 0, "allow_edit": "Rental Agent, Fleet Manager", "update_field": "vehicle_status", "update_value": "Due for Return"},
+      {"state": "Custody",            "doc_status": 0, "allow_edit": "Fleet Manager", "update_field": "vehicle_status", "update_value": "Custody"},
+      {"state": "At Garage",          "doc_status": 0, "allow_edit": "Service Advisor, Fleet Manager", "update_field": "vehicle_status", "update_value": "At Garage"},
+      {"state": "Under Maintenance",  "doc_status": 0, "allow_edit": "Service Advisor, Fleet Manager", "update_field": "vehicle_status", "update_value": "Under Maintenance"},
+      {"state": "Accident/Repair",    "doc_status": 0, "allow_edit": "Service Advisor, Fleet Manager", "update_field": "vehicle_status", "update_value": "Accident/Repair"},
+      {"state": "Deactivated",        "doc_status": 0, "allow_edit": "Fleet Manager", "update_field": "vehicle_status", "update_value": "Deactivated"}
     ],
     "transitions": [
       {"state": "Available",         "action": "Reserve",             "next_state": "Reserved",          "allowed": "Rental Agent, Fleet Manager"},
