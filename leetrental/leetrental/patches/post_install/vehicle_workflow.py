@@ -37,8 +37,8 @@ def ensure_vehicle_status_field():
     cf = frappe.get_doc({
         "doctype": "Custom Field",
         "name": "Vehicle-status",
-        "dt": "Vehicle",
-        "fieldname": "status",
+        "dt": "Vehicles",
+        "fieldname": "vehicle_status",
         "label": "Status",
         "fieldtype": "Select",
         "options": options,
@@ -65,7 +65,7 @@ def ensure_vehicle_status_sync_script():
     if frappe.db.exists("Server Script", name):
         doc = frappe.get_doc("Server Script", name)
         doc.script_type = "DocType Event"
-        doc.reference_doctype = "Vehicle"
+        doc.reference_doctype = "Vehicles"
         doc.event = "Before Save"
         doc.enabled = 1
         doc.script = script_body
@@ -75,7 +75,7 @@ def ensure_vehicle_status_sync_script():
             "doctype": "Server Script",
             "name": name,
             "script_type": "DocType Event",
-            "reference_doctype": "Vehicle",
+            "reference_doctype": "Vehicles",
             "event": "Before Save",
             "enabled": 1,
             "script": script_body,
@@ -158,7 +158,7 @@ def ensure_vehicle_workflow():
         wf = frappe.get_doc({
             "doctype": "Workflow",
             "workflow_name": wf_name,
-            "document_type": "Vehicle",
+            "document_type": "Vehicles",
             "is_active": 1,
             "override_status": 0,
             "send_email_alert": 0,
@@ -217,7 +217,7 @@ def ensure_vehicle_workflow():
     add_transition("Deactivated",      "Reactivate",           "Available",         ["Fleet Manager"])
 
     wf.workflow_name = wf_name
-    wf.document_type = "Vehicle"
+    wf.document_type = "Vehicles"
     wf.is_active = 1
     wf.workflow_state_field = "workflow_state"
 
