@@ -114,7 +114,7 @@
         <div class="psp-label">Account</div>
         <div class="psp-links">
           <a href="/me" class="psp-link">My Account</a>
-          <a id="fullscreen-button" href= class="psp-link">Fullscreen</a>
+          <a id="fullscreen-button" class="psp-link">Fullscreen</a>
           <a href="/update-password" class="psp-link">Change Password</a>
           <a href="/app?cmd=frappe.auth.logout" class="psp-link">Logout</a>
         </div>
