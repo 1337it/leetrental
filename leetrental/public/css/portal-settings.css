@@ -15,25 +15,25 @@ width: calc(100% - 20px);
 
 /* Launcher button (bottom-left) */
 #portal-settings-launcher.portal-settings-launcher {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 12px;
-  border: 1px solid var(--border-color, #e5e7eb);
-  border-radius: 10px;
-  background: var(--bg-color, #fff);
-  cursor: pointer;
-  font-weight: 600;
-  width: 100%;
+display: inline-flex;
+align-items: center;
+gap: 8px;
+padding: 8px 12px;
+border-top: 1px solid var(--border-color, #e5e7eb);
+border-radius: 0px;
+background: var(--bg-color, #fff);
+cursor: pointer;
+font-weight: 600;
+width: 100%;
 }
 
 /* Fallback fixed position if no sidebar is found */
 body > #portal-settings-launcher.portal-settings-launcher {
-  position: fixed;
-  left: 20px;
-  bottom: 20px;
-  z-index: 1000;
-  width: calc(16.6667% - 40px);
+position: fixed;
+left: 0px;
+bottom: 0px;
+z-index: 9999;
+width: calc(16.6667%);
 }
 
 /* Panel (flyout card) */
