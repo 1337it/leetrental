@@ -25,6 +25,8 @@ background: var(--bg-color, #fff);
 cursor: pointer;
 font-weight: 600;
 width: 100%;
+  border-right: 0px !important;
+border-bottom: 0px !important;
 }
 
 /* Fallback fixed position if no sidebar is found */
