@@ -123,7 +123,7 @@
     document.body.appendChild(panel);
 
     const fullscreenButton = document.getElementById('fullscreen-button');
-const myElement = document.getElementsByClassName('main-section')[0];
+const myElement = document.querySelector('body');
 
 fullscreenButton.addEventListener('click', () => {
   if (!document.fullscreenElement) {
