@@ -1,0 +1,9 @@
+{
+  "js/leet_devops.min.js": [
+    "public/js/leet_devops.js",
+    "public/js/dev_chat.js"
+  ],
+  "css/leet_devops.min.css": [
+    "public/css/leet_devops.css"
+  ]
+}
