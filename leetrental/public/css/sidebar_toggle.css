@@ -21,12 +21,7 @@ background: rgb(255, 255, 255) !important;
 display: flex !important;
 }
 
-.sidebar-toggle-btn:hover {
-    background: #f8f9fa !important;
-    border-color: #2490ef !important;
-    box-shadow: 0 6px 16px rgba(36, 144, 239, 0.3) !important;
-    transform: translateY(-2px);
-}
+
 
 .sidebar-toggle-btn:active {
     transform: translateY(0) scale(0.95);
