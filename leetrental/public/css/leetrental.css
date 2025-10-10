@@ -163,6 +163,8 @@ position: absolute;
 display: block !important;
 
   position: fixed;
+  left: 0;
+top: var(--navbar-height);
 }
 [data-page-route="Workspaces"] .page-head {
 z-index: 6;
