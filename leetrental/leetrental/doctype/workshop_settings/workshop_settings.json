@@ -1,0 +1,121 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2024-01-01 00:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "workshop_section",
+  "default_workshop_location",
+  "workshop_manager",
+  "maintenance_team",
+  "notification_section",
+  "send_email_notifications",
+  "send_system_notifications",
+  "notification_recipients",
+  "settings_section",
+  "auto_update_vehicle_status",
+  "require_odometer_reading",
+  "require_estimated_completion_date"
+ ],
+ "fields": [
+  {
+   "fieldname": "workshop_section",
+   "fieldtype": "Section Break",
+   "label": "Workshop Details"
+  },
+  {
+   "fieldname": "default_workshop_location",
+   "fieldtype": "Data",
+   "label": "Default Workshop Location",
+   "reqd": 1
+  },
+  {
+   "fieldname": "workshop_manager",
+   "fieldtype": "Link",
+   "label": "Workshop Manager",
+   "options": "Employee"
+  },
+  {
+   "fieldname": "maintenance_team",
+   "fieldtype": "Link",
+   "label": "Maintenance Team",
+   "options": "Employee Group"
+  },
+  {
+   "fieldname": "notification_section",
+   "fieldtype": "Section Break",
+   "label": "Notification Settings"
+  },
+  {
+   "fieldname": "send_email_notifications",
+   "fieldtype": "Check",
+   "label": "Send Email Notifications",
+   "default": 1
+  },
+  {
+   "fieldname": "send_system_notifications",
+   "fieldtype": "Check",
+   "label": "Send System Notifications",
+   "default": 1
+  },
+  {
+   "fieldname": "notification_recipients",
+   "fieldtype": "Table",
+   "label": "Notification Recipients",
+   "options": "Workshop Notification Recipient"
+  },
+  {
+   "fieldname": "settings_section",
+   "fieldtype": "Section Break",
+   "label": "Additional Settings"
+  },
+  {
+   "fieldname": "auto_update_vehicle_status",
+   "fieldtype": "Check",
+   "label": "Auto Update Vehicle Status",
+   "default": 1
+  },
+  {
+   "fieldname": "require_odometer_reading",
+   "fieldtype": "Check",
+   "label": "Require Odometer Reading",
+   "default": 1
+  },
+  {
+   "fieldname": "require_estimated_completion_date",
+   "fieldtype": "Check",
+   "label": "Require Estimated Completion Date",
+   "default": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "issingle": 1,
+ "links": [],
+ "modified": "2024-01-01 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "LeetRental",
+ "name": "Workshop Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "read": 1,
+   "role": "Fleet Manager",
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

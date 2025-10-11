@@ -1,0 +1,486 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "format:WRK-{YYYY}-{#####}",
+ "creation": "2024-01-01 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "vehicle_section",
+  "vehicle",
+  "license_plate",
+  "column_break_3",
+  "entry_datetime",
+  "expected_completion",
+  "actual_completion",
+  "entry_details_section",
+  "entry_odometer",
+  "priority",
+  "column_break_9",
+  "status",
+  "current_stage",
+  "issue_section",
+  "issue_description",
+  "customer_complaint",
+  "column_break_14",
+  "initial_diagnosis",
+  "estimated_cost",
+  "vehicle_info_section",
+  "make",
+  "model",
+  "year",
+  "column_break_vehicle",
+  "vin",
+  "fuel_type",
+  "color",
+  "sub_jobs_section",
+  "sub_jobs",
+  "section_break_25",
+  "total_labor_hours",
+  "total_parts_cost",
+  "column_break_28",
+  "total_labor_cost",
+  "total_workshop_cost",
+  "approval_section",
+  "approval_status",
+  "approved_by",
+  "column_break_33",
+  "approval_date",
+  "approval_notes",
+  "test_run_section",
+  "test_run_status",
+  "test_run_by",
+  "test_run_date",
+  "column_break_39",
+  "test_run_notes",
+  "test_run_failed_reason",
+  "assignment_section",
+  "assigned_to",
+  "supervisor",
+  "column_break_44",
+  "start_datetime",
+  "team_notes",
+  "additional_info_section",
+  "garage",
+  "bay_number",
+  "column_break_49",
+  "before_photos",
+  "after_photos",
+  "documents_section",
+  "internal_notes",
+  "column_break_53",
+  "customer_notes"
+ ],
+ "fields": [
+  {
+   "fieldname": "vehicle_section",
+   "fieldtype": "Section Break",
+   "label": "Vehicle Information"
+  },
+  {
+   "fieldname": "vehicle",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Vehicle",
+   "options": "Vehicles",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "vehicle.license_plate",
+   "fieldname": "license_plate",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "License Plate",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Now",
+   "fieldname": "entry_datetime",
+   "fieldtype": "Datetime",
+   "in_list_view": 1,
+   "label": "Entry Date & Time",
+   "reqd": 1
+  },
+  {
+   "fieldname": "expected_completion",
+   "fieldtype": "Datetime",
+   "label": "Expected Completion"
+  },
+  {
+   "fieldname": "actual_completion",
+   "fieldtype": "Datetime",
+   "label": "Actual Completion",
+   "read_only": 1
+  },
+  {
+   "fieldname": "entry_details_section",
+   "fieldtype": "Section Break",
+   "label": "Entry Details"
+  },
+  {
+   "fieldname": "entry_odometer",
+   "fieldtype": "Int",
+   "label": "Entry Odometer (km)",
+   "reqd": 1
+  },
+  {
+   "default": "Medium",
+   "fieldname": "priority",
+   "fieldtype": "Select",
+   "label": "Priority",
+   "options": "Low\nMedium\nHigh\nUrgent",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_9",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Vehicle Entry",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Status",
+   "options": "Vehicle Entry\nVehicle Work in Progress\nApproval Pending\nApproved\nTest Run Failed\nCompleted\nCancelled",
+   "reqd": 1
+  },
+  {
+   "fieldname": "current_stage",
+   "fieldtype": "Data",
+   "label": "Current Stage",
+   "read_only": 1
+  },
+  {
+   "fieldname": "issue_section",
+   "fieldtype": "Section Break",
+   "label": "Issue Description"
+  },
+  {
+   "fieldname": "issue_description",
+   "fieldtype": "Text Editor",
+   "label": "Issue Description",
+   "reqd": 1
+  },
+  {
+   "fieldname": "customer_complaint",
+   "fieldtype": "Small Text",
+   "label": "Customer Complaint"
+  },
+  {
+   "fieldname": "column_break_14",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "initial_diagnosis",
+   "fieldtype": "Text Editor",
+   "label": "Initial Diagnosis"
+  },
+  {
+   "fieldname": "estimated_cost",
+   "fieldtype": "Currency",
+   "label": "Estimated Cost"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "vehicle_info_section",
+   "fieldtype": "Section Break",
+   "label": "Vehicle Details"
+  },
+  {
+   "fetch_from": "vehicle.make",
+   "fieldname": "make",
+   "fieldtype": "Data",
+   "label": "Make",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "vehicle.model",
+   "fieldname": "model",
+   "fieldtype": "Data",
+   "label": "Model",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "vehicle.year",
+   "fieldname": "year",
+   "fieldtype": "Int",
+   "label": "Year",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_vehicle",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "vehicle.chassis_no",
+   "fieldname": "vin",
+   "fieldtype": "Data",
+   "label": "VIN/Chassis No",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "vehicle.fuel_type",
+   "fieldname": "fuel_type",
+   "fieldtype": "Data",
+   "label": "Fuel Type",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "vehicle.color",
+   "fieldname": "color",
+   "fieldtype": "Data",
+   "label": "Color",
+   "read_only": 1
+  },
+  {
+   "fieldname": "sub_jobs_section",
+   "fieldtype": "Section Break",
+   "label": "Sub Jobs"
+  },
+  {
+   "fieldname": "sub_jobs",
+   "fieldtype": "Table",
+   "label": "Sub Jobs",
+   "options": "Workshop Sub Job"
+  },
+  {
+   "fieldname": "section_break_25",
+   "fieldtype": "Section Break",
+   "label": "Cost Summary"
+  },
+  {
+   "fieldname": "total_labor_hours",
+   "fieldtype": "Float",
+   "label": "Total Labor Hours",
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_parts_cost",
+   "fieldtype": "Currency",
+   "label": "Total Parts Cost",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_28",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "total_labor_cost",
+   "fieldtype": "Currency",
+   "label": "Total Labor Cost",
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_workshop_cost",
+   "fieldtype": "Currency",
+   "label": "Total Workshop Cost",
+   "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "approval_section",
+   "fieldtype": "Section Break",
+   "label": "Approval"
+  },
+  {
+   "default": "Pending",
+   "fieldname": "approval_status",
+   "fieldtype": "Select",
+   "label": "Approval Status",
+   "options": "Pending\nApproved\nRejected"
+  },
+  {
+   "fieldname": "approved_by",
+   "fieldtype": "Link",
+   "label": "Approved By",
+   "options": "User"
+  },
+  {
+   "fieldname": "column_break_33",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "approval_date",
+   "fieldtype": "Datetime",
+   "label": "Approval Date"
+  },
+  {
+   "fieldname": "approval_notes",
+   "fieldtype": "Small Text",
+   "label": "Approval Notes"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "test_run_section",
+   "fieldtype": "Section Break",
+   "label": "Test Run"
+  },
+  {
+   "default": "Not Started",
+   "fieldname": "test_run_status",
+   "fieldtype": "Select",
+   "label": "Test Run Status",
+   "options": "Not Started\nIn Progress\nPassed\nFailed"
+  },
+  {
+   "fieldname": "test_run_by",
+   "fieldtype": "Link",
+   "label": "Test Run By",
+   "options": "User"
+  },
+  {
+   "fieldname": "test_run_date",
+   "fieldtype": "Datetime",
+   "label": "Test Run Date"
+  },
+  {
+   "fieldname": "column_break_39",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "test_run_notes",
+   "fieldtype": "Text Editor",
+   "label": "Test Run Notes"
+  },
+  {
+   "depends_on": "eval:doc.test_run_status=='Failed'",
+   "fieldname": "test_run_failed_reason",
+   "fieldtype": "Text Editor",
+   "label": "Test Run Failed Reason"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "assignment_section",
+   "fieldtype": "Section Break",
+   "label": "Assignment"
+  },
+  {
+   "fieldname": "assigned_to",
+   "fieldtype": "Link",
+   "label": "Assigned To",
+   "options": "User"
+  },
+  {
+   "fieldname": "supervisor",
+   "fieldtype": "Link",
+   "label": "Supervisor",
+   "options": "User"
+  },
+  {
+   "fieldname": "column_break_44",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "start_datetime",
+   "fieldtype": "Datetime",
+   "label": "Work Start Date & Time"
+  },
+  {
+   "fieldname": "team_notes",
+   "fieldtype": "Small Text",
+   "label": "Team Notes"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "additional_info_section",
+   "fieldtype": "Section Break",
+   "label": "Additional Information"
+  },
+  {
+   "fieldname": "garage",
+   "fieldtype": "Link",
+   "label": "Garage",
+   "options": "Garages"
+  },
+  {
+   "fieldname": "bay_number",
+   "fieldtype": "Data",
+   "label": "Bay Number"
+  },
+  {
+   "fieldname": "column_break_49",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "before_photos",
+   "fieldtype": "Attach Image",
+   "label": "Before Photos"
+  },
+  {
+   "fieldname": "after_photos",
+   "fieldtype": "Attach Image",
+   "label": "After Photos"
+  },
+  {
+   "fieldname": "documents_section",
+   "fieldtype": "Section Break",
+   "label": "Notes"
+  },
+  {
+   "fieldname": "internal_notes",
+   "fieldtype": "Text Editor",
+   "label": "Internal Notes"
+  },
+  {
+   "fieldname": "column_break_53",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "customer_notes",
+   "fieldtype": "Text Editor",
+   "label": "Customer Notes"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2024-01-01 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Leetrental",
+ "name": "Workshop",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Fleet Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Workshop Technician",
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1,
+ "track_seen": 1
+}

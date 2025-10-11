@@ -1,0 +1,382 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "format:SRV-{YYYY}-{#####}",
+ "creation": "2024-01-01 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "vehicle_details_section",
+  "vehicle",
+  "license_plate",
+  "column_break_4",
+  "odometer_reading",
+  "next_service_due",
+  "vehicle_info_section",
+  "make",
+  "model",
+  "year",
+  "column_break_vehicle_info",
+  "vin",
+  "fuel_type",
+  "transmission",
+  "last_service_section",
+  "last_service_date",
+  "last_service_type",
+  "column_break_last_service",
+  "last_service_odometer",
+  "days_since_last_service",
+  "service_details_section",
+  "service_date",
+  "service_type",
+  "garage",
+  "column_break_10",
+  "status",
+  "scheduled_date",
+  "completion_date",
+  "service_items_section",
+  "service_items",
+  "section_break_15",
+  "parts_replaced",
+  "fluids_changed",
+  "column_break_18",
+  "filters_changed",
+  "other_services",
+  "cost_section",
+  "labor_cost",
+  "parts_cost",
+  "column_break_23",
+  "other_costs",
+  "total_cost",
+  "technician_section",
+  "technician_name",
+  "technician_notes",
+  "column_break_28",
+  "customer_feedback",
+  "additional_information_section",
+  "attachments",
+  "column_break_31",
+  "internal_notes"
+ ],
+ "fields": [
+  {
+   "fieldname": "vehicle_details_section",
+   "fieldtype": "Section Break",
+   "label": "Vehicle Details"
+  },
+  {
+   "fieldname": "vehicle",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Vehicle",
+   "options": "Vehicles",
+   "reqd": 1
+  },
+  {
+   "fieldname": "license_plate",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "License Plate",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "odometer_reading",
+   "fieldtype": "Int",
+   "label": "Odometer Reading (km)",
+   "reqd": 1
+  },
+  {
+   "fieldname": "next_service_due",
+   "fieldtype": "Int",
+   "label": "Next Service Due (km)"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "vehicle_info_section",
+   "fieldtype": "Section Break",
+   "label": "Vehicle Information"
+  },
+  {
+   "fieldname": "make",
+   "fieldtype": "Data",
+   "label": "Make",
+   "read_only": 1
+  },
+  {
+   "fieldname": "model",
+   "fieldtype": "Data",
+   "label": "Model",
+   "read_only": 1
+  },
+  {
+   "fieldname": "year",
+   "fieldtype": "Int",
+   "label": "Year",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_vehicle_info",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "vin",
+   "fieldtype": "Data",
+   "label": "VIN/Chassis No",
+   "read_only": 1
+  },
+  {
+   "fieldname": "fuel_type",
+   "fieldtype": "Data",
+   "label": "Fuel Type",
+   "read_only": 1
+  },
+  {
+   "fieldname": "transmission",
+   "fieldtype": "Data",
+   "label": "Transmission",
+   "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "last_service_section",
+   "fieldtype": "Section Break",
+   "label": "Last Service Information"
+  },
+  {
+   "fieldname": "last_service_date",
+   "fieldtype": "Date",
+   "label": "Last Service Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "last_service_type",
+   "fieldtype": "Data",
+   "label": "Last Service Type",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_last_service",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "last_service_odometer",
+   "fieldtype": "Int",
+   "label": "Last Service Odometer",
+   "read_only": 1
+  },
+  {
+   "fieldname": "days_since_last_service",
+   "fieldtype": "Int",
+   "label": "Days Since Last Service",
+   "read_only": 1
+  },
+  {
+   "fieldname": "service_details_section",
+   "fieldtype": "Section Break",
+   "label": "Service Details"
+  },
+  {
+   "default": "Today",
+   "fieldname": "service_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Service Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "service_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Service Type",
+   "options": "Regular Service\nOil Change\nTire Rotation\nBrake Service\nTransmission Service\nCoolant Service\nAir Filter Replacement\nFull Inspection\nOther",
+   "reqd": 1
+  },
+  {
+   "fieldname": "garage",
+   "fieldtype": "Link",
+   "label": "Garage",
+   "options": "Garages",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_10",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Scheduled",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "Scheduled\nIn Progress\nCompleted\nCancelled",
+   "reqd": 1
+  },
+  {
+   "fieldname": "scheduled_date",
+   "fieldtype": "Date",
+   "label": "Scheduled Date"
+  },
+  {
+   "fieldname": "completion_date",
+   "fieldtype": "Date",
+   "label": "Completion Date"
+  },
+  {
+   "fieldname": "service_items_section",
+   "fieldtype": "Section Break",
+   "label": "Service Items"
+  },
+  {
+   "fieldname": "service_items",
+   "fieldtype": "Table",
+   "label": "Service Items",
+   "options": "Car Service Item"
+  },
+  {
+   "fieldname": "section_break_15",
+   "fieldtype": "Section Break",
+   "label": "Service Checklist"
+  },
+  {
+   "default": "0",
+   "fieldname": "parts_replaced",
+   "fieldtype": "Check",
+   "label": "Parts Replaced"
+  },
+  {
+   "default": "0",
+   "fieldname": "fluids_changed",
+   "fieldtype": "Check",
+   "label": "Fluids Changed"
+  },
+  {
+   "fieldname": "column_break_18",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "filters_changed",
+   "fieldtype": "Check",
+   "label": "Filters Changed"
+  },
+  {
+   "fieldname": "other_services",
+   "fieldtype": "Small Text",
+   "label": "Other Services Performed"
+  },
+  {
+   "fieldname": "cost_section",
+   "fieldtype": "Section Break",
+   "label": "Cost Breakdown"
+  },
+  {
+   "fieldname": "labor_cost",
+   "fieldtype": "Currency",
+   "label": "Labor Cost"
+  },
+  {
+   "fieldname": "parts_cost",
+   "fieldtype": "Currency",
+   "label": "Parts Cost"
+  },
+  {
+   "fieldname": "column_break_23",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "other_costs",
+   "fieldtype": "Currency",
+   "label": "Other Costs"
+  },
+  {
+   "fieldname": "total_cost",
+   "fieldtype": "Currency",
+   "label": "Total Cost",
+   "read_only": 1
+  },
+  {
+   "fieldname": "technician_section",
+   "fieldtype": "Section Break",
+   "label": "Technician Information"
+  },
+  {
+   "fieldname": "technician_name",
+   "fieldtype": "Data",
+   "label": "Technician Name"
+  },
+  {
+   "fieldname": "technician_notes",
+   "fieldtype": "Text Editor",
+   "label": "Technician Notes"
+  },
+  {
+   "fieldname": "column_break_28",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "customer_feedback",
+   "fieldtype": "Rating",
+   "label": "Customer Feedback"
+  },
+  {
+   "fieldname": "additional_information_section",
+   "fieldtype": "Section Break",
+   "label": "Additional Information"
+  },
+  {
+   "fieldname": "attachments",
+   "fieldtype": "Attach",
+   "label": "Attachments"
+  },
+  {
+   "fieldname": "column_break_31",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "internal_notes",
+   "fieldtype": "Text Editor",
+   "label": "Internal Notes"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2024-01-01 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Leetrental",
+ "name": "Car Service",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Fleet Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

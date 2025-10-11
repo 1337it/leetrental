@@ -1,0 +1,575 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "format:WT-{YYYY}-{#####}",
+ "creation": "2024-01-01 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "transfer_details_section",
+  "workshop",
+  "vehicle",
+  "license_plate",
+  "column_break_4",
+  "transfer_date",
+  "transfer_type",
+  "status",
+  "workshop_info_section",
+  "from_workshop",
+  "from_bay_number",
+  "column_break_10",
+  "to_workshop",
+  "to_bay_number",
+  "vehicle_info_section",
+  "make",
+  "model",
+  "year",
+  "column_break_16",
+  "vin",
+  "odometer_reading",
+  "transfer_reason_section",
+  "transfer_reason",
+  "priority",
+  "column_break_21",
+  "special_instructions",
+  "required_expertise",
+  "work_details_section",
+  "work_summary",
+  "pending_jobs",
+  "column_break_26",
+  "estimated_completion_time",
+  "parts_with_vehicle",
+  "handover_section",
+  "handed_over_by",
+  "handover_datetime",
+  "handover_signature",
+  "column_break_32",
+  "received_by",
+  "received_datetime",
+  "receiver_signature",
+  "vehicle_condition_section",
+  "vehicle_condition_notes",
+  "fuel_level",
+  "column_break_38",
+  "damage_notes",
+  "before_transfer_photos",
+  "documents_section",
+  "documents_transferred",
+  "column_break_42",
+  "keys_handed_over",
+  "tools_with_vehicle",
+  "approval_section",
+  "requires_approval",
+  "approval_status",
+  "column_break_47",
+  "approved_by",
+  "approval_date",
+  "approval_notes",
+  "timeline_section",
+  "expected_arrival",
+  "actual_arrival",
+  "column_break_53",
+  "transfer_duration",
+  "delay_reason",
+  "transport_section",
+  "transport_method",
+  "driver_name",
+  "driver_contact",
+  "column_break_59",
+  "vehicle_registration",
+  "transport_cost",
+  "additional_info_section",
+  "internal_notes",
+  "column_break_63",
+  "customer_notified",
+  "notification_sent"
+ ],
+ "fields": [
+  {
+   "fieldname": "transfer_details_section",
+   "fieldtype": "Section Break",
+   "label": "Transfer Details"
+  },
+  {
+   "fieldname": "workshop",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Source Workshop Document",
+   "options": "Workshop",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "workshop.vehicle",
+   "fieldname": "vehicle",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Vehicle",
+   "options": "Vehicles",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fetch_from": "vehicle.license_plate",
+   "fieldname": "license_plate",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "License Plate",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Now",
+   "fieldname": "transfer_date",
+   "fieldtype": "Datetime",
+   "in_list_view": 1,
+   "label": "Transfer Date & Time",
+   "reqd": 1
+  },
+  {
+   "fieldname": "transfer_type",
+   "fieldtype": "Select",
+   "label": "Transfer Type",
+   "options": "Expertise Required\nEquipment Not Available\nWorkload Balancing\nSpecialized Service\nEmergency\nCustomer Request\nOther",
+   "reqd": 1
+  },
+  {
+   "default": "Pending",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Status",
+   "options": "Pending\nIn Transit\nReceived\nCompleted\nCancelled",
+   "reqd": 1
+  },
+  {
+   "fieldname": "workshop_info_section",
+   "fieldtype": "Section Break",
+   "label": "Workshop Information"
+  },
+  {
+   "fetch_from": "workshop.garage",
+   "fieldname": "from_workshop",
+   "fieldtype": "Link",
+   "label": "From Workshop",
+   "options": "Garages",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fetch_from": "workshop.bay_number",
+   "fieldname": "from_bay_number",
+   "fieldtype": "Data",
+   "label": "From Bay Number",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_10",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "to_workshop",
+   "fieldtype": "Link",
+   "label": "To Workshop",
+   "options": "Garages",
+   "reqd": 1
+  },
+  {
+   "fieldname": "to_bay_number",
+   "fieldtype": "Data",
+   "label": "To Bay Number"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "vehicle_info_section",
+   "fieldtype": "Section Break",
+   "label": "Vehicle Information"
+  },
+  {
+   "fetch_from": "vehicle.make",
+   "fieldname": "make",
+   "fieldtype": "Data",
+   "label": "Make",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "vehicle.model",
+   "fieldname": "model",
+   "fieldtype": "Data",
+   "label": "Model",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "vehicle.year",
+   "fieldname": "year",
+   "fieldtype": "Int",
+   "label": "Year",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_16",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "vehicle.chassis_no",
+   "fieldname": "vin",
+   "fieldtype": "Data",
+   "label": "VIN/Chassis No",
+   "read_only": 1
+  },
+  {
+   "fieldname": "odometer_reading",
+   "fieldtype": "Int",
+   "label": "Odometer Reading (km)",
+   "reqd": 1
+  },
+  {
+   "fieldname": "transfer_reason_section",
+   "fieldtype": "Section Break",
+   "label": "Transfer Reason"
+  },
+  {
+   "fieldname": "transfer_reason",
+   "fieldtype": "Text Editor",
+   "label": "Transfer Reason",
+   "reqd": 1
+  },
+  {
+   "default": "Medium",
+   "fieldname": "priority",
+   "fieldtype": "Select",
+   "label": "Priority",
+   "options": "Low\nMedium\nHigh\nUrgent"
+  },
+  {
+   "fieldname": "column_break_21",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "special_instructions",
+   "fieldtype": "Small Text",
+   "label": "Special Instructions"
+  },
+  {
+   "fieldname": "required_expertise",
+   "fieldtype": "Small Text",
+   "label": "Required Expertise"
+  },
+  {
+   "fieldname": "work_details_section",
+   "fieldtype": "Section Break",
+   "label": "Work Details"
+  },
+  {
+   "fetch_from": "workshop.issue_description",
+   "fieldname": "work_summary",
+   "fieldtype": "Text Editor",
+   "label": "Work Summary",
+   "read_only": 1
+  },
+  {
+   "fieldname": "pending_jobs",
+   "fieldtype": "Table",
+   "label": "Pending Jobs to Transfer",
+   "options": "Workshop Transfer Job"
+  },
+  {
+   "fieldname": "column_break_26",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "estimated_completion_time",
+   "fieldtype": "Datetime",
+   "label": "Estimated Completion Time"
+  },
+  {
+   "fieldname": "parts_with_vehicle",
+   "fieldtype": "Table",
+   "label": "Parts With Vehicle",
+   "options": "Workshop Transfer Part"
+  },
+  {
+   "fieldname": "handover_section",
+   "fieldtype": "Section Break",
+   "label": "Handover Details"
+  },
+  {
+   "fieldname": "handed_over_by",
+   "fieldtype": "Link",
+   "label": "Handed Over By",
+   "options": "User"
+  },
+  {
+   "fieldname": "handover_datetime",
+   "fieldtype": "Datetime",
+   "label": "Handover Date & Time"
+  },
+  {
+   "fieldname": "handover_signature",
+   "fieldtype": "Signature",
+   "label": "Handover Signature"
+  },
+  {
+   "fieldname": "column_break_32",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "received_by",
+   "fieldtype": "Link",
+   "label": "Received By",
+   "options": "User"
+  },
+  {
+   "fieldname": "received_datetime",
+   "fieldtype": "Datetime",
+   "label": "Received Date & Time"
+  },
+  {
+   "fieldname": "receiver_signature",
+   "fieldtype": "Signature",
+   "label": "Receiver Signature"
+  },
+  {
+   "fieldname": "vehicle_condition_section",
+   "fieldtype": "Section Break",
+   "label": "Vehicle Condition"
+  },
+  {
+   "fieldname": "vehicle_condition_notes",
+   "fieldtype": "Text Editor",
+   "label": "Vehicle Condition Notes"
+  },
+  {
+   "fieldname": "fuel_level",
+   "fieldtype": "Select",
+   "label": "Fuel Level",
+   "options": "Empty\n1/4 Tank\n1/2 Tank\n3/4 Tank\nFull Tank"
+  },
+  {
+   "fieldname": "column_break_38",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "damage_notes",
+   "fieldtype": "Text Editor",
+   "label": "Damage Notes"
+  },
+  {
+   "fieldname": "before_transfer_photos",
+   "fieldtype": "Attach Image",
+   "label": "Before Transfer Photos"
+  },
+  {
+   "fieldname": "documents_section",
+   "fieldtype": "Section Break",
+   "label": "Documents & Items"
+  },
+  {
+   "fieldname": "documents_transferred",
+   "fieldtype": "Small Text",
+   "label": "Documents Transferred"
+  },
+  {
+   "fieldname": "column_break_42",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "keys_handed_over",
+   "fieldtype": "Check",
+   "label": "Keys Handed Over"
+  },
+  {
+   "fieldname": "tools_with_vehicle",
+   "fieldtype": "Small Text",
+   "label": "Tools With Vehicle"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "approval_section",
+   "fieldtype": "Section Break",
+   "label": "Approval"
+  },
+  {
+   "default": "0",
+   "fieldname": "requires_approval",
+   "fieldtype": "Check",
+   "label": "Requires Approval"
+  },
+  {
+   "depends_on": "requires_approval",
+   "default": "Pending",
+   "fieldname": "approval_status",
+   "fieldtype": "Select",
+   "label": "Approval Status",
+   "options": "Pending\nApproved\nRejected"
+  },
+  {
+   "fieldname": "column_break_47",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "requires_approval",
+   "fieldname": "approved_by",
+   "fieldtype": "Link",
+   "label": "Approved By",
+   "options": "User"
+  },
+  {
+   "depends_on": "requires_approval",
+   "fieldname": "approval_date",
+   "fieldtype": "Datetime",
+   "label": "Approval Date"
+  },
+  {
+   "depends_on": "requires_approval",
+   "fieldname": "approval_notes",
+   "fieldtype": "Small Text",
+   "label": "Approval Notes"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "timeline_section",
+   "fieldtype": "Section Break",
+   "label": "Timeline"
+  },
+  {
+   "fieldname": "expected_arrival",
+   "fieldtype": "Datetime",
+   "label": "Expected Arrival"
+  },
+  {
+   "fieldname": "actual_arrival",
+   "fieldtype": "Datetime",
+   "label": "Actual Arrival"
+  },
+  {
+   "fieldname": "column_break_53",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "transfer_duration",
+   "fieldtype": "Duration",
+   "label": "Transfer Duration",
+   "read_only": 1
+  },
+  {
+   "fieldname": "delay_reason",
+   "fieldtype": "Small Text",
+   "label": "Delay Reason"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "transport_section",
+   "fieldtype": "Section Break",
+   "label": "Transport Details"
+  },
+  {
+   "fieldname": "transport_method",
+   "fieldtype": "Select",
+   "label": "Transport Method",
+   "options": "Self Drive\nTow Truck\nFlatbed\nDriver\nOther"
+  },
+  {
+   "fieldname": "driver_name",
+   "fieldtype": "Data",
+   "label": "Driver Name"
+  },
+  {
+   "fieldname": "driver_contact",
+   "fieldtype": "Data",
+   "label": "Driver Contact"
+  },
+  {
+   "fieldname": "column_break_59",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "vehicle_registration",
+   "fieldtype": "Data",
+   "label": "Transport Vehicle Registration"
+  },
+  {
+   "fieldname": "transport_cost",
+   "fieldtype": "Currency",
+   "label": "Transport Cost"
+  },
+  {
+   "fieldname": "additional_info_section",
+   "fieldtype": "Section Break",
+   "label": "Additional Information"
+  },
+  {
+   "fieldname": "internal_notes",
+   "fieldtype": "Text Editor",
+   "label": "Internal Notes"
+  },
+  {
+   "fieldname": "column_break_63",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "customer_notified",
+   "fieldtype": "Check",
+   "label": "Customer Notified"
+  },
+  {
+   "depends_on": "customer_notified",
+   "fieldname": "notification_sent",
+   "fieldtype": "Datetime",
+   "label": "Notification Sent",
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2024-01-01 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Leetrental",
+ "name": "Workshop Transfer",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Fleet Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Workshop Supervisor",
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1,
+ "track_seen": 1
+}
