@@ -1,0 +1,369 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "VM.#####",
+ "creation": "2024-01-01 00:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "custom_general_info",
+  "movement_id",
+  "agreement_no",
+  "movement_type",
+  "manual_agreement_no",
+  "date",
+  "workshop",
+  "vehicle",
+  "io_section",
+  "out_heading",
+  "out_date_time",
+  "custom_column_break_xh4dg",
+  "custom_spacer",
+  "out_fuel_level",
+  "out_branch",
+  "out_notes",
+  "custom_column_break_f87lx",
+  "custom_spacer2",
+  "out_mileage",
+  "out_staff",
+  "out_customer",
+  "out_driver",
+  "cb_io",
+  "in_heading",
+  "in_date_time",
+  "custom_column_break_1sywl",
+  "custom_spacer3",
+  "in_fuel_level",
+  "in_branch",
+  "in_notes",
+  "custom_column_break_ibo93",
+  "custom_spacer4",
+  "in_mileage",
+  "in_staff",
+  "in_customer",
+  "in_driver",
+  "workshop_section",
+  "custom_column_break_0qy3e",
+  "odometer_value",
+  "in_to",
+  "out_from",
+  "movement_subtype",
+  "unit",
+  "purchase_order_no",
+  "drop_location",
+  "pickup_location",
+  "custom_column_break_18dmj",
+  "service_done",
+  "general_section"
+ ],
+ "fields": [
+  {
+   "fieldname": "custom_general_info",
+   "fieldtype": "Section Break",
+   "label": "General Info"
+  },
+  {
+   "fieldname": "movement_id",
+   "fieldtype": "Data",
+   "label": "Movement ID",
+   "read_only": 1
+  },
+  {
+   "fieldname": "agreement_no",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Agreement No",
+   "options": "Agreements"
+  },
+  {
+   "fieldname": "movement_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Movement Type",
+   "options": "Custody\nNRM/Staff Movement\nNRM/Customer Movement\nWorkshop",
+   "reqd": 1
+  },
+  {
+   "fieldname": "manual_agreement_no",
+   "fieldtype": "Data",
+   "label": "Manual Agreement No"
+  },
+  {
+   "fieldname": "date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Date",
+   "reqd": 1,
+   "default": "Today"
+  },
+  {
+   "fieldname": "workshop",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Workshop",
+   "options": "Workshop"
+  },
+  {
+   "fieldname": "vehicle",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Vehicle",
+   "options": "Vehicle",
+   "reqd": 1
+  },
+  {
+   "fieldname": "io_section",
+   "fieldtype": "Section Break",
+   "label": ""
+  },
+  {
+   "fieldname": "out_heading",
+   "fieldtype": "Heading",
+   "label": "Out Details",
+   "bold": 1
+  },
+  {
+   "fieldname": "out_date_time",
+   "fieldtype": "Datetime",
+   "label": "Date and Time"
+  },
+  {
+   "fieldname": "custom_column_break_xh4dg",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "custom_spacer",
+   "fieldtype": "HTML",
+   "label": "spacer"
+  },
+  {
+   "fieldname": "out_fuel_level",
+   "fieldtype": "Select",
+   "label": "Out Fuel Level",
+   "options": "Empty\n1/4\n1/2\n3/4\nFull"
+  },
+  {
+   "fieldname": "out_branch",
+   "fieldtype": "Link",
+   "label": "Out Branch",
+   "options": "Branch"
+  },
+  {
+   "fieldname": "out_notes",
+   "fieldtype": "Small Text",
+   "label": "Out Notes"
+  },
+  {
+   "fieldname": "custom_column_break_f87lx",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "custom_spacer2",
+   "fieldtype": "HTML",
+   "label": "spacer2"
+  },
+  {
+   "fieldname": "out_mileage",
+   "fieldtype": "Float",
+   "label": "Out Mileage"
+  },
+  {
+   "fieldname": "out_staff",
+   "fieldtype": "Link",
+   "label": "Out Staff",
+   "options": "Employee"
+  },
+  {
+   "fieldname": "out_customer",
+   "fieldtype": "Link",
+   "label": "Out Customer",
+   "options": "Customer"
+  },
+  {
+   "fieldname": "out_driver",
+   "fieldtype": "Data",
+   "label": "Out Driver"
+  },
+  {
+   "fieldname": "cb_io",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "in_heading",
+   "fieldtype": "Heading",
+   "label": "In Details",
+   "bold": 1
+  },
+  {
+   "fieldname": "in_date_time",
+   "fieldtype": "Datetime",
+   "label": "Date and Time"
+  },
+  {
+   "fieldname": "custom_column_break_1sywl",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "custom_spacer3",
+   "fieldtype": "HTML",
+   "label": "spacer3"
+  },
+  {
+   "fieldname": "in_fuel_level",
+   "fieldtype": "Select",
+   "label": "In Fuel Level",
+   "options": "Empty\n1/4\n1/2\n3/4\nFull"
+  },
+  {
+   "fieldname": "in_branch",
+   "fieldtype": "Link",
+   "label": "In Branch",
+   "options": "Branch"
+  },
+  {
+   "fieldname": "in_notes",
+   "fieldtype": "Small Text",
+   "label": "In Notes"
+  },
+  {
+   "fieldname": "custom_column_break_ibo93",
+   "fieldtype": "Column Break",
+   "hidden": 1
+  },
+  {
+   "fieldname": "custom_spacer4",
+   "fieldtype": "HTML",
+   "label": "spacer4"
+  },
+  {
+   "fieldname": "in_mileage",
+   "fieldtype": "Float",
+   "label": "In Mileage"
+  },
+  {
+   "fieldname": "in_staff",
+   "fieldtype": "Link",
+   "label": "In Staff",
+   "options": "Employee"
+  },
+  {
+   "fieldname": "in_customer",
+   "fieldtype": "Link",
+   "label": "In Customer",
+   "options": "Customer"
+  },
+  {
+   "fieldname": "in_driver",
+   "fieldtype": "Data",
+   "label": "In Driver"
+  },
+  {
+   "fieldname": "workshop_section",
+   "fieldtype": "Section Break",
+   "label": "Workshop Section",
+   "collapsible": 1
+  },
+  {
+   "fieldname": "custom_column_break_0qy3e",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "odometer_value",
+   "fieldtype": "Float",
+   "hidden": 1,
+   "label": "Odometer Value"
+  },
+  {
+   "fieldname": "in_to",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "In To"
+  },
+  {
+   "fieldname": "out_from",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Out From"
+  },
+  {
+   "fieldname": "movement_subtype",
+   "fieldtype": "Data",
+   "label": "Movement Subtype"
+  },
+  {
+   "fieldname": "unit",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Unit"
+  },
+  {
+   "fieldname": "purchase_order_no",
+   "fieldtype": "Data",
+   "label": "Purchase Order No"
+  },
+  {
+   "fieldname": "drop_location",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Drop Location"
+  },
+  {
+   "fieldname": "pickup_location",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Pickup Location"
+  },
+  {
+   "fieldname": "custom_column_break_18dmj",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "service_done",
+   "fieldtype": "Small Text",
+   "label": "Service Done"
+  },
+  {
+   "fieldname": "general_section",
+   "fieldtype": "Section Break",
+   "label": "General Section"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2024-01-01 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "leetrental",
+ "name": "Vehicle Movements",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Fleet Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

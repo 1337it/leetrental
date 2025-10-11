@@ -1,0 +1,360 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "field:agreement_no",
+ "creation": "2024-01-01 00:00:00",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "section_break_2",
+  "reservation_name",
+  "agreement_no",
+  "agreement_type",
+  "column_break_3",
+  "employee",
+  "driver",
+  "approver",
+  "section_break_22",
+  "agreement_date",
+  "status",
+  "column_break_24",
+  "start_date",
+  "end_date",
+  "section_break_9",
+  "pickup_location",
+  "pickup_date",
+  "column_break_11",
+  "drop_location",
+  "drop_date",
+  "section_break_charges",
+  "rental_rate",
+  "deposit_type",
+  "deposit",
+  "column_break_charges",
+  "total_amount",
+  "paid_amount",
+  "balance_amount",
+  "section_break_14",
+  "vehicle",
+  "permanent_vehicle",
+  "vehicle_condition",
+  "fuel_level",
+  "odometer_reading",
+  "column_break_16",
+  "vehicle_images",
+  "map_view",
+  "additional_section",
+  "terms_and_conditions",
+  "notes",
+  "column_break_additional",
+  "attachments",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "collapsible": 1,
+   "fieldname": "section_break_2",
+   "fieldtype": "Section Break",
+   "label": "Reservation & Parties"
+  },
+  {
+   "fieldname": "reservation_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Reservation Name"
+  },
+  {
+   "fieldname": "agreement_no",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Agreement No",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "agreement_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Agreement Type",
+   "options": "Daily\nWeekly\nMonthly\nLong Term",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "employee",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Employee",
+   "options": "Employee"
+  },
+  {
+   "fieldname": "driver",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Driver",
+   "options": "Driver"
+  },
+  {
+   "fieldname": "approver",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Approver",
+   "options": "User"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "section_break_22",
+   "fieldtype": "Section Break",
+   "label": "Agreement Details"
+  },
+  {
+   "default": "Today",
+   "fieldname": "agreement_date",
+   "fieldtype": "Date",
+   "label": "Agreement Date",
+   "reqd": 1
+  },
+  {
+   "default": "Draft",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "Draft\nActive\nCompleted\nCancelled"
+  },
+  {
+   "fieldname": "column_break_24",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "start_date",
+   "fieldtype": "Date",
+   "label": "Start Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "end_date",
+   "fieldtype": "Date",
+   "label": "End Date",
+   "reqd": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "section_break_9",
+   "fieldtype": "Section Break",
+   "label": "Timeline & Locations"
+  },
+  {
+   "fieldname": "pickup_location",
+   "fieldtype": "Link",
+   "label": "Pickup Location",
+   "options": "Location"
+  },
+  {
+   "fieldname": "pickup_date",
+   "fieldtype": "Datetime",
+   "label": "Pickup Date"
+  },
+  {
+   "fieldname": "column_break_11",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "drop_location",
+   "fieldtype": "Link",
+   "label": "Drop Location",
+   "options": "Location"
+  },
+  {
+   "fieldname": "drop_date",
+   "fieldtype": "Datetime",
+   "label": "Drop Date"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "section_break_charges",
+   "fieldtype": "Section Break",
+   "label": "Financials"
+  },
+  {
+   "fieldname": "rental_rate",
+   "fieldtype": "Currency",
+   "label": "Rental Rate"
+  },
+  {
+   "fieldname": "deposit_type",
+   "fieldtype": "Select",
+   "label": "Deposit Type",
+   "options": "Cash\nCheque\nCredit Card\nNone"
+  },
+  {
+   "depends_on": "eval:doc.deposit_type=='Cash'",
+   "fieldname": "deposit",
+   "fieldtype": "Currency",
+   "label": "Deposit Amount"
+  },
+  {
+   "fieldname": "column_break_charges",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "total_amount",
+   "fieldtype": "Currency",
+   "label": "Total Amount",
+   "read_only": 1
+  },
+  {
+   "fieldname": "paid_amount",
+   "fieldtype": "Currency",
+   "label": "Paid Amount"
+  },
+  {
+   "fieldname": "balance_amount",
+   "fieldtype": "Currency",
+   "label": "Balance Amount",
+   "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "section_break_14",
+   "fieldtype": "Section Break",
+   "label": "Vehicle Condition"
+  },
+  {
+   "fieldname": "vehicle",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Vehicle",
+   "options": "Vehicle",
+   "reqd": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "permanent_vehicle",
+   "fieldtype": "Check",
+   "label": "Permanent Vehicle",
+   "print_hide": 1
+  },
+  {
+   "fieldname": "vehicle_condition",
+   "fieldtype": "Select",
+   "label": "Vehicle Condition",
+   "options": "Excellent\nGood\nFair\nPoor"
+  },
+  {
+   "fieldname": "fuel_level",
+   "fieldtype": "Select",
+   "label": "Fuel Level",
+   "options": "Empty\n1/4\n1/2\n3/4\nFull"
+  },
+  {
+   "fieldname": "odometer_reading",
+   "fieldtype": "Float",
+   "label": "Odometer Reading"
+  },
+  {
+   "fieldname": "column_break_16",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "vehicle_images",
+   "fieldtype": "Attach Image",
+   "label": "Vehicle Images"
+  },
+  {
+   "fieldname": "map_view",
+   "fieldtype": "HTML",
+   "label": "Map View",
+   "print_hide": 1
+  },
+  {
+   "fieldname": "additional_section",
+   "fieldtype": "Section Break",
+   "label": "Additional Information"
+  },
+  {
+   "fieldname": "terms_and_conditions",
+   "fieldtype": "Text Editor",
+   "label": "Terms and Conditions"
+  },
+  {
+   "fieldname": "notes",
+   "fieldtype": "Text",
+   "label": "Notes"
+  },
+  {
+   "fieldname": "column_break_additional",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "attachments",
+   "fieldtype": "Attach",
+   "label": "Attachments"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Agreements",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2025-10-11 11:50:18.697289",
+ "modified_by": "Administrator",
+ "module": "leetrental",
+ "name": "Agreements",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Fleet Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Rental Agent",
+   "share": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "agreement_no",
+ "track_changes": 1
+}
