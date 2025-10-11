@@ -1,0 +1,490 @@
+{
+ "actions": [],
+ "allow_import": 1,
+ "allow_rename": 1,
+ "autoname": "field:license_plate",
+ "creation": "2024-01-01 00:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "image_5",
+  "upload_photo",
+  "column_break_4",
+  "chassis_number",
+  "custom_engine_number",
+  "tags",
+  "custom_column_break_njeoz",
+  "license_plate",
+  "model",
+  "model_year",
+  "section_break_30",
+  "model_info",
+  "transmission",
+  "color",
+  "co2_emissions",
+  "column_break_38",
+  "doors_number",
+  "seats_number",
+  "horsepower",
+  "custom_column_break_xjnyo",
+  "fuel_type",
+  "horsepower_taxation",
+  "power",
+  "workflow_state",
+  "custom_column_break_dqhfy",
+  "description",
+  "custom_insurance",
+  "custom_policy_number",
+  "custom_column_break_jdbha",
+  "custom_insurance_type",
+  "custom_column_break_3tgge",
+  "custom_insurance_provider",
+  "custom_column_break_mqwwy",
+  "custom_insurance_valid_till",
+  "custom_purchase_details",
+  "purchase_value",
+  "catalog_value_vat_incl",
+  "custom_column_break_jibpn",
+  "custom_registration_number",
+  "custom_column_break_b5hou",
+  "custom_registration_expiry",
+  "custom_column_break_xo2za",
+  "residual_value",
+  "section_break_4",
+  "column_break_24",
+  "engine_info",
+  "column_break_20",
+  "contract_info",
+  "manager",
+  "custom_driver_logs",
+  "custom_driver_details",
+  "driver_info",
+  "driver",
+  "plan_to_change_car",
+  "assignment_date",
+  "custom_column_break_0paw8",
+  "driver_licence_no",
+  "location",
+  "custom_column_break_76jdy",
+  "future_driver",
+  "custom_vehicle_logs",
+  "column_break_10",
+  "vehicle_info",
+  "first_contract_date",
+  "update_odometer",
+  "immatriculation_date",
+  "custom_column_break_f8vie",
+  "last_odometer_unit",
+  "last_odometer_value",
+  "custom_section_break_4apmz",
+  "custom_movement_report"
+ ],
+ "fields": [
+  {
+   "fieldname": "image_5",
+   "fieldtype": "Attach Image",
+   "label": "Image"
+  },
+  {
+   "fieldname": "upload_photo",
+   "fieldtype": "Attach",
+   "label": "Upload Photo"
+  },
+  {
+   "fieldname": "column_break_4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "chassis_number",
+   "fieldtype": "Data",
+   "label": "Chassis Number",
+   "reqd": 1
+  },
+  {
+   "fieldname": "custom_engine_number",
+   "fieldtype": "Data",
+   "in_list_view": 0,
+   "label": "Engine Number",
+   "reqd": 1,
+   "translatable": 1
+  },
+  {
+   "fieldname": "tags",
+   "fieldtype": "Table MultiSelect",
+   "label": "Tags",
+   "options": "Tag Link"
+  },
+  {
+   "fieldname": "custom_column_break_njeoz",
+   "fieldtype": "Column Break",
+   "label": ""
+  },
+  {
+   "fieldname": "license_plate",
+   "fieldtype": "Data",
+   "label": "License Plate",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "model",
+   "fieldtype": "Data",
+   "label": "Model"
+  },
+  {
+   "fieldname": "model_year",
+   "fieldtype": "Int",
+   "label": "Model Year",
+   "reqd": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "section_break_30",
+   "fieldtype": "Section Break",
+   "label": "Specifications"
+  },
+  {
+   "fieldname": "model_info",
+   "fieldtype": "Section Break",
+   "hidden": 1,
+   "label": "Specifications"
+  },
+  {
+   "fieldname": "transmission",
+   "fieldtype": "Select",
+   "label": "Transmission",
+   "options": "Manual\nAutomatic"
+  },
+  {
+   "fieldname": "color",
+   "fieldtype": "Data",
+   "label": "Color"
+  },
+  {
+   "fieldname": "co2_emissions",
+   "fieldtype": "Float",
+   "label": "CO2 Emissions"
+  },
+  {
+   "fieldname": "column_break_38",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "doors_number",
+   "fieldtype": "Int",
+   "label": "Doors Number"
+  },
+  {
+   "fieldname": "seats_number",
+   "fieldtype": "Int",
+   "label": "Seats Number"
+  },
+  {
+   "fieldname": "horsepower",
+   "fieldtype": "Int",
+   "label": "Horsepower"
+  },
+  {
+   "fieldname": "custom_column_break_xjnyo",
+   "fieldtype": "Column Break",
+   "label": ""
+  },
+  {
+   "fieldname": "fuel_type",
+   "fieldtype": "Select",
+   "label": "Fuel Type",
+   "options": "Gasoline\nDiesel\nElectric\nHybrid\nLPG\nCNG"
+  },
+  {
+   "fieldname": "horsepower_taxation",
+   "fieldtype": "Float",
+   "label": "Horsepower Taxation"
+  },
+  {
+   "fieldname": "power",
+   "fieldtype": "Float",
+   "label": "Power (kW)"
+  },
+  {
+   "fieldname": "workflow_state",
+   "fieldtype": "Data",
+   "label": "Workflow State"
+  },
+  {
+   "fieldname": "custom_column_break_dqhfy",
+   "fieldtype": "Column Break",
+   "label": ""
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Text Editor",
+   "label": "Description"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "custom_insurance",
+   "fieldtype": "Section Break",
+   "label": "Insurance"
+  },
+  {
+   "fieldname": "custom_policy_number",
+   "fieldtype": "Data",
+   "label": "Policy Number",
+   "translatable": 1
+  },
+  {
+   "fieldname": "custom_column_break_jdbha",
+   "fieldtype": "Column Break",
+   "label": ""
+  },
+  {
+   "fieldname": "custom_insurance_type",
+   "fieldtype": "Data",
+   "label": "Insurance Type",
+   "translatable": 1
+  },
+  {
+   "fieldname": "custom_column_break_3tgge",
+   "fieldtype": "Column Break",
+   "label": ""
+  },
+  {
+   "fieldname": "custom_insurance_provider",
+   "fieldtype": "Data",
+   "label": "Insurance Provider",
+   "translatable": 1
+  },
+  {
+   "fieldname": "custom_column_break_mqwwy",
+   "fieldtype": "Column Break",
+   "label": ""
+  },
+  {
+   "fieldname": "custom_insurance_valid_till",
+   "fieldtype": "Date",
+   "label": "Insurance Valid Till"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "custom_purchase_details",
+   "fieldtype": "Section Break",
+   "label": "Purchase Details"
+  },
+  {
+   "fieldname": "purchase_value",
+   "fieldtype": "Currency",
+   "label": "Purchase Value"
+  },
+  {
+   "fieldname": "catalog_value_vat_incl",
+   "fieldtype": "Currency",
+   "label": "Catalog Value (VAT Incl)"
+  },
+  {
+   "fieldname": "custom_column_break_jibpn",
+   "fieldtype": "Column Break",
+   "label": ""
+  },
+  {
+   "fieldname": "custom_registration_number",
+   "fieldtype": "Data",
+   "label": "Registration Number",
+   "translatable": 1
+  },
+  {
+   "fieldname": "custom_column_break_b5hou",
+   "fieldtype": "Column Break",
+   "label": ""
+  },
+  {
+   "fieldname": "custom_registration_expiry",
+   "fieldtype": "Date",
+   "label": "Registration Expiry"
+  },
+  {
+   "fieldname": "custom_column_break_xo2za",
+   "fieldtype": "Column Break",
+   "label": ""
+  },
+  {
+   "fieldname": "residual_value",
+   "fieldtype": "Currency",
+   "label": "Residual Value"
+  },
+  {
+   "fieldname": "section_break_4",
+   "fieldtype": "Section Break",
+   "hidden": 1
+  },
+  {
+   "fieldname": "column_break_24",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "engine_info",
+   "fieldtype": "Section Break",
+   "label": "Engine Info"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "column_break_20",
+   "fieldtype": "Section Break",
+   "label": "Responsible"
+  },
+  {
+   "fieldname": "contract_info",
+   "fieldtype": "Section Break",
+   "hidden": 1,
+   "label": "Contract Info"
+  },
+  {
+   "fieldname": "manager",
+   "fieldtype": "Link",
+   "label": "Responsible Persion",
+   "options": "User"
+  },
+  {
+   "fieldname": "custom_driver_logs",
+   "fieldtype": "Tab Break",
+   "label": "Driver Logs"
+  },
+  {
+   "fieldname": "custom_driver_details",
+   "fieldtype": "Section Break",
+   "label": "Driver Details"
+  },
+  {
+   "fieldname": "driver_info",
+   "fieldtype": "Section Break",
+   "hidden": 1,
+   "label": "Driver Info"
+  },
+  {
+   "fieldname": "driver",
+   "fieldtype": "Link",
+   "label": "Driver",
+   "options": "Employee"
+  },
+  {
+   "fieldname": "plan_to_change_car",
+   "fieldtype": "Check",
+   "label": "Plan To Change Car"
+  },
+  {
+   "fieldname": "assignment_date",
+   "fieldtype": "Date",
+   "label": "Assignment Date"
+  },
+  {
+   "fieldname": "custom_column_break_0paw8",
+   "fieldtype": "Column Break",
+   "label": ""
+  },
+  {
+   "fieldname": "driver_licence_no",
+   "fieldtype": "Data",
+   "label": "Driver Licence No"
+  },
+  {
+   "fieldname": "location",
+   "fieldtype": "Link",
+   "label": "Location",
+   "options": "Location"
+  },
+  {
+   "fieldname": "custom_column_break_76jdy",
+   "fieldtype": "Column Break",
+   "label": ""
+  },
+  {
+   "fieldname": "future_driver",
+   "fieldtype": "Link",
+   "label": "Future Driver",
+   "options": "Employee"
+  },
+  {
+   "fieldname": "custom_vehicle_logs",
+   "fieldtype": "Tab Break",
+   "label": "Vehicle Logs"
+  },
+  {
+   "fieldname": "column_break_10",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "vehicle_info",
+   "fieldtype": "Section Break",
+   "label": "Vehicle Info"
+  },
+  {
+   "fieldname": "first_contract_date",
+   "fieldtype": "Date",
+   "label": "First Contract Date"
+  },
+  {
+   "fieldname": "update_odometer",
+   "fieldtype": "Button",
+   "label": "Update Odometer"
+  },
+  {
+   "fieldname": "immatriculation_date",
+   "fieldtype": "Date",
+   "label": "Immatriculation Date"
+  },
+  {
+   "fieldname": "custom_column_break_f8vie",
+   "fieldtype": "Column Break",
+   "label": ""
+  },
+  {
+   "fieldname": "last_odometer_unit",
+   "fieldtype": "Select",
+   "label": "Last Odometer Unit",
+   "options": "km\nmiles"
+  },
+  {
+   "fieldname": "last_odometer_value",
+   "fieldtype": "Float",
+   "label": "Last Odometer Value"
+  },
+  {
+   "fieldname": "custom_section_break_4apmz",
+   "fieldtype": "Section Break",
+   "label": ""
+  },
+  {
+   "fieldname": "custom_movement_report",
+   "fieldtype": "Small Text",
+   "label": "Movement Report",
+   "translatable": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2024-01-01 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "leetrental",
+ "name": "Vehicles",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1,
+ "track_views": 1
+}
