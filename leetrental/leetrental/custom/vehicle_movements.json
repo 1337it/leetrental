@@ -1,4 +1,6 @@
 {
+ "doctype": "Vehicle Movements",
+ "name": "Vehicle Movements",
  "custom_fields": [
   {
    "_assign": null,
